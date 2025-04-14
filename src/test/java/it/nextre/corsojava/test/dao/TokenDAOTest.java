@@ -45,7 +45,6 @@ public class TokenDAOTest {
 	public void addTest() {
 		Token token = new Token();
 		token.setToken("testToken");
-		token.setId(11L);
 		token.setUser(new User());
 		
 		dao.add(token);
