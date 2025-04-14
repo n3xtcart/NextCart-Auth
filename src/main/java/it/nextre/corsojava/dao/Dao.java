@@ -7,7 +7,7 @@ import java.util.Map;
 
 public abstract class Dao<T extends Entity> {
 
-    private final Map<Long, T> database;
+    protected final Map<Long, T> database;
     protected Long idGenerator;
 
     protected Dao() {

@@ -1,5 +1,11 @@
 package it.nextre.corsojava.dao;
 
-public class AdminDAO {
+import it.nextre.corsojava.entity.Admin;
 
+public class AdminDAO extends Dao<Admin> {
+
+    @Override
+    public void update(Long id, Admin item) {
+
+    }
 }
