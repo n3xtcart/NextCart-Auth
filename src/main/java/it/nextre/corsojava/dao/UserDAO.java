@@ -13,6 +13,5 @@ public class UserDAO extends Dao<User> {
         user.setPassword(item.getPassword());
         user.setCognome(item.getCognome());
         user.setRole(item.getRole());
-        database.put(user.getId(), user);
     }
 }
