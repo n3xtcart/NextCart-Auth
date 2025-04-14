@@ -3,6 +3,7 @@ package it.nextre.corsojava.dao;
 import it.nextre.corsojava.entity.Entity;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public abstract class Dao<T extends Entity> {
@@ -25,4 +26,12 @@ public abstract class Dao<T extends Entity> {
     public void delete(Long id) {
         database.remove(id);
     }
+    
+    public T getById(Long id) {
+		return database.get(id);
+	}
+    
+    public List<T> getAll() {
+		return database.values().stream().toList();
+	}
 }
