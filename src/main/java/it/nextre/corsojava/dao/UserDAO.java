@@ -4,6 +4,10 @@ package it.nextre.corsojava.dao;
 import it.nextre.corsojava.entity.User;
 
 public class UserDAO  extends Dao<User> {
+	
+	public UserDAO() {
+		super();
+	}
 
 	@Override
 	public void update(Long id, User item) {
