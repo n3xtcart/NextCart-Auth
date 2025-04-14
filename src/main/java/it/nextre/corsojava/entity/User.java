@@ -5,8 +5,15 @@ public class User extends Entity{
 	protected String cognome;
 	protected String email;
 	protected String password;
+	protected Role role;
 	
 	
+	public Role getRole() {
+		return role;
+	}
+	public void setRole(Role role) {
+		this.role = role;
+	}
 	public String getNome() {
 		return nome;
 	}
