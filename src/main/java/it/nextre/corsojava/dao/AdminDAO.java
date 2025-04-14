@@ -12,6 +12,5 @@ public class AdminDAO extends Dao<Admin> {
         if (item.getEmail() != null) toModify.setEmail(item.getEmail());
         if (item.getRole() != null) toModify.setRole(item.getRole());
         if (item.getPassword() != null) toModify.setPassword(item.getPassword());
-        database.put(toModify.getId(), toModify);
     }
 }
