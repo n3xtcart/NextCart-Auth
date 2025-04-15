@@ -20,7 +20,7 @@ class TokenUserDAOTest {
             a.setCognome("cognome " + i);
             a.setEmail("a" + i + "@example.com");
             Token t = new Token();
-            t.setToken("token" + i);
+            t.setValue("token" + i);
             t.setUser(a);
             sut.add(t);
         }
@@ -29,9 +29,9 @@ class TokenUserDAOTest {
     @Test
     void add() {
         Token t = new Token();
-        t.setToken("newToken");
+        t.setValue("newToken");
         sut.add(t);
-        assertEquals("newToken", sut.getById(6L).getToken());
+        assertEquals("newToken", sut.getById(6L).getValue());
     }
 
     @Test
@@ -55,10 +55,10 @@ class TokenUserDAOTest {
     @Test
     void update() {
         Token t = new Token();
-        t.setToken("newToken");
+        t.setValue("newToken");
         t.setUser(new User());
         sut.update(3L, t);
-        assertEquals("newToken", sut.getById(3L).getToken());
+        assertEquals("newToken", sut.getById(3L).getValue());
         assertNotNull(sut.getById(3L).getUser());
     }
 }
