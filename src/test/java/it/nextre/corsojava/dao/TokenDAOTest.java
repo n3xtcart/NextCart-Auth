@@ -2,8 +2,12 @@ package it.nextre.corsojava.dao;
 
 import it.nextre.corsojava.entity.Token;
 import it.nextre.corsojava.entity.User;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class TokenDAOTest {
     private TokenUserDAO dao;
@@ -32,8 +36,8 @@ class TokenDAOTest {
 
         Token updatedToken = dao.getById(1L);
 
-        Assertions.assertEquals("testToken", updatedToken.getToken());
-        Assertions.assertNotNull(updatedToken.getUser());
+        assertEquals("testToken", updatedToken.getToken());
+        assertNotNull(updatedToken.getUser());
     }
 
     @Test
@@ -46,8 +50,8 @@ class TokenDAOTest {
 
         Token addedToken = dao.getById(11L);
 
-        Assertions.assertEquals("testToken", addedToken.getToken());
-        Assertions.assertNotNull(addedToken.getUser());
+        assertEquals("testToken", addedToken.getToken());
+        assertNotNull(addedToken.getUser());
     }
 
 
@@ -64,8 +68,8 @@ class TokenDAOTest {
     void getByIdTest() {
         Token token = dao.getById(1L);
 
-        Assertions.assertNotNull(token);
-        Assertions.assertEquals("token0", token.getToken());
+        assertNotNull(token);
+        assertEquals("token0", token.getToken());
     }
 
 }
