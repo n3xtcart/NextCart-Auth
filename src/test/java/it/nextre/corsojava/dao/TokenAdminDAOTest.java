@@ -16,7 +16,6 @@ class TokenUserDAOTest {
         sut = new TokenUserDAO();
         for (int i = 0; i < 5; i++) {
             User a = new User();
-            a.setId(i);
             a.setNome("nome " + i);
             a.setCognome("cognome " + i);
             a.setEmail("a" + i + "@example.com");
