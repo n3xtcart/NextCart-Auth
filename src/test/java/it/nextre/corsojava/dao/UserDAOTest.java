@@ -1,5 +1,6 @@
 package it.nextre.corsojava.dao;
 
+import it.nextre.corsojava.entity.Group;
 import it.nextre.corsojava.entity.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,7 +22,7 @@ class UserDAOTest {
             user.setNome("meUser" + i);
             user.setEmail("user" + i + "@example.com");
             user.setPassword("password" + i);
-            user.setRole(null);
+            user.setGroup(new Group());
             dao.add(user);
         }
     }
@@ -34,7 +35,8 @@ class UserDAOTest {
         user.setNome("nome" + i);
         user.setEmail("user" + i + "@example.com");
         user.setPassword("password" + i);
-        user.setRole(null);
+        Group group = new Group();
+        user.setGroup(group);
 
         int sizeBeforeUpdate = dao.getAll().size();
 
@@ -45,7 +47,7 @@ class UserDAOTest {
         assertEquals("nome" + i, updatedUser.getNome());
         assertEquals("user" + i + "@example.com", updatedUser.getEmail());
         assertEquals("password" + i, updatedUser.getPassword());
-        assertNull(updatedUser.getRole());
+        assertEquals(group, updatedUser.getGroup());
         assertEquals(sizeBeforeUpdate, dao.getAll().size());
 
 
@@ -59,7 +61,8 @@ class UserDAOTest {
         user.setNome("nome" + i);
         user.setEmail("user" + i + "@example.com");
         user.setPassword("password" + i);
-        user.setRole(null);
+        Group group = new Group();
+        user.setGroup(group);
 
         int sizeBeforeAdd = dao.getAll().size();
 
@@ -70,7 +73,7 @@ class UserDAOTest {
         assertEquals("nome" + i, addedUser.getNome());
         assertEquals("user" + i + "@example.com", addedUser.getEmail());
         assertEquals("password" + i, addedUser.getPassword());
-        assertNull(addedUser.getRole());
+		assertEquals(group, addedUser.getGroup());
         assertEquals(sizeBeforeAdd + 1, dao.getAll().size());
 
 
@@ -91,7 +94,7 @@ class UserDAOTest {
         User user = dao.getById(1L);
 
         assertNotNull(user);
-        assertEquals("nome0", user.getNome());
+        assertEquals("meUser0", user.getNome());
     }
 
 }

@@ -1,28 +1,32 @@
 package it.nextre.corsojava.entity;
 
-public class Role {
-	private String role;
-	private boolean admin;
-	private long priority;
+public class Role extends Entity {
+	private String descrizione;
+	private Boolean admin;
+	private Long priority;
 	
 	
 	
-	public boolean isAdmin() {
+	
+	
+	public String getDescrizione() {
+		return descrizione;
+	}
+	public void setDescrizione(String descrizione) {
+		this.descrizione = descrizione;
+	}
+	public Boolean isAdmin() {
 		return admin;
 	}
-	public void setAdmin(boolean admin) {
+	public void setAdmin(Boolean admin) {
 		this.admin = admin;
 	}
-	public String getRole() {
-		return role;
-	}
-	public void setRole(String role) {
-		this.role = role;
-	}
-	public long getPriority() {
+
+
+	public Long getPriority() {
 		return priority;
 	}
-	public void setPriority(long priority) {
+	public void setPriority(Long priority) {
 		this.priority = priority;
 	}
 	

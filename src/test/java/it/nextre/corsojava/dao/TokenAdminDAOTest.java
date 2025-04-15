@@ -1,21 +1,21 @@
 package it.nextre.corsojava.dao;
 
-import it.nextre.corsojava.entity.Admin;
+import it.nextre.corsojava.entity.User;
 import it.nextre.corsojava.entity.Token;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class TokenAdminDAOTest {
+class TokenUserDAOTest {
 
-    private TokenAdminDAO sut;
+    private TokenUserDAO sut;
 
     @BeforeEach
     void setUp() {
-        sut = new TokenAdminDAO();
+        sut = new TokenUserDAO();
         for (int i = 0; i < 5; i++) {
-            Admin a = new Admin();
+            User a = new User();
             a.setId(i);
             a.setNome("nome " + i);
             a.setCognome("cognome " + i);
@@ -55,6 +55,7 @@ class TokenAdminDAOTest {
     void update() {
         Token t = new Token();
         t.setToken("newToken");
+        t.setUser(new User());
         sut.update(3L, t);
         assertEquals("newToken", sut.getById(3L).getToken());
         assertNotNull(sut.getById(3L).getUser());

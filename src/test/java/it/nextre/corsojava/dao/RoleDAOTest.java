@@ -17,7 +17,7 @@ class RoleDAOTest {
         String[] roles = {"user", "admin", "user", "user", "user"};
         for (int i = 0; i < 5; i++) {
             Role r = new Role();
-            r.setRole(roles[i]);
+            r.setDescrizione(roles[i]);
             r.setPriority((long) i);
             sut.add(r);
         }
@@ -26,10 +26,10 @@ class RoleDAOTest {
     @Test
     void add() {
         Role newRole = new Role();
-        newRole.setRole("super admin");
+        newRole.setDescrizione("super admin");
         newRole.setPriority(5L);
         sut.add(newRole);
-        assertEquals("super admin", sut.getById(6L).getRole());
+        assertEquals("super admin", sut.getById(6L).getDescrizione());
     }
 
     @Test
@@ -56,7 +56,8 @@ class RoleDAOTest {
         newRole.setPriority(15L);
         sut.update(2L, newRole);
         newRole = sut.getById(2L);
-        assertEquals("admin", newRole.getRole());
+        newRole.setDescrizione("admin");
+        assertEquals("admin", newRole.getDescrizione());
         assertEquals(15L, newRole.getPriority());
     }
 }

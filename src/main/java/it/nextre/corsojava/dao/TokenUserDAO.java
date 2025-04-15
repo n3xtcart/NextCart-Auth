@@ -12,8 +12,8 @@ public class TokenUserDAO extends Dao<Token> {
 	@Override
 	public void update(Long id, Token item) {
 		Token tokenUser = database.get(id);
-		tokenUser.setToken(item.getToken());
-		tokenUser.setUser(item.getUser());
+		if(item.getToken()!=null) tokenUser.setToken(item.getToken());
+		if(item.getUser()!=null) tokenUser.setUser(item.getUser());
 	}
 
 }
