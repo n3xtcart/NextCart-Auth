@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import it.nextre.corsojava.dao.UserDAO;
+import it.nextre.corsojava.entity.Group;
 import it.nextre.corsojava.entity.User;
 
 
@@ -24,7 +25,7 @@ public class UserDAOTest {
 			user.setNome("meUser" + i);
 			user.setEmail("user" + i + "@example.com");
 			user.setPassword("password" + i);
-			user.setRole(null);
+			user.setGroup(new Group());
 			dao.add(user);
 		}
 	}
@@ -37,7 +38,8 @@ public class UserDAOTest {
 		user.setNome("nome" + i);
 		user.setEmail("user" + i + "@example.com");
 		user.setPassword("password" + i);
-		user.setRole(null);
+		Group group = new Group();
+		user.setGroup(group);
 		
 		int sizeBeforeUpdate = dao.getAll().size();
 		
@@ -48,7 +50,7 @@ public class UserDAOTest {
 		assertEquals("nome" + i, updatedUser.getNome());
 		assertEquals("user" + i + "@example.com", updatedUser.getEmail());
 		assertEquals("password" + i, updatedUser.getPassword());
-		assertEquals(null, updatedUser.getRole());
+		assertEquals(group, updatedUser.getGroup());
 		assertEquals(sizeBeforeUpdate, dao.getAll().size());
 		
 		
@@ -63,7 +65,8 @@ public class UserDAOTest {
 		user.setNome("nome" + i);
 		user.setEmail("user" + i + "@example.com");
 		user.setPassword("password" + i);
-		user.setRole(null);
+		Group group = new Group();
+		user.setGroup(group);
 		
 		int sizeBeforeAdd = dao.getAll().size();
 		
@@ -74,7 +77,7 @@ public class UserDAOTest {
 		assertEquals("nome" + i, addedUser.getNome());
 		assertEquals("user" + i + "@example.com", addedUser.getEmail());
 		assertEquals("password" + i, addedUser.getPassword());
-		assertEquals(null, addedUser.getRole());
+		assertEquals(group, addedUser.getGroup());
 		assertEquals(sizeBeforeAdd + 1, dao.getAll().size());
 		
 		

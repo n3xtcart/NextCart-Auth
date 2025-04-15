@@ -1,5 +1,19 @@
 package it.nextre.corsojava.entity;
 
 public class Group extends Entity{
- //TODO: decidere se serve
+	private Role role;
+
+	public Role getRole() {
+		return role;
+	}
+
+	public void setRole(Role role) {
+		this.role = role;
+	}
+	
+
+	
+	
+	
+	
 }

@@ -30,7 +30,6 @@ public class TokenDAOTest {
 	public void testUpdate() {
 		Token token = new Token();
 		token.setToken("testToken");
-		token.setId(1L);
 		token.setUser(new User());
 		
 		dao.update(1L, token);

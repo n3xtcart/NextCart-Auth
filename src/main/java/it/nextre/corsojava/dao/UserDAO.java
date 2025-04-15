@@ -16,7 +16,7 @@ public class UserDAO  extends Dao<User> {
 		user.setEmail(item.getEmail());
 		user.setPassword(item.getPassword());
 		user.setCognome(item.getCognome());	
-		user.setRole(item.getRole());
+		user.setGroup(item.getGroup());
 		
 		
 	}

@@ -2,9 +2,17 @@ package it.nextre.corsojava.entity;
 
 public class Role {
 	private String role;
+	private boolean admin;
 	private long priority;
 	
 	
+	
+	public boolean isAdmin() {
+		return admin;
+	}
+	public void setAdmin(boolean admin) {
+		this.admin = admin;
+	}
 	public String getRole() {
 		return role;
 	}

@@ -5,14 +5,14 @@ public class User extends Entity{
 	protected String cognome;
 	protected String email;
 	protected String password;
-	protected Role role;
+	protected Group group;
 	
 	
-	public Role getRole() {
-		return role;
+	public Group getGroup() {
+		return group;
 	}
-	public void setRole(Role role) {
-		this.role = role;
+	public void setGroup(Group group) {
+		this.group = group;
 	}
 	public String getNome() {
 		return nome;
