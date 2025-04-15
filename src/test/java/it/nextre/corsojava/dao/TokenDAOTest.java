@@ -19,7 +19,7 @@ class TokenDAOTest {
         for (long i = 0; i < 10; i++) {
             Token token = new Token();
             token.setId(i);
-            token.setToken("token" + i);
+            token.setValue("token" + i);
             token.setUser(new User());
             dao.add(token);
         }
@@ -28,7 +28,7 @@ class TokenDAOTest {
     @Test
     void testUpdate() {
         Token token = new Token();
-        token.setToken("testToken");
+        token.setValue("testToken");
         token.setId(1L);
         token.setUser(new User());
 
@@ -36,21 +36,21 @@ class TokenDAOTest {
 
         Token updatedToken = dao.getById(1L);
 
-        assertEquals("testToken", updatedToken.getToken());
+        assertEquals("testToken", updatedToken.getValue());
         assertNotNull(updatedToken.getUser());
     }
 
     @Test
     void addTest() {
         Token token = new Token();
-        token.setToken("testToken");
+        token.setValue("testToken");
         token.setUser(new User());
 
         dao.add(token);
 
         Token addedToken = dao.getById(11L);
 
-        assertEquals("testToken", addedToken.getToken());
+        assertEquals("testToken", addedToken.getValue());
         assertNotNull(addedToken.getUser());
     }
 
@@ -69,7 +69,7 @@ class TokenDAOTest {
         Token token = dao.getById(1L);
 
         assertNotNull(token);
-        assertEquals("token0", token.getToken());
+        assertEquals("token0", token.getValue());
     }
 
 }
