@@ -18,10 +18,10 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class UserService implements UserServiceInterface {
-    private UserDAO userDAO;
-    private TokenUserDAO tokenUserDAO;
-    private GroupDAO groupDAO;
-    private RoleDAO roleDAO;
+    private final UserDAO userDAO;
+    private final TokenUserDAO tokenUserDAO;
+    private final GroupDAO groupDAO;
+    private final RoleDAO roleDAO;
 
     public UserService(UserDAO userDAO, TokenUserDAO tokenUserDAO, GroupDAO groupDAO, RoleDAO roleDAO) {
         this.userDAO = userDAO;
