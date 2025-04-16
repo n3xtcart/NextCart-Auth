@@ -11,6 +11,7 @@ import it.nextre.corsojava.dto.UserDTO;
 import it.nextre.corsojava.entity.Group;
 import it.nextre.corsojava.entity.Role;
 import it.nextre.corsojava.entity.Token;
+import it.nextre.corsojava.entity.User;
 import it.nextre.corsojava.exception.GroupMissingException;
 import it.nextre.corsojava.exception.RoleMissingException;
 import it.nextre.corsojava.exception.UnauthorizedException;
@@ -63,8 +64,21 @@ public class UserService implements UserServiceInterface {
 
     @Override
     public void createUser(UserDTO user, TokenDTO token) {
-        // TODO Auto-generated method stub
+        RoleDTO roleDTO = token.getUserDTO().getGroupDTO().getRoleDTO();
+        if (!roleDTO.getAdmin() || roleDTO.getPriority() < user.getGroupDTO().getRoleDTO().getPriority())
+            throw new UnauthorizedException("Non possiedi i permessi per compiere questa azione.");
+        User toSave = new User();
+        toSave.setNome(user.getNome());
+        toSave.setCognome(user.getCognome());
+        toSave.setEmail(user.getEmail());
+        toSave.setPassword(user.getPassword());
 
+        Group toPut = groupDAO.getById(user.getGroupDTO().getId());
+
+        if (toPut == null) throw new GroupMissingException("Il gruppo di appartenenza non esiste");
+
+        toSave.setGroup(toPut);
+        userDAO.add(toSave);
     }
 
     @Override
