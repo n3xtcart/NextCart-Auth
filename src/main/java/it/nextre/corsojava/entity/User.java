@@ -13,6 +13,7 @@ public class User extends Entity {
     }
 
     public void setGroup(Group group) {
+        aggiornaUltimaModifica();
         this.group = group;
     }
 
@@ -21,6 +22,7 @@ public class User extends Entity {
     }
 
     public void setNome(String nome) {
+        aggiornaUltimaModifica();
         this.nome = nome;
     }
 
@@ -29,6 +31,7 @@ public class User extends Entity {
     }
 
     public void setCognome(String cognome) {
+        aggiornaUltimaModifica();
         this.cognome = cognome;
     }
 
@@ -37,6 +40,7 @@ public class User extends Entity {
     }
 
     public void setEmail(String email) {
+        aggiornaUltimaModifica();
         this.email = email;
     }
 
@@ -45,6 +49,7 @@ public class User extends Entity {
     }
 
     public void setPassword(String password) {
+        aggiornaUltimaModifica();
         this.password = password;
     }
 

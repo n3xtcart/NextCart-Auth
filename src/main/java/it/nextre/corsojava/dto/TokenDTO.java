@@ -1,16 +1,9 @@
 package it.nextre.corsojava.dto;
 
 public class TokenDTO {
-    private Long id;
+    private String token;
     private UserDTO userDTO;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     public UserDTO getUserDTO() {
         return userDTO;
@@ -18,5 +11,13 @@ public class TokenDTO {
 
     public void setUserDTO(UserDTO userDTO) {
         this.userDTO = userDTO;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 }

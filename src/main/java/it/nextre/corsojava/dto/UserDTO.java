@@ -6,6 +6,7 @@ public class UserDTO {
     private String cognome;
     private String email;
     private String password;
+    private GroupDTO groupDTO;
 
     public Long getId() {
         return id;
@@ -45,5 +46,13 @@ public class UserDTO {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public GroupDTO getGroupDTO() {
+        return groupDTO;
+    }
+
+    public void setGroupDTO(GroupDTO groupDTO) {
+        this.groupDTO = groupDTO;
     }
 }

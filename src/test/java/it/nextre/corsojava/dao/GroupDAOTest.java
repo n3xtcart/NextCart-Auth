@@ -1,17 +1,15 @@
-package it.nextre.corsojava.test.dao;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+package it.nextre.corsojava.dao;
 
 import java.util.HashMap;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import it.nextre.corsojava.dao.GroupDAO;
 import it.nextre.corsojava.entity.Group;
 import it.nextre.corsojava.entity.Role;
 import it.nextre.corsojava.entity.User;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class GroupDAOTest {
 	private GroupDAO dao;
@@ -63,8 +61,8 @@ public class GroupDAOTest {
 		dao.delete(1L);
 		
 		Group deletedGroup = dao.getById(1L);
-		
-		assertEquals(null, deletedGroup);
+
+        assertNull(deletedGroup);
 	}
 	
 	public void getByIdTest() {

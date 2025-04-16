@@ -1,9 +1,11 @@
 package it.nextre.corsojava.dao;
 
-import it.nextre.corsojava.entity.User;
 import it.nextre.corsojava.entity.Token;
+import it.nextre.corsojava.entity.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -40,8 +42,7 @@ class TokenUserDAOTest {
         assertNull(sut.getById(3L));
     }
 
-    
-    //TODO: implementare il test
+
     @Test
     void getById() {
         assertEquals("cognome 1", sut.getById(2L).getUser().getCognome());
@@ -54,11 +55,18 @@ class TokenUserDAOTest {
 
     @Test
     void update() {
-        Token t = new Token();
-        t.setValue("newToken");
-        t.setUser(new User());
-        sut.update(3L, t);
-        assertEquals("newToken", sut.getById(3L).getValue());
-        assertNotNull(sut.getById(3L).getUser());
+        try {
+            Instant old = sut.getById(3L).getUltimaModifica();
+            Thread.sleep(1L);
+            Token t = new Token();
+            t.setValue("newToken");
+            t.setUser(new User());
+            sut.update(3L, t);
+            assertEquals("newToken", sut.getById(3L).getValue());
+            assertNotNull(sut.getById(3L).getUser());
+            assertNotEquals(old, sut.getById(3L).getUltimaModifica());
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

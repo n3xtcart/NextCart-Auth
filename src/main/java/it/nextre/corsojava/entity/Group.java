@@ -8,6 +8,7 @@ public class Group extends Entity {
     }
 
     public void setRole(Role role) {
+        aggiornaUltimaModifica();
         this.role = role;
     }
 

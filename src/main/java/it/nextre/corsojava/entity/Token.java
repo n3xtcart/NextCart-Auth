@@ -9,6 +9,7 @@ public class Token extends Entity {
     }
 
     public void setValue(String value) {
+        aggiornaUltimaModifica();
         this.value = value;
     }
 
@@ -17,6 +18,7 @@ public class Token extends Entity {
     }
 
     public void setUser(User user) {
+        aggiornaUltimaModifica();
         this.user = user;
     }
 
