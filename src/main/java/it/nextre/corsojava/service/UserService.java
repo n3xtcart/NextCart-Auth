@@ -11,6 +11,7 @@ import it.nextre.corsojava.dto.UserDTO;
 import it.nextre.corsojava.entity.Group;
 import it.nextre.corsojava.entity.Role;
 import it.nextre.corsojava.entity.Token;
+import it.nextre.corsojava.exception.GroupMissingException;
 import it.nextre.corsojava.exception.RoleMissingException;
 import it.nextre.corsojava.exception.UnauthorizedException;
 
@@ -105,14 +106,27 @@ public class UserService implements UserServiceInterface {
 
     @Override
     public void updateGroup(GroupDTO group, TokenDTO token) {
-        // TODO Auto-generated method stub
-
+        if (!token.getUserDTO().getGroupDTO().getRoleDTO().getAdmin())
+            throw new UnauthorizedException("Non possiedi i permessi per compiere questa azione.");
+        Group g = groupDAO.getById(group.getId());
+        if (g == null) throw new GroupMissingException("Impossibile modificare un gruppo non presente");
+        Role role = new Role();
+        RoleDTO roleDTO = group.getRoleDTO();
+        role.setId(roleDTO.getId());
+        role.setDescrizione(roleDTO.getDescrizione());
+        role.setAdmin(roleDTO.getAdmin());
+        role.setPriority(roleDTO.getPriority());
+        g.setRole(role);
+        groupDAO.update(group.getId(), g);
     }
 
     @Override
     public void deleteGroup(GroupDTO group, TokenDTO token) {
-        // TODO Auto-generated method stub
-
+        if (!token.getUserDTO().getGroupDTO().getRoleDTO().getAdmin())
+            throw new UnauthorizedException("Non possiedi i permessi per compiere questa azione.");
+        if (groupDAO.getById(group.getId()) == null)
+            throw new GroupMissingException("Impossibile cancellare un gruppo non presente");
+        groupDAO.delete(group.getId());
     }
 
     @Override
