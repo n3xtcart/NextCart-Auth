@@ -1,4 +1,3 @@
-
 function showGroups() {
     const main = document.getElementById("main");
     main.innerHTML = `<table class="table table-striped table-hover table-bordered table-sm">
@@ -14,21 +13,85 @@ function showGroups() {
     <tbody id="userTableBody">
     </tbody>
 </table>`;
-    tbody = document.getElementById("userTableBody");
+    let tbody = document.getElementById("userTableBody");
     for (let i = 0; i < 10; i++) {
-        row = tbody.insertRow();
-        for (let j = 0; j < 3; j++) {
-            cell = row.insertCell(j);
-            cell.innerHTML = `Row ${i} Cell ${j}`;
-        }
-        cell = row.insertCell(3);
-        cell.innerHTML = `<button type="button" class="btn btn-danger btn-sm">Delete</button>`;
-        cell = row.insertCell(4);
-        cell.innerHTML = `<button type="button" class="btn btn-primary btn-sm">Edit</button>`;
+        let row = document.createElement("tr");
+        tbody.appendChild(row);
 
+        for (let j = 0; j < 3; j++) {
+            let td = document.createElement('td')
+            td.id = `Row ${i} Cell ${j}`
+            td.innerHTML = `Row ${i} Cell ${j}`;
+            row.appendChild(td);
+        }
+
+        let deleteBtnBox = document.createElement("td");
+        let deleteButton = document.createElement("button");
+        deleteButton.className = "btn btn-danger btn-sm";
+        deleteButton.textContent = 'Delete';
+        deleteButton.type = "button";
+        deleteBtnBox.append(deleteButton);
+        row.appendChild(deleteBtnBox);
+
+        let editBtnBox = document.createElement("td");
+        let editButton = document.createElement("button");
+        editButton.className = "btn btn-primary btn-sm";
+        editButton.textContent = 'Edit';
+        editButton.type = "button";
+
+        let saveBtn = document.createElement("button");
+        saveBtn.className = "btn btn-success btn-sm save-btn d-none";
+        saveBtn.textContent = 'Save';
+        saveBtn.type = "button";
+
+        editButton.addEventListener("click", () => {
+            let roleCell = document.getElementById(`Row ${i} Cell 0`);
+            let priorityCell = document.getElementById(`Row ${i} Cell 1`);
+            let adminCell = document.getElementById(`Row ${i} Cell 2`);
+
+            console.log(roleCell);
+            console.log(priorityCell);
+            console.log(adminCell);
+
+            // Converti i campi in input
+            const roleInput = document.createElement("input");
+            roleInput.type = "text";
+            roleInput.value = roleCell.innerHTML;
+            roleCell.innerHTML = ''
+            roleCell.appendChild(roleInput);
+
+            const priorityInput = document.createElement("input");
+            priorityInput.type = "text";
+            priorityInput.value = priorityCell.innerHTML;
+            priorityCell.innerHTML = ''
+            priorityCell.appendChild(priorityInput);
+
+            const adminInput = document.createElement("input");
+            adminInput.type = "text";
+            adminInput.value = adminCell.innerHTML;
+            adminCell.innerHTML = '';
+            adminCell.appendChild(adminInput);
+
+            // Nascondi il pulsante Edit e mostrare il salvataggio
+            editButton.classList.add('d-none');
+            saveBtn.classList.remove('d-none');
+
+            // Gestire il salvataggio
+            saveBtn.addEventListener("click", () => {
+                roleCell.innerHTML = roleInput.value;
+                priorityCell.innerHTML = priorityInput.value;
+                adminCell.innerHTML = adminInput.value;
+
+                saveBtn.classList.add('d-none');
+                editButton.classList.remove('d-none');
+            })
+        })
+
+        editBtnBox.append(editButton);
+        editBtnBox.append(saveBtn);
+        row.appendChild(editBtnBox);
     }
 }
-
 
 
 function showRoles() {
@@ -46,23 +109,85 @@ function showRoles() {
     <tbody id="userTableBody">
     </tbody>
 </table>`;
-    tbody = document.getElementById("userTableBody");
+    let tbody = document.getElementById("userTableBody");
     for (let i = 0; i < 10; i++) {
-        row = tbody.insertRow();
-        for (let j = 0; j < 3; j++) {
-            cell = row.insertCell(j);
-            cell.innerHTML = `Row ${i} Cell ${j}`;
-        }
-        cell = row.insertCell(3);
-        cell.innerHTML = `<button type="button" class="btn btn-danger btn-sm">Delete</button>`;
-        cell = row.insertCell(4);
-        cell.innerHTML = `<button type="button" class="btn btn-primary btn-sm">Edit</button>`;
+        let row = document.createElement("tr");
+        tbody.appendChild(row);
 
+        for (let j = 0; j < 3; j++) {
+            let td = document.createElement('td')
+            td.id = `Row ${i} Cell ${j}`
+            td.innerHTML = `Row ${i} Cell ${j}`;
+            row.appendChild(td);
+        }
+
+        let deleteBtnBox = document.createElement("td");
+        let deleteButton = document.createElement("button");
+        deleteButton.className = "btn btn-danger btn-sm";
+        deleteButton.textContent = 'Delete';
+        deleteButton.type = "button";
+        deleteBtnBox.append(deleteButton);
+        row.appendChild(deleteBtnBox);
+
+        let editBtnBox = document.createElement("td");
+        let editButton = document.createElement("button");
+        editButton.className = "btn btn-primary btn-sm";
+        editButton.textContent = 'Edit';
+        editButton.type = "button";
+
+        let saveBtn = document.createElement("button");
+        saveBtn.className = "btn btn-success btn-sm save-btn d-none";
+        saveBtn.textContent = 'Save';
+        saveBtn.type = "button";
+
+        editButton.addEventListener("click", () => {
+            let roleCell = document.getElementById(`Row ${i} Cell 0`);
+            let priorityCell = document.getElementById(`Row ${i} Cell 1`);
+            let adminCell = document.getElementById(`Row ${i} Cell 2`);
+
+            console.log(roleCell);
+            console.log(priorityCell);
+            console.log(adminCell);
+
+            // Converti i campi in input
+            const roleInput = document.createElement("input");
+            roleInput.type = "text";
+            roleInput.value = roleCell.innerHTML;
+            roleCell.innerHTML = ''
+            roleCell.appendChild(roleInput);
+
+            const priorityInput = document.createElement("input");
+            priorityInput.type = "text";
+            priorityInput.value = priorityCell.innerHTML;
+            priorityCell.innerHTML = ''
+            priorityCell.appendChild(priorityInput);
+
+            const adminInput = document.createElement("input");
+            adminInput.type = "text";
+            adminInput.value = adminCell.innerHTML;
+            adminCell.innerHTML = '';
+            adminCell.appendChild(adminInput);
+
+            // Nascondi il pulsante Edit e mostrare il salvataggio
+            editButton.classList.add('d-none');
+            saveBtn.classList.remove('d-none');
+
+            // Gestire il salvataggio
+            saveBtn.addEventListener("click", () => {
+                roleCell.innerHTML = roleInput.value;
+                priorityCell.innerHTML = priorityInput.value;
+                adminCell.innerHTML = adminInput.value;
+
+                saveBtn.classList.add('d-none');
+                editButton.classList.remove('d-none');
+            })
+        })
+
+        editBtnBox.append(editButton);
+        editBtnBox.append(saveBtn);
+        row.appendChild(editBtnBox);
     }
 }
-
-
-
 
 
 function showUsers() {
@@ -81,21 +206,89 @@ function showUsers() {
     <tbody id="userTableBody">
     </tbody>
 </table>`;
-    tbody = document.getElementById("userTableBody");
+    let tbody = document.getElementById("userTableBody");
     for (let i = 0; i < 10; i++) {
-        row = tbody.insertRow();
-        for (let j = 0; j < 4; j++) {
-            cell = row.insertCell(j);
-            cell.innerHTML = `Row ${i} Cell ${j}`;
-        }
-        cell = row.insertCell(4);
-        cell.innerHTML = `<button type="button" class="btn btn-danger btn-sm">Delete</button>`;
-        cell = row.insertCell(5);
-        cell.innerHTML = `<button type="button" class="btn btn-primary btn-sm">Edit</button>`;
+        let row = document.createElement("tr");
+        tbody.appendChild(row);
 
+        for (let j = 0; j < 4; j++) {
+            let td = document.createElement('td')
+            td.id = `Row ${i} Cell ${j}`
+            td.innerHTML = `Row ${i} Cell ${j}`;
+            row.appendChild(td);
+        }
+
+        let deleteBtnBox = document.createElement("td");
+        let deleteButton = document.createElement("button");
+        deleteButton.className = "btn btn-danger btn-sm";
+        deleteButton.textContent = 'Delete';
+        deleteButton.type = "button";
+        deleteBtnBox.append(deleteButton);
+        row.appendChild(deleteBtnBox);
+
+        let editBtnBox = document.createElement("td");
+        let editButton = document.createElement("button");
+        editButton.className = "btn btn-primary btn-sm";
+        editButton.textContent = 'Edit';
+        editButton.type = "button";
+
+        let saveBtn = document.createElement("button");
+        saveBtn.className = "btn btn-success btn-sm save-btn d-none";
+        saveBtn.textContent = 'Save';
+        saveBtn.type = "button";
+
+        editButton.addEventListener("click", () => {
+            let emailCell = document.getElementById(`Row ${i} Cell 0`);
+            let nameCell = document.getElementById(`Row ${i} Cell 1`);
+            let surnameCell = document.getElementById(`Row ${i} Cell 2`);
+            let roleCell = document.getElementById(`Row ${i} Cell 3`);
+
+            // Converti i campi in input
+            const emailInput = document.createElement("input");
+            emailInput.type = "text";
+            emailInput.value = emailCell.innerHTML;
+            emailCell.innerHTML = ''
+            emailCell.appendChild(emailInput);
+
+            const nameInput = document.createElement("input");
+            nameInput.type = "text";
+            nameInput.value = nameCell.innerHTML;
+            nameCell.innerHTML = ''
+            nameCell.appendChild(nameInput);
+
+            const surnameInput = document.createElement("input");
+            surnameInput.type = "text";
+            surnameInput.value = surnameCell.innerHTML;
+            surnameCell.innerHTML = '';
+            surnameCell.appendChild(surnameInput);
+
+            const roleInput = document.createElement("input");
+            roleInput.type = "text";
+            roleInput.value = roleCell.innerHTML;
+            roleCell.innerHTML = '';
+            roleCell.appendChild(roleInput);
+
+            // Nascondi il pulsante Edit e mostrare il salvataggio
+            editButton.classList.add('d-none');
+            saveBtn.classList.remove('d-none');
+
+            // Gestire il salvataggio
+            saveBtn.addEventListener("click", () => {
+                emailCell.innerHTML = emailInput.value;
+                nameCell.innerHTML = nameInput.value;
+                surnameCell.innerHTML = surnameInput.value;
+                roleCell.innerHTML = roleInput.value;
+
+                saveBtn.classList.add('d-none');
+                editButton.classList.remove('d-none');
+            })
+        })
+
+        editBtnBox.append(editButton);
+        editBtnBox.append(saveBtn);
+        row.appendChild(editBtnBox);
     }
 }
-
 
 
 function createUser() {
@@ -138,12 +331,12 @@ function createUser() {
 </form>
         `;
     createDropdown(document.getElementById("dropdownUser"), [
-        { name: "Group 1" },
-        { name: "Group 2" },
-        { name: "Group 3" },
-        { name: "Group 4" },
-        { name: "Group 5" },
-        { name: "Group 6" },
+        {name: "Group 1"},
+        {name: "Group 2"},
+        {name: "Group 3"},
+        {name: "Group 4"},
+        {name: "Group 5"},
+        {name: "Group 6"},
     ]);
 }
 
@@ -171,12 +364,12 @@ function createGroup() {
         `;
 
     createDropdown(document.getElementById("dropdownGroup"), [
-        { name: "Group 1" },
-        { name: "Group 2" },
-        { name: "Group 3" },
-        { name: "Group 4" },
-        { name: "Group 5" },
-        { name: "Group 6" },
+        {name: "Group 1"},
+        {name: "Group 2"},
+        {name: "Group 3"},
+        {name: "Group 4"},
+        {name: "Group 5"},
+        {name: "Group 6"},
     ]);
 }
 
@@ -228,7 +421,6 @@ document.addEventListener("DOMContentLoaded", function () {
     showUsersB.addEventListener("click", () => showUsers());
     showGroupsB.addEventListener("click", () => showGroups());
     showRolesB.addEventListener("click", () => showRoles());
-
 
 
 });
