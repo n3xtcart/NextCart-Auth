@@ -1,5 +1,7 @@
 package it.nextre.corsojava.entity;
 
+import it.nextre.corsojava.dto.UserDTO;
+
 public class User extends Entity {
     private String nome;
     private String cognome;
@@ -8,7 +10,26 @@ public class User extends Entity {
     private Group group;
 
 
-    public Group getGroup() {
+    public User(UserDTO user) {
+    			this.id = user.getId();
+		this.nome = user.getNome();
+		this.cognome = user.getCognome();
+		this.email = user.getEmail();
+		this.password = user.getPassword();
+		if (user.getGroupDTO() != null) {
+			this.group = new Group(user.getGroupDTO());
+		}
+	}
+	
+
+
+	public User() {
+		// TODO Auto-generated constructor stub
+	}
+
+
+
+	public Group getGroup() {
         return group;
     }
 

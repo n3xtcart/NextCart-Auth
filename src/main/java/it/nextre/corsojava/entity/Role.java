@@ -1,12 +1,25 @@
 package it.nextre.corsojava.entity;
 
+import it.nextre.corsojava.dto.RoleDTO;
+
 public class Role extends Entity {
     private String descrizione;
     private Boolean admin;
     private Long priority;
 
 
-    public String getDescrizione() {
+    public Role(RoleDTO roleDTO) {
+		this.id = roleDTO.getId();
+		this.descrizione = roleDTO.getDescrizione();
+		this.admin = roleDTO.getAdmin();
+		this.priority = roleDTO.getPriority();
+	}
+
+	public Role() {
+		// TODO Auto-generated constructor stub
+	}
+
+	public String getDescrizione() {
         return descrizione;
     }
 
@@ -32,6 +45,20 @@ public class Role extends Entity {
     public void setPriority(Long priority) {
         aggiornaUltimaModifica();
         this.priority = priority;
+    }
+    
+    public int compareTo(Role o) {
+    	if(admin !=null && o.isAdmin()!=null && admin.booleanValue()==o.isAdmin().booleanValue()) {
+			return priority.compareTo(o.getPriority());
+		}
+    	else if(admin!=null && admin.booleanValue() ) {
+    		return 1;
+    	}
+    	else if(o.isAdmin()!=null && o.isAdmin().booleanValue()) {
+			return -1;
+		}
+		return 0;
+    
     }
 
 

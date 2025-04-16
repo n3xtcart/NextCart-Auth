@@ -1,6 +1,8 @@
 package it.nextre.corsojava.dao;
 
 
+import java.util.Optional;
+
 import it.nextre.corsojava.entity.User;
 
 public class UserDAO extends Dao<User> {
@@ -23,8 +25,15 @@ public class UserDAO extends Dao<User> {
 
 
     public User getByEmail(String email) {
-        var u = database.values().stream().filter(user -> user.getNome().equals(email)).findFirst();
+        Optional<User> u = database.values().stream().filter(user -> user.getEmail().equals(email)).findFirst();
         return u.orElse(null);
+ 
     }
+
+	public Optional<User> findByEmailPassword(String email, String password) {
+		Optional<User> u = database.values().stream()
+				.filter(user -> user.getEmail().equals(email) && user.getPassword().equals(password)).findFirst();
+		return u;
+	}
 
 }

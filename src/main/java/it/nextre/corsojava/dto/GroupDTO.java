@@ -1,10 +1,20 @@
 package it.nextre.corsojava.dto;
 
+import it.nextre.corsojava.entity.Group;
+
 public class GroupDTO {
     private RoleDTO roleDTO;
     private Long id;
 
-    public RoleDTO getRoleDTO() {
+    public GroupDTO(Group group) {
+    			this.id = group.getId();
+		if (group.getRole() != null) {
+			this.roleDTO = new RoleDTO(group.getRole());
+		}
+	}
+
+
+	public RoleDTO getRoleDTO() {
         return roleDTO;
     }
 

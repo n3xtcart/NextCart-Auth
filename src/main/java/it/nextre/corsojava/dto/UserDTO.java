@@ -1,58 +1,75 @@
 package it.nextre.corsojava.dto;
 
+import it.nextre.corsojava.entity.User;
+
 public class UserDTO {
-    private Long id;
-    private String nome;
-    private String cognome;
-    private String email;
-    private String password;
-    private GroupDTO groupDTO;
+	private Long id;
+	private String nome;
+	private String cognome;
+	private String email;
+	private String password;
+	private GroupDTO groupDTO;
 
-    public Long getId() {
-        return id;
-    }
+	public UserDTO(User user) {
+		this.id = user.getId();
+		this.nome = user.getNome();
+		this.cognome = user.getCognome();
+		this.email = user.getEmail();
+		if (user.getGroup() != null) {
+			this.groupDTO = new GroupDTO(user.getGroup());
+		}
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+	}
 
-    public String getNome() {
-        return nome;
-    }
+	public UserDTO() {
+		// TODO Auto-generated constructor stub
+	}
 
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
+	public Long getId() {
+		return id;
+	}
 
-    public String getCognome() {
-        return cognome;
-    }
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-    public void setCognome(String cognome) {
-        this.cognome = cognome;
-    }
+	public String getNome() {
+		return nome;
+	}
 
-    public String getEmail() {
-        return email;
-    }
+	public void setNome(String nome) {
+		this.nome = nome;
+	}
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+	public String getCognome() {
+		return cognome;
+	}
 
-    public String getPassword() {
-        return password;
-    }
+	public void setCognome(String cognome) {
+		this.cognome = cognome;
+	}
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
+	public String getEmail() {
+		return email;
+	}
 
-    public GroupDTO getGroupDTO() {
-        return groupDTO;
-    }
+	public void setEmail(String email) {
+		this.email = email;
+	}
 
-    public void setGroupDTO(GroupDTO groupDTO) {
-        this.groupDTO = groupDTO;
-    }
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public GroupDTO getGroupDTO() {
+		return groupDTO;
+	}
+
+	public void setGroupDTO(GroupDTO groupDTO) {
+		this.groupDTO = groupDTO;
+	}
 }
