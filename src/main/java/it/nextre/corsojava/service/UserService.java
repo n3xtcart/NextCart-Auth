@@ -18,6 +18,16 @@ public class UserService implements UserServiceInterface {
 	private TokenUserDAO tokenUserDAO;
 	private GroupDAO groupDAO;
 	private RoleDAO roleDAO;
+	
+	public UserService() {
+		super();
+		this.userDAO = new UserDAO();
+		this.tokenService = new TokenAdminDAO();
+		this.tokenUserDAO = new TokenUserDAO();
+		this.groupDAO = new GroupDAO();
+		this.roleDAO = new RoleDAO();
+	}
+	
 	@Override
 	public TokenDTO login(UserDTO user) {
 		// TODO Auto-generated method stub
