@@ -8,8 +8,10 @@ import it.nextre.corsojava.dto.GroupDTO;
 import it.nextre.corsojava.dto.RoleDTO;
 import it.nextre.corsojava.dto.TokenDTO;
 import it.nextre.corsojava.dto.UserDTO;
+import it.nextre.corsojava.entity.Group;
 import it.nextre.corsojava.entity.Role;
 import it.nextre.corsojava.entity.Token;
+import it.nextre.corsojava.exception.RoleMissingException;
 import it.nextre.corsojava.exception.UnauthorizedException;
 
 import java.util.List;
@@ -92,8 +94,13 @@ public class UserService implements UserServiceInterface {
 
     @Override
     public void createGroup(GroupDTO group, TokenDTO token) {
-        // TODO Auto-generated method stub
-
+        if (!token.getUserDTO().getGroupDTO().getRoleDTO().getAdmin())
+            throw new UnauthorizedException("Non possiedi i permessi per compiere questa azione.");
+        Group toSave = new Group();
+        RoleDTO infoRole = group.getRoleDTO();
+        Role role = roleDAO.getById(infoRole.getId());
+        toSave.setRole(role);
+        groupDAO.add(toSave);
     }
 
     @Override
@@ -127,21 +134,35 @@ public class UserService implements UserServiceInterface {
     }
 
     @Override
-    public void createRole(RoleDTO group, TokenDTO token) {
-        // TODO Auto-generated method stub
-
+    public void createRole(RoleDTO roleDTO, TokenDTO token) {
+        if (!token.getUserDTO().getGroupDTO().getRoleDTO().getAdmin())
+            throw new UnauthorizedException("Non possiedi i permessi per compiere questa azione.");
+        Role toSave = new Role();
+        toSave.setDescrizione(roleDTO.getDescrizione());
+        toSave.setPriority(roleDTO.getPriority());
+        toSave.setAdmin(roleDTO.getAdmin());
+        roleDAO.add(toSave);
     }
 
     @Override
-    public void updateRole(RoleDTO group, TokenDTO token) {
-        // TODO Auto-generated method stub
-
+    public void updateRole(RoleDTO roleDTO, TokenDTO token) {
+        if (!token.getUserDTO().getGroupDTO().getRoleDTO().getAdmin())
+            throw new UnauthorizedException("Non possiedi i permessi per compiere questa azione.");
+        Role role = new Role();
+        role.setDescrizione(roleDTO.getDescrizione());
+        role.setAdmin(roleDTO.getAdmin());
+        role.setPriority(roleDTO.getPriority());
+        roleDAO.update(roleDTO.getId(), role);
     }
 
     @Override
-    public void deleteRole(RoleDTO group, TokenDTO token) {
-        // TODO Auto-generated method stub
-
+    public void deleteRole(RoleDTO roleDTO, TokenDTO token) {
+        if (!token.getUserDTO().getGroupDTO().getRoleDTO().getAdmin())
+            throw new UnauthorizedException("Non possiedi i permessi per compiere questa azione.");
+        Role r = roleDAO.getById(roleDTO.getId());
+        if (r == null)
+            throw new RoleMissingException("Ruolo richiesto da cancellare non presente");
+        roleDAO.delete(roleDTO.getId());
     }
 
     @Override
