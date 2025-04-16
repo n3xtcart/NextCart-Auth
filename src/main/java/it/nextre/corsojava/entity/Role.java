@@ -11,6 +11,7 @@ public class Role extends Entity {
     }
 
     public void setDescrizione(String descrizione) {
+        aggiornaUltimaModifica();
         this.descrizione = descrizione;
     }
 
@@ -19,6 +20,7 @@ public class Role extends Entity {
     }
 
     public void setAdmin(Boolean admin) {
+        aggiornaUltimaModifica();
         this.admin = admin;
     }
 
@@ -28,6 +30,7 @@ public class Role extends Entity {
     }
 
     public void setPriority(Long priority) {
+        aggiornaUltimaModifica();
         this.priority = priority;
     }
 
