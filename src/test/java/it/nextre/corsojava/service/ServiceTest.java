@@ -236,6 +236,20 @@ class ServiceTest {
     }
 
     @Test
+    void createUser() {
+        Token t = tokenUserDAO.getById(3L);
+        TokenDTO req = new TokenDTO(t);
+        UserDTO toSave = new UserDTO();
+        toSave.setGroupDTO(new GroupDTO(groupDAO.getById(1L)));
+        toSave.setNome("Nomefico");
+        toSave.setCognome("Cognomefico");
+        toSave.setPassword("passwordComplessa");
+        toSave.setEmail("email123455667@example.com");
+        userService.createUser(toSave, req);
+        assertEquals(21, userService.getAllUsers(req).size());
+    }
+
+    @Test
     void deleteUserTest() {
         Token toDelete = tokenUserDAO.getById(1L);
         TokenDTO req = new TokenDTO(toDelete);
@@ -247,7 +261,7 @@ class ServiceTest {
     }
 
     @Test
-    void createUserTest() {
+    void updateUser() {
         Token toUpdate = tokenUserDAO.getById(3L);
         TokenDTO req = new TokenDTO(toUpdate);
         UserDTO toBeUpdate = new UserDTO(toUpdate.getUser());
