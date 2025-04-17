@@ -346,18 +346,18 @@ function createUser() {
 </form>
         `;
     const groupInput = document.getElementById("group");
-    if(groupInput.value.trim()== "") {
+    if (groupInput.value.trim() == "") {
         const groupIdError = document.getElementById("inputError");
         groupIdError.classList.add("d-block");
     }
     createDropdown(document.getElementById("dropdownUser"), [
-        {name: "Group 1"},
-        {name: "Group 2"},
-        {name: "Group 3"},
-        {name: "Group 4"},
-        {name: "Group 5"},
-        {name: "Group 6"},
-    ],groupInput);
+        { name: "Group 1" },
+        { name: "Group 2" },
+        { name: "Group 3" },
+        { name: "Group 4" },
+        { name: "Group 5" },
+        { name: "Group 6" },
+    ], groupInput);
 }
 
 function createGroup() {
@@ -386,19 +386,19 @@ function createGroup() {
 </form>
         `;
 
-        const groupInput = document.getElementById("role");
-        if(groupInput.value.trim()== "") {
-            const groupIdError = document.getElementById("inputError");
-            groupIdError.classList.add("d-block");
-        }
+    const groupInput = document.getElementById("role");
+    if (groupInput.value.trim() == "") {
+        const groupIdError = document.getElementById("inputError");
+        groupIdError.classList.add("d-block");
+    }
     createDropdown(document.getElementById("dropdownGroup"), [
-        {name: "Group 1"},
-        {name: "Group 2"},
-        {name: "Group 3"},
-        {name: "Group 4"},
-        {name: "Group 5"},
-        {name: "Group 6"},
-    ],groupInput);
+        { name: "Group 1" },
+        { name: "Group 2" },
+        { name: "Group 3" },
+        { name: "Group 4" },
+        { name: "Group 5" },
+        { name: "Group 6" },
+    ], groupInput);
 }
 
 function createRole() {
@@ -430,7 +430,7 @@ function createRole() {
         `;
 }
 
-function createDropdown(elem, data,input) {
+function createDropdown(elem, data, input) {
     data.forEach((item) => {
         li = document.createElement("li");
         a = document.createElement("a");
