@@ -209,7 +209,7 @@ class ServiceTest {
             userService.updateUser(userKo2, tokenOk2);
 
         });
-        assertEquals("Non puoi cambiare il ruolo di un utente se il tuo è più basso", exception.getMessage());
+        assertEquals("Non puoi modificare un utente con priorità maggiore alla tua", exception.getMessage());
 
         UserDTO userKo3 = new UserDTO();
         userKo3.setCognome("cognome");

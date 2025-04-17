@@ -105,7 +105,7 @@ public class UserService implements UserServiceInterface {
             throw new UnauthorizedException("Non puoi cambiare il ruolo di un utente con uno di priorità maggiore al tuo");
         }
         if (t.getUser().getGroup().getRole().compareTo(u.getGroup().getRole()) < 0) {
-            throw new UnauthorizedException("Non puoi cambiare il tuo ruolo con uno di priorità maggiore");
+            throw new UnauthorizedException("Non puoi modificare un utente con priorità maggiore alla tua");
         }
         if (!t.getUser().getId().equals(u.getId()) && !t.getUser().getGroup().getRole().isAdmin())
             throw new UnauthorizedException("Non puoi cambiare il ruolo di un utente se il tuo è più basso");
