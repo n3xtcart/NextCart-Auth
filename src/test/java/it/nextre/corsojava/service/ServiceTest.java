@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ServiceTest {
+class ServiceTest {
     UserService userService;
     GroupDAO groupDAO;
     RoleDAO roleDAO;
@@ -27,7 +27,7 @@ public class ServiceTest {
 
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         userDAO = new UserDAO();
         groupDAO = new GroupDAO();
         tokenUserDAO = new TokenUserDAO();
@@ -83,7 +83,7 @@ public class ServiceTest {
 
 
     @Test
-    public void loginTest() {
+    void loginTest() {
         UserDTO userOk = new UserDTO();
         userOk.setCognome("cognome");
         userOk.setNome("nome");
@@ -105,7 +105,7 @@ public class ServiceTest {
     }
 
     @Test
-    public void registerTest() {
+    void registerTest() {
         UserDTO userKo = new UserDTO();
         userKo.setCognome("cognome");
         userKo.setNome("nome");
@@ -155,7 +155,7 @@ public class ServiceTest {
 
 
     @Test
-    public void updateTest() {
+    void updateTest() {
         UserDTO userOk = new UserDTO();
         userOk.setCognome("cognome");
         userOk.setNome("nome");
@@ -218,4 +218,103 @@ public class ServiceTest {
 
     }
 
+    @Test
+    void logoutTest() {
+        Token toDelete = tokenUserDAO.getById(1L);
+        TokenDTO req = new TokenDTO(toDelete);
+        userService.logout(req);
+        assertThrows(UnauthorizedException.class, () -> userService.getAllUsers(req));
+    }
+
+    @Test
+    void deleteUserTest() {
+        Token toDelete = tokenUserDAO.getById(1L);
+        TokenDTO req = new TokenDTO(toDelete);
+        UserDTO toBeDeleted = req.getUserDTO();
+        toBeDeleted.setPassword(toDelete.getUser().getPassword());
+        userService.deleteUser(toBeDeleted, req);
+        var exception = assertThrows(UnauthorizedException.class, () -> userService.login(toBeDeleted));
+        assertEquals("Credenziali non valide", exception.getMessage());
+    }
+
+    @Test
+    void createUserTest() {
+        Token toUpdate = tokenUserDAO.getById(3L);
+        TokenDTO req = new TokenDTO(toUpdate);
+        UserDTO toBeUpdate = new UserDTO(toUpdate.getUser());
+        toBeUpdate.setNome("NuovoNome");
+        toBeUpdate.setCognome("NuovoCognome");
+        toBeUpdate.setPassword("NuovaPassword");
+        toBeUpdate.setEmail("nuovaemail@example.com");
+        userService.updateUser(toBeUpdate, req);
+        assertDoesNotThrow(() -> userService.login(toBeUpdate));
+    }
+
+    @Test
+    void getAllUsers() {
+        Token t = tokenUserDAO.getById(4L);
+        TokenDTO req = new TokenDTO(t);
+        assertEquals(20, userService.getAllUsers(req).size());
+    }
+
+    @Test
+    void createGroup() {
+        Token t = tokenUserDAO.getById(5L);
+        TokenDTO req = new TokenDTO(t);
+        GroupDTO newGroup = new GroupDTO();
+        newGroup.setRoleDTO(new RoleDTO(roleDAO.getById(1L)));
+        userService.createGroup(newGroup, req);
+        assertEquals(3, userService.getAllGroup(req).size());
+    }
+
+    @Test
+    void updateGroup() {
+        Token t = tokenUserDAO.getById(3L);
+        TokenDTO req = new TokenDTO(t);
+        GroupDTO groupDTO = new GroupDTO(groupDAO.getById(1L));
+        groupDTO.setRoleDTO(new RoleDTO(roleDAO.getById(2L)));
+        userService.updateGroup(groupDTO, req);
+        var groups = userService.getAllGroup(req);
+        assertEquals(groups.get(0).getRoleDTO().getDescrizione(), groups.get(1).getRoleDTO().getDescrizione());
+    }
+
+    @Test
+    void deleteGroup() {
+        Token t = tokenUserDAO.getById(2L);
+        TokenDTO req = new TokenDTO(t);
+        GroupDTO groupDTO = new GroupDTO(groupDAO.getById(1L));
+        userService.deleteGroup(groupDTO, req);
+        assertEquals(1, userService.getAllGroup(req).size());
+    }
+
+    @Test
+    void createRole() {
+        Token t = tokenUserDAO.getById(6L);
+        TokenDTO req = new TokenDTO(t);
+        RoleDTO toSave = new RoleDTO();
+        toSave.setAdmin(true);
+        toSave.setDescrizione("Nuovo ruolo super fico");
+        toSave.setPriority(5L);
+        userService.createRole(toSave, req);
+        assertEquals(3, userService.getAllRole(req).size());
+    }
+
+    @Test
+    void updateRole() {
+        Token t = tokenUserDAO.getById(7L);
+        TokenDTO req = new TokenDTO(t);
+        RoleDTO toUpdate = new RoleDTO(roleDAO.getById(1L));
+        toUpdate.setDescrizione("Nuova descrizione");
+        userService.updateRole(toUpdate, req);
+        assertEquals("Nuova descrizione", userService.getAllRole(req).get(0).getDescrizione());
+    }
+
+    @Test
+    void deleteRole() {
+        Token t = tokenUserDAO.getById(9L);
+        TokenDTO req = new TokenDTO(t);
+        RoleDTO toDelete = new RoleDTO(roleDAO.getById(2L));
+        userService.deleteRole(toDelete, req);
+        assertEquals(1, userService.getAllRole(req).size());
+    }
 }
