@@ -96,11 +96,10 @@ public class UserService implements UserServiceInterface {
         if (user == null) throw new UnauthorizedException("Utente non valido");
         if (user.getGroupDTO() == null) throw new UnauthorizedException("Gruppo non valido");
         if (user.getGroupDTO().getRoleDTO() == null) throw new UnauthorizedException("Ruolo non valido");
-        if (!checkToken(token)) throw new UnauthorizedException("Token non valido");
+        if (!checkToken(token)) throw new UnauthorizedException("Token non presente");
         User u = userDAO.getById(user.getId());
         if (u == null) throw new UserMissingException("Utente non trovato");
         Token t = tokenUserDAO.getTokenByValue(token.getValue());
-        if (t == null) throw new UnauthorizedException("Token non trovato");
         if (t.getUser().getGroup().getRole().compareTo(new Role(user.getGroupDTO().getRoleDTO())) < 0) {
             throw new UnauthorizedException("Non puoi cambiare il ruolo di un utente con uno di priorità maggiore al tuo");
         }
@@ -122,7 +121,7 @@ public class UserService implements UserServiceInterface {
         if (user == null) throw new UnauthorizedException("Utente non valido");
         if (user.getGroupDTO() == null) throw new UnauthorizedException("Gruppo non valido");
         if (user.getGroupDTO().getRoleDTO() == null) throw new UnauthorizedException("Ruolo non valido");
-
+        if (!checkToken(token)) throw new UnauthorizedException("Token non presente");
         User u = userDAO.getById(user.getId());
         if (u == null) throw new UnauthorizedException("Utente non trovato");
         Token t = tokenUserDAO.getTokenByValue(token.getValue());
@@ -133,7 +132,7 @@ public class UserService implements UserServiceInterface {
             userDAO.delete(user.getId());
             tokenUserDAO.getTokenByIdUser(user.getId()).forEach(tok -> tokenUserDAO.delete(tok.getId()));
         } else {
-            throw new UnauthorizedException("Non puoi cancellare un utente con uno di priorità maggiore");
+            throw new UnauthorizedException("Non puoi cancellare un utente con priorità maggiore alla tua");
         }
     }
 

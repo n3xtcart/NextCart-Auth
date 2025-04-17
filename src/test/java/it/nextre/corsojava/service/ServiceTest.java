@@ -103,6 +103,26 @@ class ServiceTest {
         assertThrows(UnauthorizedException.class, () -> {
             userService.login(userKo);
         });
+        
+        UserDTO userKo2 = new UserDTO();
+        userKo2.setCognome("cognome");
+        userKo2.setNome("nome");
+        userKo2.setEmail("user1@example.com");
+        userKo2.setPassword("");
+        userKo2.setGroupDTO(null);
+        assertThrows(UnauthorizedException.class, () -> {
+        	userService.login(userKo2);
+        });
+        
+        UserDTO userKo3 = new UserDTO();
+        userKo3.setCognome("cognome");
+        userKo3.setNome("nome");
+        userKo3.setEmail("");
+        userKo3.setPassword("password1");
+        userKo3.setGroupDTO(null);
+        assertThrows(UnauthorizedException.class, () -> {
+        	userService.login(userKo3);
+        });
     }
 
     @Test
@@ -158,6 +178,21 @@ class ServiceTest {
         exception = assertThrows(UnauthorizedException.class, () -> {
             userService.register(userKo3);
 
+        });
+        assertEquals("Gruppo non valido", exception.getMessage());
+        
+        
+
+        exception = assertThrows(UnauthorizedException.class, () -> {
+            userService.register(null);
+
+        });
+        assertEquals("Utente non valido", exception.getMessage());
+        
+        UserDTO userKo4 = new UserDTO();
+        exception = assertThrows(UnauthorizedException.class, () -> {
+        	userService.register(userKo4);
+        	
         });
         assertEquals("Gruppo non valido", exception.getMessage());
 
@@ -224,6 +259,7 @@ class ServiceTest {
 
         });
         assertEquals("Non puoi cambiare il ruolo di un utente con uno di priorità maggiore al tuo", exception.getMessage());
+        
 
 
     }
@@ -233,6 +269,13 @@ class ServiceTest {
         Token toDelete = tokenUserDAO.getById(1L);
         TokenDTO req = new TokenDTO(toDelete);
         userService.logout(req);
+        assertThrows(UnauthorizedException.class, () -> userService.getAllUsers(req));
+        Token toDelete2 =new Token();
+        toDelete2.setValue("tokenNonValido");
+        toDelete2.setId(100L);
+        toDelete2.setUser(new User());
+        TokenDTO req2 = new TokenDTO(toDelete2);
+        userService.logout(req2);
         assertThrows(UnauthorizedException.class, () -> userService.getAllUsers(req));
     }
 
@@ -259,6 +302,19 @@ class ServiceTest {
         userService.deleteUser(toBeDeleted, req);
         var exception = assertThrows(UnauthorizedException.class, () -> userService.login(toBeDeleted));
         assertEquals("Credenziali non valide", exception.getMessage());
+
+        Token toDelete2 = tokenUserDAO.getById(2L);
+        TokenDTO req2 = new TokenDTO(toDelete2);
+        UserDTO toBeDeleted2 = new UserDTO(userDAO.getById(11L));
+        toBeDeleted.setPassword(toDelete.getUser().getPassword());
+        userService.deleteUser(toBeDeleted2, req2);
+        
+        Token toDelete3 = tokenUserDAO.getById(3L);
+        TokenDTO req3 = new TokenDTO(toDelete3);
+        UserDTO toBeDeleted3 = new UserDTO(userDAO.getById(2L));
+        toBeDeleted.setPassword(toDelete.getUser().getPassword());
+        Exception exception2= assertThrows(UnauthorizedException.class, () -> userService.deleteUser(toBeDeleted3, req3));
+        assertEquals("Non puoi cancellare un utente con priorità maggiore alla tua", exception2.getMessage());
     }
 
     @Test
