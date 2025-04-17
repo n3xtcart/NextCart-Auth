@@ -55,13 +55,12 @@ public class UserService implements UserServiceInterface {
 		return tokenDTO;
 	}
 
-//	@Override
-//	public void logout(TokenDTO token) {
-//		Token t = tokenUserDAO.getById(token.getId());
-//		if (t != null) {
-//			tokenUserDAO.delete(t.getId());
-//		}
-//    }
+	public void logout(TokenDTO token) {
+		Token t = tokenUserDAO.getTokenByValue(token.getValue());
+		if (t != null) {
+			tokenUserDAO.delete(t.getId());
+		}
+    }
 
 	@Override
 	public TokenDTO register(UserDTO user) {
@@ -100,7 +99,7 @@ public class UserService implements UserServiceInterface {
 
 	@Override
 	public boolean checkToken(TokenDTO token) {
-		return tokenUserDAO.getAll().stream().anyMatch(t -> t.getValue().equals(token.getToken()));
+		return tokenUserDAO.getAll().stream().anyMatch(t -> t.getValue().equals(token.getValue()));
 	}
 
 	@Override
@@ -108,28 +107,30 @@ public class UserService implements UserServiceInterface {
 		if(user == null) throw new UnauthorizedException("Utente non valido");
 		if(user.getGroupDTO() == null) throw new UnauthorizedException("Gruppo non valido");
 		if(user.getGroupDTO().getRoleDTO() == null) throw new UnauthorizedException("Ruolo non valido");
-
+		if(checkToken(token) == false) throw new UnauthorizedException("Token non valido");
 		User u = userDAO.getById(user.getId());
 		if(u == null) throw new UnauthorizedException("Utente non trovato");
-    	if(token.getUserDTO().getId().equals(user.getId())) {
-    		if(u.getGroup().getRole().compareTo(new Role(user.getGroupDTO().getRoleDTO())) < 0) {
+		Token t = tokenUserDAO.getTokenByValue(token.getValue());
+    	if(t.getUser().getId().equals(u.getId())) {
+    		if(u.getGroup().getRole().compareTo(u.getGroup().getRole()) < 0) {
 				throw new UnauthorizedException("Non puoi cambiare il tuo ruolo con uno di priorità maggiore");
 			}
-			u.setNome(user.getNome());
 			u.setNome(user.getNome());
 			u.setCognome(user.getCognome());
 			u.setEmail(user.getEmail());
 			u.setPassword(user.getPassword());
 			u.setGroup(new Group(user.getGroupDTO()));
 			userDAO.update(user.getId(), u);
-    	}else if(new Role(token.getUserDTO().getGroupDTO().getRoleDTO()).compareTo(u.getGroup().getRole()) > 0) {
+    	}else if(t.getUser().getGroup().getRole().compareTo(u.getGroup().getRole()) > 0) {
     		u.setNome(user.getNome());
 			u.setCognome(user.getCognome());
 			u.setEmail(user.getEmail());
 			u.setPassword(user.getPassword());
 			u.setGroup(new Group(user.getGroupDTO()));
 			userDAO.update(user.getId(), u);
-    	}
+    	}else {
+			throw new UnauthorizedException("Non puoi cambiare il ruolo di un utente con uno di priorità maggiore");
+		}
     }
 
 	@Override
@@ -140,12 +141,15 @@ public class UserService implements UserServiceInterface {
 
 		User u = userDAO.getById(user.getId());
 		if(u == null) throw new UnauthorizedException("Utente non trovato");
-    	if(token.getUserDTO().getId().equals(user.getId())) {
+		Token t = tokenUserDAO.getTokenByValue(token.getValue());
+    	if(t.getUser().getId().equals(user.getId())) {
 			userDAO.delete(user.getId());
-			tokenUserDAO.getTokenByIdUser(user.getId()).forEach(t -> tokenUserDAO.delete(t.getId()));
-    	}else if(new Role(token.getUserDTO().getGroupDTO().getRoleDTO()).compareTo(u.getGroup().getRole()) > 0) {
+			tokenUserDAO.getTokenByIdUser(user.getId()).forEach(tok -> tokenUserDAO.delete(tok.getId()));
+    	}else if(t.getUser().getGroup().getRole().compareTo(u.getGroup().getRole()) > 0) {
     		userDAO.delete(user.getId());
-			tokenUserDAO.getTokenByIdUser(user.getId()).forEach(t -> tokenUserDAO.delete(t.getId()));
+			tokenUserDAO.getTokenByIdUser(user.getId()).forEach(tok -> tokenUserDAO.delete(tok.getId()));
+    	}else {
+    		throw new UnauthorizedException("Non puoi cancellare un utente con uno di priorità maggiore");
     	}
     }
 

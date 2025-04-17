@@ -21,5 +21,9 @@ public class TokenUserDAO extends Dao<Token> {
 	public List<Token> getTokenByIdUser(Long id) {
 		return database.values().stream().filter(token -> token.getUser().getId().equals(id)).toList();
 	}
+	
+	public Token getTokenByValue(String value) {
+		return database.values().stream().filter(token -> token.getValue().equals(value)).findFirst().orElse(null);
+	}
 
 }
