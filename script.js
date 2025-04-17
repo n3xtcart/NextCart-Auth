@@ -293,27 +293,42 @@ function showUsers() {
 
 function createUser() {
     const main = document.getElementById("main");
-    main.innerHTML = `<form id="userForm" method="POST" action="/createUser" enctype="multipart/form-data">
+    main.innerHTML = `<form id="userForm" method="POST" class="was-validated" action="/createUser" enctype="multipart/form-data">
     <div class="row p-5">
         <div class="col">
             <label for="mail">Mail:</label><br>
-            <input type="text" id="mail" name="mail"><br>
+            <input type="text" id="mail" name="mail" required><br>
+            <div class="invalid-feedback">
+              il campo è obbligatorio
+            </div>
 
             <label for="name">Name:</label><br>
-            <input type="text" id="name" name="name"><br>
+            <input type="text" id="name" name="name"  required><br>
+            <div class="invalid-feedback">
+              il campo è obbligatorio
+            </div>
 
             <label for="password">Password:</label><br>
-            <input type="password" id="password" name="password"><br>
+            <input type="password" id="password" name="password" required><br>
+            <div class="invalid-feedback">
+              il campo è obbligatorio
+            </div>
         </div>
 
         <div class="col">
 
             <label for="surname">Surname:</label><br>
-            <input type="text" id="surname" name="surname"><br>
+            <input type="text" id="surname" name="surname" required><br>
+            <div class="invalid-feedback">
+              il campo è obbligatorio
+            </div><br>
             <div class="row">
             <label for="group">Group:</label><br>
                 <div class="col m-1 pr-0">
-                    <input type="text" id="group" name="group" readonly>
+                    <input type="text" id="group" name="group" readonly ><br>
+            <div class="invalid-feedback" id="inputError">
+              il campo è obbligatorio
+            </div>
 
                     <input type="submit" class="mt-3" value="Create User">
                 </div>
@@ -330,6 +345,11 @@ function createUser() {
     </div>
 </form>
         `;
+    const groupInput = document.getElementById("group");
+    if(groupInput.value.trim()== "") {
+        const groupIdError = document.getElementById("inputError");
+        groupIdError.classList.add("d-block");
+    }
     createDropdown(document.getElementById("dropdownUser"), [
         {name: "Group 1"},
         {name: "Group 2"},
@@ -337,18 +357,21 @@ function createUser() {
         {name: "Group 4"},
         {name: "Group 5"},
         {name: "Group 6"},
-    ]);
+    ],groupInput);
 }
 
 function createGroup() {
     const main = document.getElementById("main");
-    main.innerHTML = `<form id="userForm" method="POST" action="/createUser" enctype="multipart/form-data">
+    main.innerHTML = `<form id="userForm" method="POST" action="/createUser" class="was-validated" enctype="multipart/form-data">
     <div class="row p-5">
 
         <div class="row">
             <div class="col-3 m-1">
                 <label for="role">Role:</label><br>
                 <input type="text" id="role" name="role" readonly><br>
+                <div class="invalid-feedback" id="inputError">
+                  il campo è obbligatorio
+                </div>
                 <input type="submit" class="mt-3" value="Create Group">
             </div>
             <div class="col-8 m-1">
@@ -363,6 +386,11 @@ function createGroup() {
 </form>
         `;
 
+        const groupInput = document.getElementById("role");
+        if(groupInput.value.trim()== "") {
+            const groupIdError = document.getElementById("inputError");
+            groupIdError.classList.add("d-block");
+        }
     createDropdown(document.getElementById("dropdownGroup"), [
         {name: "Group 1"},
         {name: "Group 2"},
@@ -370,25 +398,31 @@ function createGroup() {
         {name: "Group 4"},
         {name: "Group 5"},
         {name: "Group 6"},
-    ]);
+    ],groupInput);
 }
 
 function createRole() {
     const main = document.getElementById("main");
-    main.innerHTML = `<form id="userForm" method="POST" action="/createUser" enctype="multipart/form-data">
+    main.innerHTML = `<form id="userForm" method="POST" action="/createUser"  class="was-validated" enctype="multipart/form-data">
 
 
         <div class="row">
             <div class="col-3 m-1">
                 <label for="role">Role:</label><br>
-                <input type="text" id="role" name="role"><br>
+                <input type="text" id="role" name="role" required><br>
+                <div class="invalid-feedback" >
+                  il campo è obbligatorio
+                </div>
                 <label for="priority">Priority:</label><br>
-                <input type="number" id="priority" name="priority"><br>
+                <input type="number" id="priority" name="priority" required><br>
+                <div class="invalid-feedback" >
+                    il campo è obbligatorio
+                </div>
             </div>
             
             <div class="col-3 m-1">
                 <label for="admin">Admin:</label><br>
-                <input type="checkbox" id="admin" name="admin"><br>
+                <input type="checkbox" id="admin" name="admin" ><br>
                 <input type="submit" class="mt-3" value="Create Role">
             </div>
          </div>
@@ -396,7 +430,7 @@ function createRole() {
         `;
 }
 
-function createDropdown(elem, data) {
+function createDropdown(elem, data,input) {
     data.forEach((item) => {
         li = document.createElement("li");
         a = document.createElement("a");
@@ -404,6 +438,11 @@ function createDropdown(elem, data) {
         li.appendChild(a);
         a.innerHTML = item.name;
         elem.appendChild(li);
+        a.addEventListener("click", () => {
+            input.value = item.name;
+            const groupIdError = document.getElementById("inputError");
+            groupIdError.classList.remove("d-block");
+        })
     })
 }
 

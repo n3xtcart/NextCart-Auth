@@ -106,6 +106,15 @@ class ServiceTest {
 
     @Test
     void registerTest() {
+    	UserDTO userOk = new UserDTO();
+        userOk.setCognome("cognome");
+        userOk.setNome("nome");
+        userOk.setId(30L);
+        userOk.setEmail("user100@example.com");
+        userOk.setPassword("password1");
+        userOk.setGroupDTO(new GroupDTO(groupDAO.getById(2L)));
+        userService.register(userOk);
+        
         UserDTO userKo = new UserDTO();
         userKo.setCognome("cognome");
         userKo.setNome("nome");
