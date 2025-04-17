@@ -44,9 +44,7 @@ public class UserService implements UserServiceInterface {
 		Optional<User> byEmailPassword = userDAO.findByEmailPassword(user.getEmail(), user.getPassword());
 		if (byEmailPassword.isPresent()) {
 			User u = byEmailPassword.get();
-			Token token = new Token();
-			token.setUser(u);
-			token.setValue(generateToken());
+			Token token = generateToken(u);
 			tokenUserDAO.add(token);
 			tokenDTO = new TokenDTO(token);
 		} else {
@@ -68,29 +66,19 @@ public class UserService implements UserServiceInterface {
 		if(user== null ) {
 			throw new UnauthorizedException("Utente non valido");
 		}
-		if(user.getGroupDTO() == null) {
+		if(user.getGroupDTO() == null ||  groupDAO.getById(user.getGroupDTO().getId()) == null ) {
 			throw new UnauthorizedException("Gruppo non valido");
 		}
-		if(user.getGroupDTO().getRoleDTO() == null) {
-			throw new UnauthorizedException("Ruolo non valido");
-		}
-		if(user.getGroupDTO().getRoleDTO().getAdmin()== null || user.getGroupDTO().getRoleDTO().getAdmin()) {
+		Group group = groupDAO.getById(user.getGroupDTO().getId());
+		
+		if(group.getRole().isAdmin()== true) {
 			throw new UnauthorizedException("Non puoi registrarti come admin");
 		}
 		if (userDAO.getByEmail(user.getEmail()) != null) {
 			throw new UnauthorizedException("Utente già registrato");
 		}
-		if ( groupDAO.getById(user.getGroupDTO().getId()) == null) {
-			throw new UnauthorizedException("Gruppo non valido");
-		}
-		if ( user.getGroupDTO().getRoleDTO().getAdmin() == null
-				|| user.getGroupDTO().getRoleDTO().getAdmin() == true) {
-			throw new UnauthorizedException("Ruolo non valido");
-		}
 		userDAO.add(new User(user));
-		Token token = new Token();
-		token.setUser(userDAO.getByEmail(user.getEmail()));
-		token.setValue(generateToken());
+		Token token = generateToken(userDAO.getByEmail(user.getEmail()));
 		tokenUserDAO.add(token);
 		tokenDTO = new TokenDTO(token);
 
@@ -111,8 +99,12 @@ public class UserService implements UserServiceInterface {
 		User u = userDAO.getById(user.getId());
 		if(u == null) throw new UnauthorizedException("Utente non trovato");
 		Token t = tokenUserDAO.getTokenByValue(token.getValue());
+		if(t == null) throw new UnauthorizedException("Token non trovato");
+		if(t.getUser().getGroup().getRole().compareTo(new Role(user.getGroupDTO().getRoleDTO())) < 0) {
+			throw new UnauthorizedException("Non puoi cambiare il ruolo di un utente con uno di priorità maggiore al tuo");
+		}
     	if(t.getUser().getId().equals(u.getId())) {
-    		if(u.getGroup().getRole().compareTo(u.getGroup().getRole()) < 0) {
+    		if(t.getUser().getGroup().getRole().compareTo(u.getGroup().getRole()) < 0) {
 				throw new UnauthorizedException("Non puoi cambiare il tuo ruolo con uno di priorità maggiore");
 			}
 			u.setNome(user.getNome());
@@ -129,7 +121,7 @@ public class UserService implements UserServiceInterface {
 			u.setGroup(new Group(user.getGroupDTO()));
 			userDAO.update(user.getId(), u);
     	}else {
-			throw new UnauthorizedException("Non puoi cambiare il ruolo di un utente con uno di priorità maggiore");
+			throw new UnauthorizedException("Non puoi cambiare il ruolo di un utente se il tuo è più basso");
 		}
     }
 
@@ -255,13 +247,16 @@ public class UserService implements UserServiceInterface {
 		}).toList();
 	}
 
-	private String generateToken() {
+	public Token generateToken(User user) {
 		Set<String> allTokens = tokenUserDAO.getAll().stream().map(Token::getValue).collect(Collectors.toSet());
 		String token;
 		do {
 			token = UUID.randomUUID().toString();
 		} while (allTokens.contains(token));
-		return token;
+		Token tokenUser = new Token();
+		tokenUser.setValue(token);
+		tokenUser.setUser(user);
+		return tokenUser;
 	}
 
 }

@@ -16,6 +16,10 @@ public class RoleDTO {
 
 	}
 
+	public RoleDTO() {
+		// TODO Auto-generated constructor stub
+	}
+
 	public String getDescrizione() {
 		return descrizione;
 	}

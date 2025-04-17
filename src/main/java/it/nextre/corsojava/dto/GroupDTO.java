@@ -14,6 +14,11 @@ public class GroupDTO {
 	}
 
 
+	public GroupDTO() {
+		// TODO Auto-generated constructor stub
+	}
+
+
 	public RoleDTO getRoleDTO() {
         return roleDTO;
     }
