@@ -275,8 +275,7 @@ class ServiceTest {
         toDelete2.setId(100L);
         toDelete2.setUser(new User());
         TokenDTO req2 = new TokenDTO(toDelete2);
-        userService.logout(req2);
-        assertThrows(UnauthorizedException.class, () -> userService.getAllUsers(req));
+        assertThrows(UnauthorizedException.class, () -> userService.logout(req2));
     }
 
     @Test
