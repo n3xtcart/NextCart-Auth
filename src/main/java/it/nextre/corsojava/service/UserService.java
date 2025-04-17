@@ -15,6 +15,7 @@ import it.nextre.corsojava.entity.User;
 import it.nextre.corsojava.exception.GroupMissingException;
 import it.nextre.corsojava.exception.RoleMissingException;
 import it.nextre.corsojava.exception.UnauthorizedException;
+import it.nextre.corsojava.exception.UserMissingException;
 
 import java.util.List;
 import java.util.Optional;
@@ -95,34 +96,25 @@ public class UserService implements UserServiceInterface {
         if (user == null) throw new UnauthorizedException("Utente non valido");
         if (user.getGroupDTO() == null) throw new UnauthorizedException("Gruppo non valido");
         if (user.getGroupDTO().getRoleDTO() == null) throw new UnauthorizedException("Ruolo non valido");
-        if (checkToken(token) == false) throw new UnauthorizedException("Token non valido");
+        if (!checkToken(token)) throw new UnauthorizedException("Token non valido");
         User u = userDAO.getById(user.getId());
-        if (u == null) throw new UnauthorizedException("Utente non trovato");
+        if (u == null) throw new UserMissingException("Utente non trovato");
         Token t = tokenUserDAO.getTokenByValue(token.getValue());
         if (t == null) throw new UnauthorizedException("Token non trovato");
         if (t.getUser().getGroup().getRole().compareTo(new Role(user.getGroupDTO().getRoleDTO())) < 0) {
             throw new UnauthorizedException("Non puoi cambiare il ruolo di un utente con uno di priorità maggiore al tuo");
         }
-        if (t.getUser().getId().equals(u.getId())) {
-            if (t.getUser().getGroup().getRole().compareTo(u.getGroup().getRole()) < 0) {
-                throw new UnauthorizedException("Non puoi cambiare il tuo ruolo con uno di priorità maggiore");
-            }
-            u.setNome(user.getNome());
-            u.setCognome(user.getCognome());
-            u.setEmail(user.getEmail());
-            u.setPassword(user.getPassword());
-            u.setGroup(new Group(user.getGroupDTO()));
-            userDAO.update(user.getId(), u);
-        } else if (t.getUser().getGroup().getRole().compareTo(u.getGroup().getRole()) > 0) {
-            u.setNome(user.getNome());
-            u.setCognome(user.getCognome());
-            u.setEmail(user.getEmail());
-            u.setPassword(user.getPassword());
-            u.setGroup(new Group(user.getGroupDTO()));
-            userDAO.update(user.getId(), u);
-        } else {
-            throw new UnauthorizedException("Non puoi cambiare il ruolo di un utente se il tuo è più basso");
+        if (t.getUser().getGroup().getRole().compareTo(u.getGroup().getRole()) < 0) {
+            throw new UnauthorizedException("Non puoi cambiare il tuo ruolo con uno di priorità maggiore");
         }
+        if (!t.getUser().getId().equals(u.getId()) && !t.getUser().getGroup().getRole().isAdmin())
+            throw new UnauthorizedException("Non puoi cambiare il ruolo di un utente se il tuo è più basso");
+        u.setNome(user.getNome());
+        u.setCognome(user.getCognome());
+        u.setEmail(user.getEmail());
+        u.setPassword(user.getPassword());
+        u.setGroup(new Group(user.getGroupDTO()));
+        userDAO.update(user.getId(), u);
     }
 
     @Override

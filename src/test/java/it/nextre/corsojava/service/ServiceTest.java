@@ -13,6 +13,7 @@ import it.nextre.corsojava.entity.Role;
 import it.nextre.corsojava.entity.Token;
 import it.nextre.corsojava.entity.User;
 import it.nextre.corsojava.exception.UnauthorizedException;
+import it.nextre.corsojava.exception.UserMissingException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -189,7 +190,7 @@ class ServiceTest {
         userKo.setPassword("");
         userKo.setGroupDTO(new GroupDTO(groupDAO.getById(1L)));
         originUser = new UserDTO(userDAO.getById(1L));
-        Exception exception = assertThrows(UnauthorizedException.class, () -> {
+        Exception exception = assertThrows(UserMissingException.class, () -> {
             TokenDTO tokenOk2 = new TokenDTO(tokenUserDAO.getTokenByIdUser(1L).get(0));
             userService.updateUser(userKo, tokenOk2);
 
