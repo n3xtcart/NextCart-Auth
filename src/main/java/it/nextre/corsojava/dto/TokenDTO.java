@@ -3,11 +3,11 @@ package it.nextre.corsojava.dto;
 import it.nextre.corsojava.entity.Token;
 
 public class TokenDTO {
-    private String token;
+    private String value;
     private UserDTO userDTO;
 
     public TokenDTO(Token token) {
-		this.token = token.getValue();
+		this.value = token.getValue();
 		this.userDTO = new UserDTO(token.getUser());
 	
 	}
@@ -20,11 +20,11 @@ public class TokenDTO {
         this.userDTO = userDTO;
     }
 
-    public String getToken() {
-        return token;
+    public String getValue() {
+        return value;
     }
 
-    public void setToken(String token) {
-        this.token = token;
+    public void setToken(String value) {
+        this.value = value;
     }
 }
