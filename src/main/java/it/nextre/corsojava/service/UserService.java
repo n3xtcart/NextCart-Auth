@@ -55,15 +55,14 @@ public class UserService implements UserServiceInterface {
     }
 
     public void logout(TokenDTO token) {
+        if (token == null) throw new UnauthorizedException("Token mancante");
         Token t = tokenUserDAO.getTokenByValue(token.getValue());
-        if (t != null) {
-            tokenUserDAO.delete(t.getId());
-        }
+        if (t == null) throw new UnauthorizedException("Token non presente");
+        tokenUserDAO.delete(t.getId());
     }
 
     @Override
     public TokenDTO register(UserDTO user) {
-        TokenDTO tokenDTO = null;
         if (user == null) {
             throw new UnauthorizedException("Utente non valido");
         }
@@ -81,9 +80,8 @@ public class UserService implements UserServiceInterface {
         userDAO.add(new User(user));
         Token token = generateToken(userDAO.getByEmail(user.getEmail()));
         tokenUserDAO.add(token);
-        tokenDTO = new TokenDTO(token);
 
-        return tokenDTO;
+        return new TokenDTO(token);
     }
 
     @Override
