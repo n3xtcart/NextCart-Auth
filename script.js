@@ -297,38 +297,28 @@ function createUser() {
     <div class="row p-5">
         <div class="col">
             <label for="mail">Mail:</label><br>
-            <input type="text" id="mail" name="mail" required><br>
-            <div class="invalid-feedback">
-              il campo è obbligatorio
-            </div>
+            <input type="text"  class="form-control is-invalid"   id="mail" name="mail" required><br>
+            
 
             <label for="name">Name:</label><br>
-            <input type="text" id="name" name="name"  required><br>
-            <div class="invalid-feedback">
-              il campo è obbligatorio
-            </div>
+            <input type="text"  class="form-control is-invalid"  id="name" name="name"  required><br>
+           
 
             <label for="password">Password:</label><br>
-            <input type="password" id="password" name="password" required><br>
-            <div class="invalid-feedback">
-              il campo è obbligatorio
-            </div>
+            <input type="password" class="form-control is-invalid"  id="password" name="password" required><br>
+           
         </div>
 
         <div class="col">
 
             <label for="surname">Surname:</label><br>
-            <input type="text" id="surname" name="surname" required><br>
-            <div class="invalid-feedback">
-              il campo è obbligatorio
-            </div><br>
+            <input type="text"  class="form-control is-invalid"  id="surname" name="surname" required><br>
+            
             <div class="row">
             <label for="group">Group:</label><br>
                 <div class="col m-1 pr-0">
-                    <input type="text" id="group" name="group" readonly ><br>
-            <div class="invalid-feedback" id="inputError">
-              il campo è obbligatorio
-            </div>
+                    <input type="text"  class="form-control is-invalid"  id="group" name="group" readonly ><br>
+            
 
                     <input type="submit" class="mt-3" value="Create User">
                 </div>
@@ -346,10 +336,7 @@ function createUser() {
 </form>
         `;
     const groupInput = document.getElementById("group");
-    if (groupInput.value.trim() == "") {
-        const groupIdError = document.getElementById("inputError");
-        groupIdError.classList.add("d-block");
-    }
+    
     createDropdown(document.getElementById("dropdownUser"), [
         { name: "Group 1" },
         { name: "Group 2" },
@@ -368,10 +355,8 @@ function createGroup() {
         <div class="row">
             <div class="col-3 m-1">
                 <label for="role">Role:</label><br>
-                <input type="text" id="role" name="role" readonly><br>
-                <div class="invalid-feedback" id="inputError">
-                  il campo è obbligatorio
-                </div>
+                <input type="text"  class="form-control is-invalid" id="role" name="role" readonly><br>
+                
                 <input type="submit" class="mt-3" value="Create Group">
             </div>
             <div class="col-8 m-1">
@@ -387,10 +372,7 @@ function createGroup() {
         `;
 
     const groupInput = document.getElementById("role");
-    if (groupInput.value.trim() == "") {
-        const groupIdError = document.getElementById("inputError");
-        groupIdError.classList.add("d-block");
-    }
+    
     createDropdown(document.getElementById("dropdownGroup"), [
         { name: "Group 1" },
         { name: "Group 2" },
@@ -409,15 +391,11 @@ function createRole() {
         <div class="row">
             <div class="col-3 m-1">
                 <label for="role">Role:</label><br>
-                <input type="text" id="role" name="role" required><br>
-                <div class="invalid-feedback" >
-                  il campo è obbligatorio
-                </div>
+                <input type="text" class="form-control is-invalid"  id="role" name="role" required><br>
+                
                 <label for="priority">Priority:</label><br>
-                <input type="number" id="priority" name="priority" required><br>
-                <div class="invalid-feedback" >
-                    il campo è obbligatorio
-                </div>
+                <input type="number"  class="form-control is-invalid"  id="priority" name="priority" required><br>
+                
             </div>
             
             <div class="col-3 m-1">
@@ -440,8 +418,8 @@ function createDropdown(elem, data, input) {
         elem.appendChild(li);
         a.addEventListener("click", () => {
             input.value = item.name;
-            const groupIdError = document.getElementById("inputError");
-            groupIdError.classList.remove("d-block");
+            input.classList.remove("is-invalid");
+            input.classList.add("is-valid");
         })
     })
 }
