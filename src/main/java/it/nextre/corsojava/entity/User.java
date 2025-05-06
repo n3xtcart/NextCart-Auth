@@ -12,8 +12,8 @@ public class User extends Entity {
     private String email;
 		@Attribute(name = "password")
     private String password;
-		@Attribute(name = "group")
-    private Group group;
+		@Attribute(name = "group",type = "Object", className = Object.class)
+    private Entity group;
 
 
     public User(UserDTO user) {
@@ -36,12 +36,16 @@ public class User extends Entity {
 
 
 	public Group getGroup() {
-        return group;
+        return (Group) group;
     }
 
     public void setGroup(Group group) {
         aggiornaUltimaModifica();
         this.group = group;
+    }
+    public void setGroup(Object group) {
+    	aggiornaUltimaModifica();
+    	this.group =  (Entity) group;
     }
 
     public String getNome() {

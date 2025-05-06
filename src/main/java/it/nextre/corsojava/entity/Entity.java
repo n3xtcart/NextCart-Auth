@@ -4,13 +4,13 @@ import java.time.Instant;
 
 import it.nextre.corsojava.entity.annotation.Attribute;
 
-public abstract class Entity {
+public class Entity {
 	@Attribute(name = "id")
     protected Long id;
 
     protected Instant instant;
 
-    protected Entity() {
+    public Entity() {
         this.instant = Instant.now();
     }
 

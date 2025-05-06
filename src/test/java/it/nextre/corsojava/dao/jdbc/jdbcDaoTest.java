@@ -16,8 +16,23 @@ public class jdbcDaoTest {
 		user.setNome("salvatore");
 		user.setEmail("bo");
 		user.setPassword("lalalal");
-		user.setGroup(new Group());
+		Group group = new Group();
+		group.setId(1L);
+		user.setGroup(group);
 		dao.add(user);
+		User byId = dao.getById(3L);
+		System.out.println(byId);
 	}
+	
+	
+//	@Test
+//	public void testUpdate() {
+//
+//		Method[] methods = PreparedStatement.class.getMethods();
+//		for(Method m : methods) {
+//			System.out.println(m.getName());
+//		}
+//		
+//	}
 
 }

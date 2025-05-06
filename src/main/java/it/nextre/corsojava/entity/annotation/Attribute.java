@@ -10,5 +10,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 public @interface Attribute {
 	String name() default "";
+	String type() default "String";
+	Class<?> className() default String.class;
 
 }
