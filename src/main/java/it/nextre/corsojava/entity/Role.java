@@ -1,10 +1,14 @@
 package it.nextre.corsojava.entity;
 
 import it.nextre.corsojava.dto.RoleDTO;
+import it.nextre.corsojava.entity.annotation.Attribute;
 
 public class Role extends Entity {
+	@Attribute(name = "descrizione")
     private String descrizione;
+		@Attribute(name = "admin")
     private Boolean admin;
+		@Attribute(name = "priority")
     private Long priority;
 
 

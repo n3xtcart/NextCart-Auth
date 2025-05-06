@@ -9,13 +9,16 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.util.HashMap;
+
 class TokenDAOTest {
     private TokenUserDAO dao;
 
     @BeforeEach
     void setUp() {
         // Initialize the database or any required setup before each test
-        this.dao = new TokenUserDAO();
+        this.dao = TokenUserDAO.getIstance();
+        dao.setDatabase(new HashMap<Long, Token>());
         for (long i = 0; i < 10; i++) {
             Token token = new Token();
             token.setId(i);

@@ -6,10 +6,17 @@ import java.util.Optional;
 import it.nextre.corsojava.entity.User;
 
 public class UserDAO extends Dao<User> {
+	private static UserDAO instance = new UserDAO();
 
-    public UserDAO() {
-        super();
-    }
+
+	public static UserDAO getInstance() {
+		return instance;
+	}
+
+	private UserDAO() {
+
+		super();
+	}
 
     @Override
     public void update(Long id, User item) {

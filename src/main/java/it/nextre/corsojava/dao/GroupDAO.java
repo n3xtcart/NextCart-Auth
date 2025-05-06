@@ -5,8 +5,13 @@ package it.nextre.corsojava.dao;
 import it.nextre.corsojava.entity.Group;
 
 public class GroupDAO extends Dao<Group> {
+	private static GroupDAO instance=new GroupDAO();
 	
-	public GroupDAO() {
+	
+	public static GroupDAO getIstance() {
+		return instance;
+	}
+	private GroupDAO() {
 		
 		super();
 	}
@@ -16,4 +21,7 @@ public class GroupDAO extends Dao<Group> {
 		Group group = database.get(id);
 		if(item.getRole()!=null)group.setRole(item.getRole());
 		
-	}}
+	}
+	}
+
+

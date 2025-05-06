@@ -7,13 +7,16 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import java.util.HashMap;
+
 class RoleDAOTest {
 
     private RoleDAO sut;
 
     @BeforeEach
     void setUp() {
-        sut = new RoleDAO();
+        sut = RoleDAO.getIstance();
+        sut.setDatabase(new HashMap<Long, Role>());
         String[] roles = {"user", "admin", "user", "user", "user"};
         for (int i = 0; i < 5; i++) {
             Role r = new Role();

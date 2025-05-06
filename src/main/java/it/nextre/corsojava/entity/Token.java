@@ -1,7 +1,11 @@
 package it.nextre.corsojava.entity;
 
+import it.nextre.corsojava.entity.annotation.Attribute;
+
 public class Token extends Entity {
+	@Attribute(name = "value")
     private String value;
+	@Attribute(name = "user")
     private User user;
 
     public String getValue() {

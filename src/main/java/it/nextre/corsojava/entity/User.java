@@ -1,12 +1,18 @@
 package it.nextre.corsojava.entity;
 
 import it.nextre.corsojava.dto.UserDTO;
+import it.nextre.corsojava.entity.annotation.Attribute;
 
 public class User extends Entity {
+	@Attribute(name = "nome")
     private String nome;
+		@Attribute(name = "cognome")
     private String cognome;
+		@Attribute(name = "email")
     private String email;
+		@Attribute(name = "password")
     private String password;
+		@Attribute(name = "group")
     private Group group;
 
 

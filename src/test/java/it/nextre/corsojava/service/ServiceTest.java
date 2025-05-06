@@ -19,6 +19,9 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 class ServiceTest {
     UserService userService;
     GroupDAO groupDAO;
@@ -29,11 +32,15 @@ class ServiceTest {
 
     @BeforeEach
     void setUp() {
-        userDAO = new UserDAO();
-        groupDAO = new GroupDAO();
-        tokenUserDAO = new TokenUserDAO();
-        roleDAO = new RoleDAO();
-        userService = new UserService(userDAO, tokenUserDAO, groupDAO, roleDAO);
+        groupDAO=GroupDAO.getIstance();
+        roleDAO=RoleDAO.getIstance();
+        tokenUserDAO=TokenUserDAO.getIstance();
+        userDAO = UserDAO.getInstance();
+        userService = UserService.getInstance();
+        groupDAO.setDatabase(new HashMap<Long, Group>());
+        roleDAO.setDatabase(new HashMap<Long, Role>());
+        tokenUserDAO.setDatabase(new HashMap<Long, Token>());
+        userDAO.setDatabase(new HashMap<Long, User>());
         Role role = new Role();
         role.setDescrizione("admin" + 1);
         role.setPriority((long) 1);
@@ -362,8 +369,9 @@ class ServiceTest {
         Token t = tokenUserDAO.getById(2L);
         TokenDTO req = new TokenDTO(t);
         GroupDTO groupDTO = new GroupDTO(groupDAO.getById(1L));
+        int oldSize=userService.getAllGroup(req).size();
         userService.deleteGroup(groupDTO, req);
-        assertEquals(1, userService.getAllGroup(req).size());
+        assertEquals(oldSize-1, userService.getAllGroup(req).size());
     }
 
     @Test

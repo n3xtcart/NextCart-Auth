@@ -17,7 +17,8 @@ public class GroupDAOTest {
 	@BeforeEach
 	public void setUp() {
 		// Initialize the database or any required setup before each test
-		this.dao = new GroupDAO();
+		this.dao = GroupDAO.getIstance();
+		dao.setDatabase(new HashMap<Long, Group>());
 		for(int i = 0; i < 10; i++) {
 			Group group = new Group();
 			HashMap<Long, User> map = new HashMap<Long, User>();

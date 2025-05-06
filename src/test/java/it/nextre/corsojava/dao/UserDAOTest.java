@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.HashMap;
+
 
 class UserDAOTest {
     private UserDAO dao;
@@ -14,7 +16,8 @@ class UserDAOTest {
     @BeforeEach
     void setUp() {
         // Initialize the database or any required setup before each test
-        this.dao = new UserDAO();
+        this.dao = UserDAO.getInstance();
+        dao.setDatabase(new HashMap<Long, User>());
         for (long i = 0; i < 10; i++) {
             User user = new User();
             user.setId(i);

@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
+import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -15,7 +16,8 @@ class TokenUserDAOTest {
 
     @BeforeEach
     void setUp() {
-        sut = new TokenUserDAO();
+        sut = TokenUserDAO.getIstance();
+        sut.setDatabase(new HashMap<Long, Token>());
         for (int i = 0; i < 5; i++) {
             User a = new User();
             a.setNome("nome " + i);

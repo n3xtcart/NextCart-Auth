@@ -27,18 +27,23 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class UserService implements UserServiceInterface {
-    private final UserDAO userDAO;
-    private final TokenUserDAO tokenUserDAO;
-    private final GroupDAO groupDAO;
-    private final RoleDAO roleDAO;
+    private final UserDAO userDAO=UserDAO.getInstance();
+    private final TokenUserDAO tokenUserDAO=TokenUserDAO.getIstance();
+    private final GroupDAO groupDAO=GroupDAO.getIstance();
+    private final RoleDAO roleDAO=RoleDAO.getIstance();
     private static final Logger LOGGER = LogManager.getLogger(UserService.class);
+    private static UserService instance=new UserService();
 
-    public UserService(UserDAO userDAO, TokenUserDAO tokenUserDAO, GroupDAO groupDAO, RoleDAO roleDAO) {
-        this.userDAO = userDAO;
-        this.tokenUserDAO = tokenUserDAO;
-        this.groupDAO = groupDAO;
-        this.roleDAO = roleDAO;
+
+    
+    private UserService(){
+    	
     }
+
+    public static UserService getInstance() {
+    	return instance;
+    }
+    
 
     @Override
     public TokenDTO login(UserDTO user) {

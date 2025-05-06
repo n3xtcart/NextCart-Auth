@@ -8,7 +8,7 @@ import java.util.Map;
 
 public abstract class Dao<T extends Entity> implements DaoInterface<T> {
 
-    protected final Map<Long, T> database;
+    protected  Map<Long, T> database;
     protected Long idGenerator;
 
     protected Dao() {
@@ -40,6 +40,11 @@ public abstract class Dao<T extends Entity> implements DaoInterface<T> {
       item.setId(idGenerator++);
       database.put(item.getId(), item);
 		
+	}
+	
+	public void setDatabase(Map<Long,T> database) {
+		this.database=database;
+		this.idGenerator=1L;
 	}
 
 

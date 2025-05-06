@@ -5,10 +5,16 @@ import java.util.List;
 import it.nextre.corsojava.entity.Token;
 
 public class TokenUserDAO extends Dao<Token> {
-	
-	public TokenUserDAO() {
+	private static TokenUserDAO instance = new TokenUserDAO();
+
+
+	public static TokenUserDAO getIstance() {
+		return instance;
+	}
+
+	private TokenUserDAO() {
+
 		super();
-		
 	}
 
 	@Override
