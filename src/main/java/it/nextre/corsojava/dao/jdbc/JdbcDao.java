@@ -25,7 +25,13 @@ import it.nextre.corsojava.exception.JdbcDaoException;
 public abstract class JdbcDao<T extends Entity> implements DaoInterface<T> {
 	protected static final Logger LOGGER = LogManager.getLogger(JdbcDao.class);
 	protected String tableName;
-	protected Class<T> clazz;
+	protected Class<?> clazz;
+	
+	
+	protected JdbcDao(Class<?> clazz, String tableName) {
+		this.clazz = clazz;
+		this.tableName = tableName;
+	}
 
 	public Connection getConnection() throws SQLException, FileNotFoundException, IOException {
 		Properties properties = new Properties();
@@ -93,14 +99,14 @@ public abstract class JdbcDao<T extends Entity> implements DaoInterface<T> {
 			ps.setLong(i++, id);
 			rs=ps.executeQuery();
 			if (rs.next()) {
-				T item = clazz.getDeclaredConstructor().newInstance();
+				T item = (T) clazz.getDeclaredConstructor().newInstance();
 				for (Field field : fields) {
 					Attribute annotations = field.getAnnotation(Attribute.class);
 					if (annotations != null) {
 
 						String methodName="set"+field.getName().substring(0, 1).toUpperCase()+field.getName().substring(1);
 						
-		                var setter = clazz.getMethod(methodName, field.getType());
+		                var setter = clazz.getClass().getMethod(methodName, field.getType());
 
 		               
 		                Object value = rs.getObject(field.getName(), field.getType());
@@ -137,8 +143,8 @@ public abstract class JdbcDao<T extends Entity> implements DaoInterface<T> {
 
 	@Override
 	public List<T> getAll() {
-		Class<?> entityClass = clazz.getClass();
-		Field[] fields = entityClass.getDeclaredFields();
+		System.out.println(clazz.getName());
+		Field[] fields = clazz.getDeclaredFields();
 		StringBuilder sb = new StringBuilder();
 		for (Field field : fields) {
 			Attribute annotations = field.getAnnotation(Attribute.class);
@@ -156,14 +162,14 @@ public abstract class JdbcDao<T extends Entity> implements DaoInterface<T> {
 			rs=ps.executeQuery();
 			ArrayList<T> items = new ArrayList<>();
 			while (rs.next()) {
-				T item = clazz.getDeclaredConstructor().newInstance();
+				T item = (T) clazz.getDeclaredConstructor().newInstance();
 				for (Field field : fields) {
 					Attribute annotations = field.getAnnotation(Attribute.class);
 					if (annotations != null) {
 
 						String methodName="set"+field.getName().substring(0, 1).toUpperCase()+field.getName().substring(1);
 						
-		                var setter = clazz.getMethod(methodName, field.getType());
+		                var setter = clazz.getClass().getMethod(methodName, field.getType());
 
 		               
 		                Object value = rs.getObject(field.getName(), field.getType());
@@ -202,24 +208,37 @@ public abstract class JdbcDao<T extends Entity> implements DaoInterface<T> {
 
 	@Override
 	public void add(T item) {
-		Class<?> entityClass = clazz.getClass();
-		Field[] fields = entityClass.getDeclaredFields();
-		StringBuilder sb = new StringBuilder("VALUES (");
+		Field[] fields = clazz.getDeclaredFields();
+		StringBuilder sb = new StringBuilder(" VALUES (id,");
+		StringBuilder struc = new StringBuilder(" (id,");
 		ArrayList<String> value=new ArrayList<>();
 		for (Field field : fields) {
+			System.out.println(field.getName());
 			Attribute annotations = field.getAnnotation(Attribute.class);
 			if (annotations != null) {
 				sb.append("?").append(",");
                 value.add(annotations.name());
+                struc.append(annotations.name().equals("group")?"groupId":annotations.name()).append(",");
 			}
 		}
-		String query = "INSERT INTO ? "+sb.toString().substring(0, sb.length()-1)+")";
+		struc.deleteCharAt(struc.length()-1).append(")");
+		System.out.println(sb.toString());
+		String query = "INSERT INTO "+tableName+struc.toString()+sb.toString().substring(0, sb.length()-1)+")";
+		System.out.println(query);
 		try (Connection connection = getConnection()) {
 			PreparedStatement ps = connection.prepareStatement(query);
 			int i = 1;
-			ps.setString(i++, tableName);
+			Object value1 = null;
 			for(String val:value) {
-				ps.setString(i++, val);
+				try {
+					value1 = clazz.getMethod("get"+val.substring(0, 1).toUpperCase()+val.substring(1)).invoke(item);
+					System.out.println(value1);
+				} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException
+						| SecurityException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				ps.setString(i++, value1.toString());
 			}
 			ps.executeUpdate();
 		} catch (FileNotFoundException e) {

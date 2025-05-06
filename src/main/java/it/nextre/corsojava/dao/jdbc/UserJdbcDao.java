@@ -10,9 +10,7 @@ public class UserJdbcDao extends JdbcDao<User> {
 	}
 
 	private UserJdbcDao() {
-		super();
-		this.tableName = "user";
-		this.clazz = User.class;
+		super(User.class,"user");
 	}
 
 	@Override
