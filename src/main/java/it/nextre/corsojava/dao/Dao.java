@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public abstract class Dao<T extends Entity> {
+public abstract class Dao<T extends Entity> implements DaoInterface<T> {
 
     protected final Map<Long, T> database;
     protected Long idGenerator;
@@ -16,22 +16,31 @@ public abstract class Dao<T extends Entity> {
         this.database = new HashMap<>();
     }
 
-    public void add(T item) {
-        item.setId(idGenerator++);
-        database.put(item.getId(), item);
-    }
+	@Override
+	public void delete(Long id) {
+      database.remove(id);
+		
+	}
 
-    public abstract void update(Long id, T item);
-
-    public void delete(Long id) {
-        database.remove(id);
-    }
-    
-    public T getById(Long id) {
+	@Override
+	public T getById(Long id) {
 		return database.get(id);
 	}
-    
-    public List<T> getAll() {
+
+	@Override
+	public List<T> getAll() {
 		return database.values().stream().toList();
 	}
+
+	@Override
+	public abstract void update(Long id, T item);
+
+	@Override
+	public void add(T item) {
+      item.setId(idGenerator++);
+      database.put(item.getId(), item);
+		
+	}
+
+
 }
