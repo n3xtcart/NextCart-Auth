@@ -5,7 +5,7 @@ import it.nextre.corsojava.entity.annotation.Attribute;
 
 public class Group extends Entity {
 
-	@Attribute(name = "ruolo")
+	@Attribute(fieldName = "role",colName = "roleId",className = Role.class)
 	private Role role;
 
 	public Group(GroupDTO groupDTO) {

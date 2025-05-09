@@ -36,9 +36,10 @@ public abstract class Dao<T extends Entity> implements DaoInterface<T> {
 	public abstract void update(Long id, T item);
 
 	@Override
-	public void add(T item) {
+	public Long add(T item) {
       item.setId(idGenerator++);
       database.put(item.getId(), item);
+      return item.getId();
 		
 	}
 	

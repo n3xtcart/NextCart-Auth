@@ -4,16 +4,16 @@ import it.nextre.corsojava.dto.UserDTO;
 import it.nextre.corsojava.entity.annotation.Attribute;
 
 public class User extends Entity {
-	@Attribute(name = "nome")
+	@Attribute(colName = "nome",fieldName = "nome")
     private String nome;
-		@Attribute(name = "cognome")
+		@Attribute(colName = "cognome",fieldName = "cognome")
     private String cognome;
-		@Attribute(name = "email")
+		@Attribute(colName = "email",fieldName = "email")
     private String email;
-		@Attribute(name = "password")
+		@Attribute(colName = "password",fieldName = "password")
     private String password;
-		@Attribute(name = "group",type = "Object", className = Object.class)
-    private Entity group;
+		@Attribute(colName = "groupId",fieldName = "group" , className = Group.class)
+    private Group group;
 
 
     public User(UserDTO user) {
@@ -36,16 +36,12 @@ public class User extends Entity {
 
 
 	public Group getGroup() {
-        return (Group) group;
+        return group;
     }
 
     public void setGroup(Group group) {
         aggiornaUltimaModifica();
         this.group = group;
-    }
-    public void setGroup(Object group) {
-    	aggiornaUltimaModifica();
-    	this.group =  (Entity) group;
     }
 
     public String getNome() {

@@ -9,7 +9,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface Attribute {
-	String name() default "";
+	String fieldName() default "";
+	String colName() default "";
 	String type() default "String";
 	Class<?> className() default String.class;
 

@@ -1,0 +1,84 @@
+package it.nextre.corsojava.dao.jdbc;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+
+import org.junit.jupiter.api.Test;
+
+import it.nextre.corsojava.entity.Token;
+import it.nextre.corsojava.entity.User;
+
+public class TokenJdbcDaoTest {
+	
+	@Test
+	public void testSaveToken() {
+		TokenJdbcDao dao = TokenJdbcDao.getInstance();
+		Token token = new Token();
+		token.setId(1L);
+		User user = new User();
+		user.setId(1L);
+		token.setUser(user);
+		token.setValue("ddvdvdfvdfv");
+		Long long1 = dao.add(token);
+		Token byId = dao.getById(long1);
+		assertEquals(long1, byId.getId());
+		assertEquals(token.getUser().getId(), byId.getUser().getId());
+		assertEquals(token.getValue(), byId.getValue());
+	}
+	
+	
+	@Test
+	public void testUpdateToken() {
+		TokenJdbcDao dao = TokenJdbcDao.getInstance();
+		Token token = new Token();
+		token.setId(1L);
+		User user = new User();
+		user.setId(1L);
+		token.setUser(user);
+		token.setValue("ddvdvdfvdfv");
+		dao.update(2L,token);
+		Token byId = dao.getById(2L);
+		assertNotEquals(token.getId(), byId.getId());
+		assertEquals(token.getUser().getId(), byId.getUser().getId());
+		assertEquals(token.getValue(), byId.getValue());
+		
+		
+		}
+	
+	
+	@Test
+	public void testDeleteToken() {
+		TokenJdbcDao dao = TokenJdbcDao.getInstance();
+		Token token = new Token();
+		token.setId(1L);
+		User user = new User();
+		user.setId(1L);
+		token.setUser(user);
+		token.setValue("ddvdvdfvdfv");
+		Long long1 = dao.add(token);
+		dao.delete(long1);
+		Token byId = dao.getById(long1);
+		assertEquals(null, byId);
+		
+	}
+	
+	@Test
+	public void testGetAllToken() {
+		TokenJdbcDao dao = TokenJdbcDao.getInstance();
+		Token token = new Token();
+		token.setId(1L);
+		User user = new User();
+		user.setId(1L);
+		token.setUser(user);
+		token.setValue("ddvdvdfvdfv");
+		int size = dao.getAll().size();
+		Long long1 = dao.add(token);
+		int size2 = dao.getAll().size();
+		assertEquals(size+1, size2);
+		
+		
+	}
+		
+	
+
+}

@@ -4,11 +4,11 @@ import it.nextre.corsojava.dto.RoleDTO;
 import it.nextre.corsojava.entity.annotation.Attribute;
 
 public class Role extends Entity {
-	@Attribute(name = "descrizione")
+	@Attribute(fieldName = "descrizione",colName = "descrizione")
     private String descrizione;
-		@Attribute(name = "admin")
+		@Attribute(fieldName = "admin",colName = "admin",type = "Boolean",className = Boolean.class)
     private Boolean admin;
-		@Attribute(name = "priority")
+		@Attribute(fieldName = "priority",colName = "priority",type = "Long",className = Long.class)
     private Long priority;
 
 
@@ -50,6 +50,10 @@ public class Role extends Entity {
         aggiornaUltimaModifica();
         this.priority = priority;
     }
+    
+    public Boolean getAdmin() {
+		return admin != null && admin.booleanValue();
+	}
     
     public int compareTo(Role o) {
     	if(admin !=null && o.isAdmin()!=null && admin.booleanValue()==o.isAdmin().booleanValue()) {

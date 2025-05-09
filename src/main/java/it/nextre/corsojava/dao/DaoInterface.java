@@ -20,5 +20,5 @@ public interface DaoInterface<T extends Entity>{
 	void update(Long id, T item);
 
 
-	void add(T item);
+	Long add(T item);
 }

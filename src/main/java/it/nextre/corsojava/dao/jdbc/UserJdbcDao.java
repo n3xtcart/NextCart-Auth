@@ -13,8 +13,6 @@ public class UserJdbcDao extends JdbcDao<User> {
 		super(User.class,"user");
 	}
 
-	@Override
-	public void update(Long id, User item) {
-	}
+	
 
 }
