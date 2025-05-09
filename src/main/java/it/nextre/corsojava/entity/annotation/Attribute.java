@@ -11,7 +11,8 @@ import java.lang.annotation.Target;
 public @interface Attribute {
 	String fieldName() default "";
 	String colName() default "";
-	String type() default "String";
+	String type() default "string";
 	Class<?> className() default String.class;
+	Class<?> colClass() default String.class;
 
 }

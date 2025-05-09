@@ -6,9 +6,9 @@ import it.nextre.corsojava.entity.annotation.Attribute;
 public class Role extends Entity {
 	@Attribute(fieldName = "descrizione",colName = "descrizione")
     private String descrizione;
-		@Attribute(fieldName = "admin",colName = "admin",type = "Boolean",className = Boolean.class)
+		@Attribute(fieldName = "admin",colName = "admin",className = Boolean.class,colClass = boolean.class,type="boolean")
     private Boolean admin;
-		@Attribute(fieldName = "priority",colName = "priority",type = "Long",className = Long.class)
+		@Attribute(fieldName = "priority",colName = "priority",type = "long",className = Long.class,colClass = long.class)
     private Long priority;
 
 

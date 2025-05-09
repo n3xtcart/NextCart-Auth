@@ -5,7 +5,7 @@ import java.time.Instant;
 import it.nextre.corsojava.entity.annotation.Attribute;
 
 public class Entity {
-	@Attribute(fieldName = "id",colName = "id",type = "Long",className = Long.class)
+	@Attribute(fieldName = "id",colName = "id",type = "long",className = Long.class,colClass = long.class)
     protected Long id;
 
     protected Instant instant;

@@ -12,7 +12,7 @@ public class User extends Entity {
     private String email;
 		@Attribute(colName = "password",fieldName = "password")
     private String password;
-		@Attribute(colName = "groupId",fieldName = "group" , className = Group.class)
+		@Attribute(colName = "groupId",fieldName = "group" ,type = "long", className = Group.class,colClass = long.class)
     private Group group;
 
 

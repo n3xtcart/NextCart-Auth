@@ -46,10 +46,10 @@ public abstract class JdbcDao<T extends Entity> implements DaoInterface<T> {
 			pass = properties.getProperty("password");
 			url = properties.getProperty("url");
 		} catch (FileNotFoundException e) {
-			LOGGER.error("Properties file not found", e);
+			LOGGER.error("Properties file not found"+e.getMessage(), e);
 			throw e;
 		} catch (IOException e) {
-			LOGGER.error("Error reading properties file", e);
+			LOGGER.error("Error reading properties file"+e.getMessage(), e);
 			throw e;
 		}
 		LOGGER.trace("Connecting to database with URL: {}", url);
@@ -69,11 +69,11 @@ public abstract class JdbcDao<T extends Entity> implements DaoInterface<T> {
 			ps.setLong(i++, id);
 			ps.executeUpdate();
 		} catch (FileNotFoundException e) {
-			throw new JdbcDaoException("File not found", e);
+			throw new JdbcDaoException("File not found"+e.getMessage(), e);
 		} catch (SQLException e) {
-			throw new JdbcDaoException("SQL error", e);
+			throw new JdbcDaoException("SQL error"+e.getMessage(), e);
 		} catch (IOException e) {
-			throw new JdbcDaoException("IO error", e);
+			throw new JdbcDaoException("IO error"+e.getMessage(), e);
 		}
 
 	}
@@ -112,10 +112,10 @@ public abstract class JdbcDao<T extends Entity> implements DaoInterface<T> {
 							Method method=ResultSet.class.getMethod("get"+annotations.type().substring(0,1).toUpperCase()+annotations.type().substring(1),String.class);
 							
 							Object me=method.invoke(rs, annotations.colName());
-							if(annotations.className()!=String.class && annotations.className()!=Long.class && annotations.className()!=Boolean.class) {
+							if(annotations.className().getSuperclass()==Entity.class) {
 								var entity=annotations.className().getDeclaredConstructor().newInstance();
 								Method setId=annotations.className().getMethod("setId",Long.class);
-								setId.invoke(entity, (long) Integer.parseInt((String) me));
+								setId.invoke(entity,  me);
 								setter.invoke(item, entity);
 							}else	setter.invoke(item, me);
 						
@@ -127,7 +127,7 @@ public abstract class JdbcDao<T extends Entity> implements DaoInterface<T> {
 				return item;
 			}
 		} catch (FileNotFoundException e) {
-			throw new JdbcDaoException("File not found", e);
+			throw new JdbcDaoException("File not found"+e.getMessage(), e);
 		} catch (SQLException e) {
 			throw new JdbcDaoException("SQL error" + e.getMessage(), e);
 		} catch (IOException e) {
@@ -180,10 +180,10 @@ public abstract class JdbcDao<T extends Entity> implements DaoInterface<T> {
 							Method method=ResultSet.class.getMethod("get"+annotations.type().substring(0,1).toUpperCase()+annotations.type().substring(1),String.class);
 							
 							Object me=method.invoke(rs,annotations.colName());
-							if(annotations.className()!=String.class && annotations.className()!=Long.class && annotations.className()!=Boolean.class) {
+							if(annotations.className().getSuperclass()==Entity.class) {
 								var entity=annotations.className().getDeclaredConstructor().newInstance();
 								Method setId=annotations.className().getMethod("setId",Long.class);
-								setId.invoke(entity, (long) Integer.parseInt((String) me));
+								setId.invoke(entity,  me);
 								setter.invoke(item, entity);
 							}else	setter.invoke(item, me);
 						
@@ -196,22 +196,22 @@ public abstract class JdbcDao<T extends Entity> implements DaoInterface<T> {
 			}
 			return list;
 		} catch (FileNotFoundException e) {
-			throw new JdbcDaoException("File not found", e);
+			throw new JdbcDaoException("File not found"+e.getMessage(), e);
 		} catch (SQLException e) {
-			throw new JdbcDaoException("SQL error", e);
+			throw new JdbcDaoException("SQL error"+e.getMessage(), e);
 		} catch (IOException e) {
-			throw new JdbcDaoException("IO error", e);
+			throw new JdbcDaoException("IO error"+e.getMessage(), e);
 		} catch (InstantiationException e) {
-			throw new JdbcDaoException("Instantiation error", e);
+			throw new JdbcDaoException("Instantiation error"+e.getMessage(), e);
 		} catch (IllegalAccessException e) {
             
-			throw new JdbcDaoException("Illegal access error", e);
+			throw new JdbcDaoException("Illegal access error"+e.getMessage(), e);
 		}catch (InvocationTargetException e) {
-			throw new JdbcDaoException("Invocation target error", e);
+			throw new JdbcDaoException("Invocation target error"+e.getMessage(), e);
 		} catch (NoSuchMethodException e) {
-			throw new JdbcDaoException("No such method error", e);
+			throw new JdbcDaoException("No such method error"+e.getMessage(), e);
 		} catch (SecurityException e) {
-			throw new JdbcDaoException("Security error", e);
+			throw new JdbcDaoException("Security error"+e.getMessage(), e);
 		}
 
 	}
@@ -240,47 +240,39 @@ public abstract class JdbcDao<T extends Entity> implements DaoInterface<T> {
 			for(Attribute val:value) {
 				
 					value1 = clazz.getMethod("get"+val.fieldName().substring(0, 1).toUpperCase()+val.fieldName().substring(1)).invoke(item);
+					if(value1 instanceof Entity e ) {
+						value1=e.getId();
+					}
 					Method method = null;
-					try {
-						if(value1 instanceof Boolean b) {
-							method = PreparedStatement.class.getMethod("setBoolean",int.class,boolean.class);
-							
-						}else if(value1 instanceof Long l) {
-							method = PreparedStatement.class.getMethod("setLong",int.class,long.class);
-						}else if(value1 instanceof Entity e) {
-							value1=e.getId();
-							method = PreparedStatement.class.getMethod("setLong",int.class,long.class);
-						}else method = PreparedStatement.class.getMethod("set"+val.type().substring(0,1)+val.type().substring(1),int.class,val.className());
+						method = PreparedStatement.class.getMethod("set"+val.type().toUpperCase().substring(0,1)+val.type().substring(1),int.class,val.colClass());
 						method.invoke(ps, i++, value1);
 					 
-					} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException
-							| SecurityException e) {
-	                throw new JdbcDaoException("Error invoking method"+e.getMessage(), e);
-				
-					}
+					
 				
 				
 			}
 		
 			ps.executeUpdate();
 		} catch (FileNotFoundException e) {
-			throw new JdbcDaoException("File not found", e);
+			throw new JdbcDaoException("File not found "+e.getMessage(), e);
 		} catch (SQLException e) {
-			throw new JdbcDaoException("SQL error", e);
+			throw new JdbcDaoException("SQL error "+e.getMessage(), e);
 		} catch (IOException e) {
-			throw new JdbcDaoException("IO error", e);
+			throw new JdbcDaoException("IO error "+e.getMessage(), e);
 		} catch (IllegalAccessException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			throw new JdbcDaoException("Illegal access error "+e1.getMessage(), e1);
+			
 		} catch (InvocationTargetException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (NoSuchMethodException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (SecurityException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			throw new JdbcDaoException("Invocation target error "+e1.getMessage(), e1);
+			
+		} catch (IllegalArgumentException e) {
+			throw new JdbcDaoException("Illegal argument error "+e.getMessage(), e);
+		} catch (SecurityException e) {
+			throw new JdbcDaoException("Security error "+e.getMessage(), e);
+		} catch (NoSuchMethodException e) {
+			throw new JdbcDaoException("No such method error "+e.getMessage(), e);
+		} catch (NullPointerException e) {
+			LOGGER.error("Null pointer exception: "+e.getMessage(), e);
 		}
 
 	
@@ -303,34 +295,25 @@ public abstract class JdbcDao<T extends Entity> implements DaoInterface<T> {
 		struc.deleteCharAt(struc.length()-1).append(")");
 		String query = "INSERT INTO "+tableName+struc.toString()+sb.toString().substring(0, sb.length()-1)+")";
 		
+		ResultSet rs = null;
+		PreparedStatement ps = null;
 		try (Connection connection = getConnection()) {
-			PreparedStatement ps = connection.prepareStatement(query,PreparedStatement.RETURN_GENERATED_KEYS);
-			ResultSet rs = null;
+			ps = connection.prepareStatement(query,PreparedStatement.RETURN_GENERATED_KEYS);
 			int i = 1;
 			Object value1 = null;
 			for(Attribute val:value) {
 				
 					value1 = clazz.getMethod("get"+val.fieldName().substring(0, 1).toUpperCase()+val.fieldName().substring(1)).invoke(item);
 					Method method = null;
-					try {
 						if(value1 instanceof Entity e) {
 							value1=e.getId();
-							method = PreparedStatement.class.getMethod("setLong",int.class,long.class);
-						}else if(value1 instanceof Long ) {
-							
-							method = PreparedStatement.class.getMethod("setLong",int.class,long.class);
+						
 						}
-						else if(value1 instanceof Boolean ) {
-							method = PreparedStatement.class.getMethod("setBoolean",int.class,boolean.class);
-						}else method = PreparedStatement.class.getMethod("set"+val.type().substring(0,1)+val.type().substring(1),int.class,val.className());
+						method = PreparedStatement.class.getMethod("set"+val.type().substring(0,1).toUpperCase()+val.type().substring(1),int.class,val.colClass());
 						
 						method.invoke(ps, i++, value1);
 					 
-					} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException
-							| SecurityException e) {
-	                throw new JdbcDaoException("Error invoking method"+e.getMessage(), e);
-				
-					}
+					
 				
 				
 			}
@@ -342,25 +325,33 @@ public abstract class JdbcDao<T extends Entity> implements DaoInterface<T> {
 				item.setId(id);
 				return id;
 			}
-		} catch (FileNotFoundException e) {
-			throw new JdbcDaoException("File not found", e);
-		} catch (SQLException e) {
-			throw new JdbcDaoException("SQL error", e);
 		} catch (IOException e) {
-			throw new JdbcDaoException("IO error", e);
-		} catch (IllegalAccessException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (InvocationTargetException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (NoSuchMethodException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (SecurityException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+			throw new JdbcDaoException("IO error "+e.getMessage(), e);
+		} catch (IllegalAccessException e) {
+			throw new JdbcDaoException("Illegal access error "+e.getMessage(), e);
+			
+		} catch (InvocationTargetException e) {
+			throw new JdbcDaoException("Invocation target error "+e.getMessage(), e);
+			
+		} catch (IllegalArgumentException e) {
+			throw new JdbcDaoException("Illegal argument error "+e.getMessage(), e);
+		} catch (SecurityException e) {
+			throw new JdbcDaoException("Security error "+e.getMessage(), e);
+		} catch (NoSuchMethodException e) {
+			throw new JdbcDaoException("No such method error "+e.getMessage(), e);
+		} catch (NullPointerException e) {
+throw new JdbcDaoException("Null pointer exception "+e.getMessage(), e);
+		} catch (Exception e) {
+			LOGGER.error("Error: "+e.getMessage(), e);
+		} finally {
+			try {
+				if (rs != null) {
+					rs.close();
+				}
+			} catch (SQLException e) {
+				LOGGER.error("Error closing ResultSet: "+e.getMessage(), e);
+			}
+		} 
 		return null;
 
 	}
