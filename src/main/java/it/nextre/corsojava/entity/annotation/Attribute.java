@@ -14,5 +14,6 @@ public @interface Attribute {
 	String type() default "string";
 	Class<?> className() default String.class;
 	Class<?> colClass() default String.class;
+	boolean auto() default false;
 
 }
