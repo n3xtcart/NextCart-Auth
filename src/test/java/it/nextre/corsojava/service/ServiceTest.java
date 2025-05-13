@@ -67,6 +67,7 @@ class ServiceTest {
             user.setNome("meUser" + i);
             user.setEmail("user" + i + "@example.com");
             user.setPassword("password" + i);
+            user.setActive(true);
             user.setGroup(group);
             userDAO.add(user);
             Token token = userService.generateToken(user);
@@ -80,6 +81,7 @@ class ServiceTest {
             user.setEmail("user" + i + "@example.com");
             user.setPassword("password" + i);
             user.setGroup(group2);
+            user.setActive(true);
             userDAO.add(user);
             Token token = userService.generateToken(user);
             tokenUserDAO.add(token);

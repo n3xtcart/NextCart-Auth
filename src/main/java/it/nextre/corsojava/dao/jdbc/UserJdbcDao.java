@@ -24,7 +24,7 @@ public class UserJdbcDao extends JdbcDao<User> {
 	}
 
 	public Optional<User> findByEmailPassword(String email, String password) {
-		String query="SELECT id,nome,cognome,email,password,ultimaModifica,groupId"
+		String query="SELECT id,nome,cognome,email,password,ultimaModifica,groupId,active"
 				+ " FROM user where email=? and password=? ";
 		PreparedStatement ps=null;
 		ResultSet rs=null;
@@ -42,6 +42,7 @@ public class UserJdbcDao extends JdbcDao<User> {
 				user.setPassword(rs.getString("password"));
 				user.setNome(rs.getString("nome"));
 				user.setUltimaModifica(rs.getTimestamp("ultimaModifica").toInstant());
+				user.setActive(rs.getBoolean("active"));
 				Group  g=new Group();
 				g.setId(rs.getLong("groupId"));
 				user.setGroup(g);
@@ -76,7 +77,7 @@ public class UserJdbcDao extends JdbcDao<User> {
 	}
 
 	public User getByEmail(String email) {
-		String query="SELECT id,nome,cognome,email,password,ultimaModifica,groupId"
+		String query="SELECT id,nome,cognome,email,password,ultimaModifica,groupId,active"
 				+ " FROM user where email=?  ";
 		PreparedStatement ps=null;
 		ResultSet rs=null;
@@ -93,6 +94,7 @@ public class UserJdbcDao extends JdbcDao<User> {
 				user.setPassword(rs.getString("password"));
 				user.setNome(rs.getString("nome"));
 				user.setUltimaModifica(rs.getTimestamp("ultimaModifica").toInstant());
+				user.setActive(rs.getBoolean("active"));
 				Group  g=new Group();
 				g.setId(rs.getLong("groupId"));
 				user.setGroup(g);

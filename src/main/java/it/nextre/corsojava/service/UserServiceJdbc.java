@@ -69,7 +69,7 @@ public class UserServiceJdbc implements UserServiceInterface {
             throw new UnauthorizedException("Email o password non validi");
         }
         Optional<User> byEmailPassword = objectService.getUserByEmailPassword(user.getEmail(), user.getPassword());
-        if (byEmailPassword.isPresent()) {
+        if (byEmailPassword.isPresent() && byEmailPassword.get().getActive()) {
             User u = byEmailPassword.get();
             Token token = generateToken(u);
             tokenUserDAO.add(token);
@@ -190,7 +190,7 @@ public class UserServiceJdbc implements UserServiceInterface {
         User u = objectService.getUserById(user.getId());
         
         LOGGER.info("Modifica in corso per l'utente: " + user.getEmail());
-        if (u == null) throw new UserMissingException("Utente non trovato");
+        if (u == null ||!u.getActive()) throw new UserMissingException("Utente non trovato");
         Token t = objectService.getTokenByValue(token.getValue());
         if (t.getUser().getGroup().getRole().compareTo(new Role(user.getGroupDTO().getRoleDTO())) < 0) {
         	LOGGER.warn("Tentativo di modifica del ruolo con priorità maggiore");
@@ -224,7 +224,7 @@ public class UserServiceJdbc implements UserServiceInterface {
         }
         User u = objectService.getUserById(user.getId());
         LOGGER.info("Cancellazione in corso per l'utente: " + user.getEmail());
-        if (u == null) throw new UnauthorizedException("Utente non trovato");
+        if (u == null||!u.getActive()) throw new UnauthorizedException("Utente non trovato");
         Token t = objectService.getTokenByValue(token.getValue());
         if (t.getUser().getId().equals(user.getId())) {
             userDAO.delete(user.getId());
@@ -270,7 +270,7 @@ public class UserServiceJdbc implements UserServiceInterface {
         	throw new UnauthorizedException("Non possiedi i permessi per compiere questa azione.");
         }
         LOGGER.info("Recupero lista utenti in corso");
-        return objectService.getAllUsers().stream().map(user -> {
+        return objectService.getAllUsers().stream().filter(a->a.getActive()).map(user -> {
             UserDTO dto = new UserDTO(user);
             dto.setPassword(user.getPassword());
             return dto;

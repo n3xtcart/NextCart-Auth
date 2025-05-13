@@ -67,7 +67,7 @@ public class UserService implements UserServiceInterface {
             throw new UnauthorizedException("Email o password non validi");
         }
         Optional<User> byEmailPassword = userDAO.findByEmailPassword(user.getEmail(), user.getPassword());
-        if (byEmailPassword.isPresent()) {
+        if (byEmailPassword.isPresent() && byEmailPassword.get().getActive()) {
             User u = byEmailPassword.get();
             Token token = generateToken(u);
             tokenUserDAO.add(token);
@@ -193,7 +193,7 @@ public class UserService implements UserServiceInterface {
         if (!checkToken(token)) throw new UnauthorizedException("Token non presente");
         User u = userDAO.getById(user.getId());
         LOGGER.info("Modifica in corso per l'utente: " + user.getEmail());
-        if (u == null) throw new UserMissingException("Utente non trovato");
+        if (u == null || !u.getActive()) throw new UserMissingException("Utente non trovato");
         Token t = tokenUserDAO.getTokenByValue(token.getValue());
         if (t.getUser().getGroup().getRole().compareTo(new Role(user.getGroupDTO().getRoleDTO())) < 0) {
         	LOGGER.warn("Tentativo di modifica del ruolo con priorità maggiore");
@@ -218,7 +218,7 @@ public class UserService implements UserServiceInterface {
 
     @Override
     public void deleteUser(UserDTO user, TokenDTO token) {
-        if (user == null) throw new UnauthorizedException("Utente non valido");
+        if (user == null ) throw new UnauthorizedException("Utente non valido");
         if (user.getGroupDTO() == null) throw new UnauthorizedException("Gruppo non valido");
         if (user.getGroupDTO().getRoleDTO() == null) throw new UnauthorizedException("Ruolo non valido");
         if (!checkToken(token)) {
@@ -227,7 +227,7 @@ public class UserService implements UserServiceInterface {
         }
         User u = userDAO.getById(user.getId());
         LOGGER.info("Cancellazione in corso per l'utente: " + user.getEmail());
-        if (u == null) throw new UnauthorizedException("Utente non trovato");
+        if (u == null || !u.getActive()) throw new UnauthorizedException("Utente non trovato");
         Token t = tokenUserDAO.getTokenByValue(token.getValue());
         if (t.getUser().getId().equals(user.getId())) {
             userDAO.delete(user.getId());
@@ -261,6 +261,7 @@ public class UserService implements UserServiceInterface {
         }
 
         toSave.setGroup(toPut);
+        toSave.setActive(true);
         userDAO.add(toSave);
         LOGGER.info("Creazione effettuata con successo per l'utente: " + user.getEmail());
     }
@@ -272,7 +273,8 @@ public class UserService implements UserServiceInterface {
         	throw new UnauthorizedException("Non possiedi i permessi per compiere questa azione.");
         }
         LOGGER.info("Recupero lista utenti in corso");
-        return userDAO.getAll().stream().map(user -> {
+   
+        return userDAO.getAll().stream().filter(a->a.getActive()).map(user -> {
             UserDTO dto = new UserDTO(user);
             dto.setPassword(user.getPassword());
             return dto;

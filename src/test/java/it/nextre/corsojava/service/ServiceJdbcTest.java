@@ -201,8 +201,7 @@ class ServiceJdbcTest {
         toSave.setCognome("Cognomefico");
         toSave.setPassword("passwordComplessa");
         toSave.setEmail("email123455667@example.com");
-        
-        int old=userDAO.getAll().size();
+        int old=userDAO.getAll().stream().filter(a->a.getActive()).toList().size();
         userService.createUser(toSave, req);
         assertEquals(old+1, userService.getAllUsers(req).size());
     }
@@ -266,7 +265,7 @@ class ServiceJdbcTest {
     t.getUser().getGroup().setRole(roleDAO.getById(t.getUser().getGroup().getRole().getId()));
    
         TokenDTO req = new TokenDTO(t);
-        int old=userDAO.getAll().size();
+        int old=userDAO.getAll().stream().filter(a->a.getActive()).toList().size();
         assertEquals(old, userService.getAllUsers(req).size());
     }
 
