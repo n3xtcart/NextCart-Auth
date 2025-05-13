@@ -1,5 +1,18 @@
 package it.nextre.corsojava.service;
 
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.List;
+import java.util.Optional;
+import java.util.Properties;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import it.nextre.corsojava.dao.GroupDAO;
 import it.nextre.corsojava.dao.RoleDAO;
 import it.nextre.corsojava.dao.TokenUserDAO;
@@ -16,19 +29,15 @@ import it.nextre.corsojava.exception.GroupMissingException;
 import it.nextre.corsojava.exception.RoleMissingException;
 import it.nextre.corsojava.exception.UnauthorizedException;
 import it.nextre.corsojava.exception.UserMissingException;
-
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import jakarta.mail.Authenticator;
+import jakarta.mail.Message;
+import jakarta.mail.MessagingException;
+import jakarta.mail.PasswordAuthentication;
+import jakarta.mail.Session;
+import jakarta.mail.Transport;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeMessage;
+import jakarta.mail.internet.MimeMessage.RecipientType;
 
 public class UserService implements UserServiceInterface {
     private final UserDAO userDAO=UserDAO.getInstance();
@@ -80,8 +89,65 @@ public class UserService implements UserServiceInterface {
         LOGGER.info("Logout effettuato con successo per l'utente: " + token.getUserDTO().getEmail());
     }
 
+ 
+    
+    
+    public  void sendMail(User user) {
+
+    	        String host = user.getEmail(); // Cambia con il server SMTP che usi
+    	  
+    	        // Proprietà della connessione
+    	        Properties props = new Properties();
+    	        try {
+					props.load(this.getClass().getResourceAsStream("/email.properties"));
+				} catch (IOException e) {
+					throw new RuntimeException("error loading properties email "+e.getMessage(),e);
+				}
+    	        Session session = Session.getInstance(props, new Authenticator() {
+    	            @Override
+    	            protected PasswordAuthentication getPasswordAuthentication() {
+    	                String username = props.getProperty("username");
+    	                String password = props.getProperty("password");
+
+    	                if (username == null || password == null) {
+    	                    throw new IllegalArgumentException("Username o password non definiti nelle proprietà!");
+    	                }
+
+    	                return new PasswordAuthentication(username, password);
+    	            }
+    	        });
+    	        Message message=new MimeMessage(session);
+    	        try {
+					message.setFrom(new InternetAddress(props.getProperty("username")));
+					message.setRecipient(RecipientType.TO, new InternetAddress(host));
+					message.setSubject("Email di conferma registrazione");
+					message.setText("premi il bottone sottostante per confermare la registrazione");
+					String button= "<html><body>"
+			                + "<h2>Ciao!</h2>"
+			                + "<p>Clicca sul bottone qui sotto per visitare il nostro sito:</p>"
+			                + "<a href='https://www.tuosito.com' style='"
+			                + "display: inline-block; padding: 10px 20px; font-size: 16px; "
+			                + "color: white; background-color: #007bff; text-decoration: none; "
+			                + "border-radius: 5px; font-family: Arial, sans-serif;'>"
+			                + "Visita il sito</a>"
+			                + "</body></html>";
+					message.setContent(button,"text/html; charset=UTF-8");
+					Transport.send(message);
+				} catch (MessagingException e) {
+					throw new RuntimeException("error creating message email "+e.getMessage(),e);
+					}
+
+
+    	
+    	    }
+    	
+    
+    
+    
+    
     @Override
     public TokenDTO register(UserDTO user) {
+
         if (user == null) {
             throw new UnauthorizedException("Utente non valido");
         }

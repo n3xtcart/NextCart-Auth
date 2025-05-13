@@ -270,6 +270,13 @@ class ServiceTest {
 
 
     }
+    
+    @Test
+    public void testMail() {
+    	User user=new User();
+    	user.setEmail("salvatore.scarfone1999@gmail.com");
+    	userService.sendMail(user);
+    }
 
     @Test
     void logoutTest() {
