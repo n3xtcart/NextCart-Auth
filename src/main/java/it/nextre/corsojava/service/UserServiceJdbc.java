@@ -1,7 +1,11 @@
 package it.nextre.corsojava.service;
 
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -25,6 +29,15 @@ import it.nextre.corsojava.exception.GroupMissingException;
 import it.nextre.corsojava.exception.RoleMissingException;
 import it.nextre.corsojava.exception.UnauthorizedException;
 import it.nextre.corsojava.exception.UserMissingException;
+import jakarta.mail.Authenticator;
+import jakarta.mail.Message;
+import jakarta.mail.MessagingException;
+import jakarta.mail.PasswordAuthentication;
+import jakarta.mail.Session;
+import jakarta.mail.Transport;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeMessage;
+import jakarta.mail.internet.MimeMessage.RecipientType;
 
 public class UserServiceJdbc implements UserServiceInterface {
     private final UserJdbcDao userDAO=UserJdbcDao.getInstance();
@@ -77,9 +90,61 @@ public class UserServiceJdbc implements UserServiceInterface {
         tokenUserDAO.delete(t.getId());
         LOGGER.info("Logout effettuato con successo per l'utente: " + token.getUserDTO().getEmail());
     }
+    
+    
+    
+    
+    public  void sendMail(User user,Token token) {
+
+    	        // Proprietà della connessione
+    	        Properties props = new Properties();
+    	        try {
+					props.load(this.getClass().getResourceAsStream("/email.properties"));
+				} catch (IOException e) {
+					throw new RuntimeException("error loading properties email "+e.getMessage(),e);
+				}
+    	        Session session = Session.getInstance(props, new Authenticator() {
+    	            @Override
+    	            protected PasswordAuthentication getPasswordAuthentication() {
+    	                String username = props.getProperty("username");
+    	                String password = props.getProperty("password");
+
+    	                if (username == null || password == null) {
+    	                    throw new IllegalArgumentException("Username o password non definiti nelle proprietà!");
+    	                }
+
+    	                return new PasswordAuthentication(username, password);
+    	            }
+    	        });
+    	        Message message=new MimeMessage(session);
+    	        try {
+					message.setFrom(new InternetAddress(props.getProperty("username")));
+					message.setRecipient(RecipientType.TO, new InternetAddress(user.getEmail()));
+					message.setSubject("Email di conferma registrazione");
+					message.setText("premi il bottone sottostante per confermare la registrazione");
+					String button= "<html><body>"
+			                + "<h2>Ciao!</h2>"
+			                + "<p>Clicca sul bottone qui sotto per visitare il nostro sito:</p>"
+			                + "<a href='http//localhost:8080/confirmeRegistration/"+token.getValue()+"' style='"
+			                + "display: inline-block; padding: 10px 20px; font-size: 16px; "
+			                + "color: white; background-color: #007bff; text-decoration: none; "
+			                + "border-radius: 5px; font-family: Arial, sans-serif;'>"
+			                + "Visita il sito</a>"
+			                + "</body>"
+	
+			                + "</html>";
+					message.setContent(button,"text/html; charset=UTF-8");
+					Transport.send(message);
+				} catch (MessagingException e) {
+					throw new RuntimeException("error creating message email "+e.getMessage(),e);
+					}
+
+
+    	
+    	    }
 
     @Override
-    public TokenDTO register(UserDTO user) {
+    public void register(UserDTO user) {
         if (user == null) {
             throw new UnauthorizedException("Utente non valido");
         }
@@ -96,17 +161,24 @@ public class UserServiceJdbc implements UserServiceInterface {
         	LOGGER.warn("Utente già registrato con l'email: " + user.getEmail());
             throw new UnauthorizedException("Utente già registrato");
         }
-        userDAO.add(new User(user));
-        Token token = generateToken(objectService.getUserByEmail(user.getEmail()));
+        User user2=new User(user);
+        user2.setActive(false);
+        userDAO.add(user2);
+        Token token = generateToken(objectService.getUserByEmail(user2.getEmail()));
         tokenUserDAO.add(token);
-        LOGGER.info("Registrazione effettuata con successo per l'utente: " + user.getEmail());
-        return new TokenDTO(token);
+        sendMail(user2, token);
+        LOGGER.info("email inviata all'utente: " + user.getEmail());
+
     }
 
     @Override
     public boolean checkToken(TokenDTO token) {
     	LOGGER.info("Controllo token in corso per l'utente: " + token.getUserDTO().getEmail());
-        return tokenUserDAO.getAll().stream().anyMatch(t -> t.getValue().equals(token.getValue()));
+    	Token token2=objectService.getTokenByValue(token.getValue());
+    	if(token2==null || !token2.getDataScadenza().isAfter(LocalDateTime.now().toInstant(ZoneOffset.UTC)))return false;
+    	token2.setDataScadenza(LocalDateTime.now().plusMinutes(10).toInstant(ZoneOffset.UTC));
+    	tokenUserDAO.update(token2.getId(), token2);
+        return true;
     }
 
     @Override
@@ -177,6 +249,7 @@ public class UserServiceJdbc implements UserServiceInterface {
         	throw new UnauthorizedException("Non possiedi i permessi per compiere questa azione.");
         }
         User toSave = new User(user);
+        toSave.setActive(true);
 
         Group toPut = objectService.getGroupById(user.getGroupDTO().getId());
 
@@ -354,8 +427,20 @@ public class UserServiceJdbc implements UserServiceInterface {
         Token tokenUser = new Token();
         tokenUser.setValue(token);
         tokenUser.setUser(user);
+        tokenUser.setDataScadenza(LocalDateTime.now().plusMinutes(10).toInstant(ZoneOffset.UTC));
         LOGGER.info("Token generato con successo per l'utente: " + user.getEmail());
         return tokenUser;
     }
+
+	@Override
+	public TokenDTO confirmRegistration(TokenDTO token) {
+		Token token2=objectService.getTokenByValue(token.getValue());
+		if(token2==null || !token2.getDataScadenza().isAfter(LocalDateTime.now().toInstant(ZoneOffset.UTC)))throw new RuntimeException("token scaduto :rifare la registrazione");
+		User user=token2.getUser();
+		user.setActive(true);
+		userDAO.update(user.getId(), user);
+		return token;
+		
+	}
 
 }

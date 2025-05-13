@@ -12,7 +12,9 @@ public interface UserServiceInterface {
 
     public TokenDTO login(UserDTO user);
 
-    public TokenDTO register(UserDTO user);
+    public void register(UserDTO user);
+    
+    public TokenDTO confirmRegistration(TokenDTO token);
 
     public boolean checkToken(TokenDTO token);
 

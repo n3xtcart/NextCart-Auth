@@ -19,6 +19,7 @@ public class UserjdbcDaoTest {
 		user.setNome("salvatore");
 		user.setEmail("bo");
 		user.setPassword("lalalal");
+		user.setActive(true);
 		Group group = new Group();
 		group.setId(1L);
 		user.setGroup(group);
@@ -42,6 +43,8 @@ public class UserjdbcDaoTest {
 		user.setNome("Salvatore");
 		user.setEmail("bo");
 		user.setPassword("lalalal");
+
+		user.setActive(true);
 		Group group = new Group();
 		group.setId(3L);
 		user.setGroup(group);
@@ -67,6 +70,7 @@ public class UserjdbcDaoTest {
 		user.setNome("Salvatore");
 		user.setEmail("bo");
 		user.setPassword("lalalal");
+		user.setActive(true);
 		Group group = new Group();
 		group.setId(3L);
 		user.setGroup(group);
@@ -86,6 +90,8 @@ public class UserjdbcDaoTest {
 		user.setNome("Salvatore");
 		user.setEmail("bo");
 		user.setPassword("lalalal");
+
+		user.setActive(true);
 		Group group = new Group();
 		group.setId(3L);
 		user.setGroup(group);

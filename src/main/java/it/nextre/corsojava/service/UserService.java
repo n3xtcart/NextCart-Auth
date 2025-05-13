@@ -92,10 +92,8 @@ public class UserService implements UserServiceInterface {
  
     
     
-    public  void sendMail(User user) {
+    public  void sendMail(User user,Token token) {
 
-    	        String host = user.getEmail(); // Cambia con il server SMTP che usi
-    	  
     	        // Proprietà della connessione
     	        Properties props = new Properties();
     	        try {
@@ -119,18 +117,20 @@ public class UserService implements UserServiceInterface {
     	        Message message=new MimeMessage(session);
     	        try {
 					message.setFrom(new InternetAddress(props.getProperty("username")));
-					message.setRecipient(RecipientType.TO, new InternetAddress(host));
+					message.setRecipient(RecipientType.TO, new InternetAddress(user.getEmail()));
 					message.setSubject("Email di conferma registrazione");
 					message.setText("premi il bottone sottostante per confermare la registrazione");
 					String button= "<html><body>"
 			                + "<h2>Ciao!</h2>"
 			                + "<p>Clicca sul bottone qui sotto per visitare il nostro sito:</p>"
-			                + "<a href='https://www.tuosito.com' style='"
+			                + "<a href='http//localhost:8080/confirmeRegistration/"+token.getValue()+"' style='"
 			                + "display: inline-block; padding: 10px 20px; font-size: 16px; "
 			                + "color: white; background-color: #007bff; text-decoration: none; "
 			                + "border-radius: 5px; font-family: Arial, sans-serif;'>"
 			                + "Visita il sito</a>"
-			                + "</body></html>";
+			                + "</body>"
+	
+			                + "</html>";
 					message.setContent(button,"text/html; charset=UTF-8");
 					Transport.send(message);
 				} catch (MessagingException e) {
@@ -146,7 +146,7 @@ public class UserService implements UserServiceInterface {
     
     
     @Override
-    public TokenDTO register(UserDTO user) {
+    public void register(UserDTO user) {
 
         if (user == null) {
             throw new UnauthorizedException("Utente non valido");
@@ -164,19 +164,23 @@ public class UserService implements UserServiceInterface {
         	LOGGER.warn("Utente già registrato con l'email: " + user.getEmail());
             throw new UnauthorizedException("Utente già registrato");
         }
-        userDAO.add(new User(user));
-        Token token = generateToken(userDAO.getByEmail(user.getEmail()));
+        User user2=new User(user);
+        user2.setActive(false);
+        userDAO.add(user2);
+        Token token = generateToken(userDAO.getByEmail(user2.getEmail()));
         tokenUserDAO.add(token);
-        LOGGER.info("Registrazione effettuata con successo per l'utente: " + user.getEmail());
-        return new TokenDTO(token);
+        sendMail(user2, token);
+        LOGGER.info("email inviata all'utente: " + user.getEmail());
+
+
     }
 
     @Override
     public boolean checkToken(TokenDTO token) {
     	LOGGER.info("Controllo token in corso per l'utente: " + token.getUserDTO().getEmail());
     	Token token2=tokenUserDAO.getTokenByValue(token.getValue());
-    	if(token2==null || !token2.getDataScandenza().isAfter(LocalDateTime.now().toInstant(ZoneOffset.UTC)))return false;
-    	token2.setDataScandenza(LocalDateTime.now().plusMinutes(10).toInstant(ZoneOffset.UTC));
+    	if(token2==null || !token2.getDataScadenza().isAfter(LocalDateTime.now().toInstant(ZoneOffset.UTC)))return false;
+    	token2.setDataScadenza(LocalDateTime.now().plusMinutes(10).toInstant(ZoneOffset.UTC));
     	tokenUserDAO.update(token2.getId(), token2);
         return true;
     }
@@ -425,10 +429,21 @@ public class UserService implements UserServiceInterface {
         Token tokenUser = new Token();
         tokenUser.setValue(token);
         tokenUser.setUser(user);
-        tokenUser.setDataScandenza(LocalDateTime.now().plusMinutes(10).toInstant(ZoneOffset.UTC));
+        tokenUser.setDataScadenza(LocalDateTime.now().plusMinutes(10).toInstant(ZoneOffset.UTC));
     	
         LOGGER.info("Token generato con successo per l'utente: " + user.getEmail());
         return tokenUser;
     }
+
+	@Override
+	public TokenDTO confirmRegistration(TokenDTO token) {
+		Token token2=tokenUserDAO.getTokenByValue(token.getValue());
+		if(token2==null || !token2.getDataScadenza().isAfter(LocalDateTime.now().toInstant(ZoneOffset.UTC)))throw new RuntimeException("token scaduto :rifare la registrazione");
+		User user=token2.getUser();
+		user.setActive(true);
+		userDAO.update(user.getId(), user);
+		return token;
+		
+	}
 
 }

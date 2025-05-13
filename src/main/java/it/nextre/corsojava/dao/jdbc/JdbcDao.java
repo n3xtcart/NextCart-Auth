@@ -90,6 +90,7 @@ public abstract class JdbcDao<T extends Entity> implements DaoInterface<T> {
 
 	}
 
+	//TODO gestire active di user
 	@Override
 	public T getById(Long id) {
 		List<Field> fields = new ArrayList<>(Arrays.asList(clazz.getDeclaredFields()));
@@ -181,6 +182,9 @@ public abstract class JdbcDao<T extends Entity> implements DaoInterface<T> {
 		return null;
 
 	}
+	
+
+	//TODO gestire active di user
 
 	@Override
 	public List<T> getAll() {

@@ -26,10 +26,13 @@ public class UserDAO extends Dao<User> {
         if (item.getPassword() != null) user.setPassword(item.getPassword());
         if (item.getCognome() != null) user.setCognome(item.getCognome());
         if (item.getGroup() != null) user.setGroup(item.getGroup());
+        if(item.getActive()!=null)user.setActive(item.getActive());
 
 
     }
 
+
+	//TODO gestire active di user
 
     public User getByEmail(String email) {
         Optional<User> u = database.values().stream().filter(user -> user.getEmail().equals(email)).findFirst();

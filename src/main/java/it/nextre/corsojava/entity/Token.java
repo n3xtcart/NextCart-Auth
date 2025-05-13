@@ -2,6 +2,8 @@ package it.nextre.corsojava.entity;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 import it.nextre.corsojava.entity.annotation.Attribute;
 
@@ -10,9 +12,13 @@ public class Token extends Entity {
     private String value;
 	@Attribute(colName = "userId",type = "long",fieldName = "user",className = User.class,colClass = long.class)
     private User user;
-	@Attribute(fieldName = "scadenza",colName = "scadenza", className = Instant.class,colClass = Timestamp.class,type = "timestamp" )
+	@Attribute(fieldName = "dataScadenza",colName = "scadenza", className = Instant.class,colClass = Timestamp.class,type = "timestamp" )
     private Instant dataScandenza;
 
+	
+	public Token() {
+		this.dataScandenza=LocalDateTime.now().toInstant(ZoneOffset.UTC);
+	}
     public String getValue() {
         return value;
     }
@@ -31,11 +37,11 @@ public class Token extends Entity {
         this.user = user;
     }
 
-	public Instant getDataScandenza() {
+	public Instant getDataScadenza() {
 		return dataScandenza;
 	}
 
-	public void setDataScandenza(Instant dataScandenza) {
+	public void setDataScadenza(Instant dataScandenza) {
 		this.dataScandenza = dataScandenza;
 	}
     

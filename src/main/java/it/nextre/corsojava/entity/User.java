@@ -14,6 +14,8 @@ public class User extends Entity {
     private String password;
 		@Attribute(colName = "groupId",fieldName = "group" ,type = "long", className = Group.class,colClass = long.class)
     private Group group;
+		@Attribute(fieldName = "active",colName = "active",className = Boolean.class,colClass = boolean.class,type="boolean")
+	    private Boolean active;
 
 
     public User(UserDTO user) {
@@ -26,7 +28,28 @@ public class User extends Entity {
 			this.group = new Group(user.getGroupDTO());
 		}
 	}
+    
+    
+    
 	
+
+
+	public Boolean getActive() {
+		return active;
+	}
+
+
+
+
+
+
+	public void setActive(Boolean active) {
+		this.active = active;
+	}
+
+
+
+
 
 
 	public User() {

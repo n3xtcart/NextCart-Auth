@@ -22,11 +22,15 @@ public abstract class Dao<T extends Entity> implements DaoInterface<T> {
 		
 	}
 
+
+	//TODO gestire active di user
 	@Override
 	public T getById(Long id) {
 		return database.get(id);
 	}
 
+
+	//TODO gestire active di user
 	@Override
 	public List<T> getAll() {
 		return database.values().stream().toList();

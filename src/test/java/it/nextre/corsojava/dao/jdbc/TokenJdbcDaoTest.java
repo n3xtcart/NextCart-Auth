@@ -3,6 +3,9 @@ package it.nextre.corsojava.dao.jdbc;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+
 import org.junit.jupiter.api.Test;
 
 import it.nextre.corsojava.entity.Token;
@@ -36,6 +39,7 @@ public class TokenJdbcDaoTest {
 		user.setId(1L);
 		token.setUser(user);
 		token.setValue("ddvdvdfvdfv");
+		token.setDataScadenza(LocalDateTime.now().plusMinutes(10).toInstant(ZoneOffset.UTC));
 		dao.update(6L,token);
 		Token byId = dao.getById(6L);
 		assertNotEquals(token.getId(), byId.getId());

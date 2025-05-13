@@ -271,11 +271,29 @@ class ServiceTest {
 
     }
     
+    @Test 
+    public void confirmRegistration() {
+        User toSave = new User();
+        toSave.setGroup(groupDAO.getById(1L));
+        toSave.setNome("Nomefico");
+        toSave.setCognome("Cognomefico");
+        toSave.setPassword("passwordComplessa");
+        toSave.setEmail("email123455667@example.com");
+        toSave.setActive(false);
+        userDAO.add(toSave);
+    
+        Token token = userService.generateToken(userDAO.getByEmail(toSave.getEmail()));
+        tokenUserDAO.add(token);
+        userService.confirmRegistration(new TokenDTO(token));
+        toSave=userDAO.getByEmail(toSave.getEmail());
+        assertEquals(toSave.getActive(), true);
+    }
+    
     @Test
     public void testMail() {
     	User user=new User();
     	user.setEmail("salvatore.scarfone1999@gmail.com");
-    	userService.sendMail(user);
+    	userService.sendMail(user,userService.generateToken(user));
     }
 
     @Test
