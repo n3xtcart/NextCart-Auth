@@ -1,9 +1,18 @@
 package it.nextre.corsojava.service;
 
-import it.nextre.corsojava.dao.GroupDAO;
-import it.nextre.corsojava.dao.RoleDAO;
-import it.nextre.corsojava.dao.TokenUserDAO;
-import it.nextre.corsojava.dao.UserDAO;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import it.nextre.corsojava.dao.jdbc.GroupJdbcDao;
+import it.nextre.corsojava.dao.jdbc.RoleJdbcDao;
+import it.nextre.corsojava.dao.jdbc.TokenJdbcDao;
+import it.nextre.corsojava.dao.jdbc.UserJdbcDao;
 import it.nextre.corsojava.dto.GroupDTO;
 import it.nextre.corsojava.dto.RoleDTO;
 import it.nextre.corsojava.dto.TokenDTO;
@@ -17,39 +26,28 @@ import it.nextre.corsojava.exception.RoleMissingException;
 import it.nextre.corsojava.exception.UnauthorizedException;
 import it.nextre.corsojava.exception.UserMissingException;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-public class UserService implements UserServiceInterface {
-    private final UserDAO userDAO=UserDAO.getInstance();
-    private final TokenUserDAO tokenUserDAO=TokenUserDAO.getIstance();
-    private final GroupDAO groupDAO=GroupDAO.getIstance();
-    private final RoleDAO roleDAO=RoleDAO.getIstance();
-    private static final Logger LOGGER = LogManager.getLogger(UserService.class);
-    private static UserService instance=new UserService();
+public class UserServiceJdbc implements UserServiceInterface {
+    private final UserJdbcDao userDAO=UserJdbcDao.getInstance();
+    private final TokenJdbcDao tokenUserDAO=TokenJdbcDao.getInstance();
+    private final GroupJdbcDao groupDAO=GroupJdbcDao.getInstance();
+    private final RoleJdbcDao roleDAO=RoleJdbcDao.getInstance();
+    private static final Logger LOGGER = LogManager.getLogger(UserServiceJdbc.class);
+    private static ObjectService objectService=ObjectService.getInstance();
+    private static UserServiceJdbc instance=new UserServiceJdbc();
 
 
     
-    private UserService(){
+    private UserServiceJdbc(){
+    	
     	
     }
 
-    public static UserService getInstance() {
+    public static UserServiceJdbc getInstance() {
     	return instance;
     }
-    
 
-    @Override
+
+	@Override
     public TokenDTO login(UserDTO user) {
     	LOGGER.info("Login in corso per l'utente: " + user.getEmail());
         TokenDTO tokenDTO = null;
@@ -57,7 +55,7 @@ public class UserService implements UserServiceInterface {
         	LOGGER.warn("Email o password non validi");
             throw new UnauthorizedException("Email o password non validi");
         }
-        Optional<User> byEmailPassword = userDAO.findByEmailPassword(user.getEmail(), user.getPassword());
+        Optional<User> byEmailPassword = objectService.getUserByEmailPassword(user.getEmail(), user.getPassword());
         if (byEmailPassword.isPresent()) {
             User u = byEmailPassword.get();
             Token token = generateToken(u);
@@ -74,8 +72,8 @@ public class UserService implements UserServiceInterface {
     public void logout(TokenDTO token) {
         if (token == null)  throw new UnauthorizedException("Token mancante");
         LOGGER.info("Logout in corso per l'utente: " + token.getUserDTO().getEmail());
-        Token t = tokenUserDAO.getTokenByValue(token.getValue());
-        if (t == null) throw new UnauthorizedException("Token non presente");
+        Token t =objectService.getTokenByValue(token.getValue());
+        if(t==null) throw new UnauthorizedException("token non presente");
         tokenUserDAO.delete(t.getId());
         LOGGER.info("Logout effettuato con successo per l'utente: " + token.getUserDTO().getEmail());
     }
@@ -85,21 +83,21 @@ public class UserService implements UserServiceInterface {
         if (user == null) {
             throw new UnauthorizedException("Utente non valido");
         }
-        if (user.getGroupDTO() == null || groupDAO.getById(user.getGroupDTO().getId()) == null) {
+        if (user.getGroupDTO() == null || user.getGroupDTO().getId()==null || groupDAO.getById(user.getGroupDTO().getId()) == null) {
             throw new UnauthorizedException("Gruppo non valido");
         }
-        Group group = groupDAO.getById(user.getGroupDTO().getId());
+        Group group = objectService.getGroupById(user.getGroupDTO().getId());
         LOGGER.info("Registrazione in corso per l'utente: " + user.getEmail());
         if (group.getRole().isAdmin() == true) {
         	LOGGER.warn("Tentativo di registrazione come admin");
             throw new UnauthorizedException("Non puoi registrarti come admin");
         }
-        if (userDAO.getByEmail(user.getEmail()) != null) {
+        if (objectService.getUserByEmail(user.getEmail()) != null) {
         	LOGGER.warn("Utente già registrato con l'email: " + user.getEmail());
             throw new UnauthorizedException("Utente già registrato");
         }
         userDAO.add(new User(user));
-        Token token = generateToken(userDAO.getByEmail(user.getEmail()));
+        Token token = generateToken(objectService.getUserByEmail(user.getEmail()));
         tokenUserDAO.add(token);
         LOGGER.info("Registrazione effettuata con successo per l'utente: " + user.getEmail());
         return new TokenDTO(token);
@@ -108,11 +106,7 @@ public class UserService implements UserServiceInterface {
     @Override
     public boolean checkToken(TokenDTO token) {
     	LOGGER.info("Controllo token in corso per l'utente: " + token.getUserDTO().getEmail());
-    	Token token2=tokenUserDAO.getTokenByValue(token.getValue());
-    	if(token2==null || !token2.getDataScandenza().isAfter(LocalDateTime.now().toInstant(ZoneOffset.UTC)))return false;
-    	token2.setDataScandenza(LocalDateTime.now().plusMinutes(10).toInstant(ZoneOffset.UTC));
-    	tokenUserDAO.update(token2.getId(), token2);
-        return true;
+        return tokenUserDAO.getAll().stream().anyMatch(t -> t.getValue().equals(token.getValue()));
     }
 
     @Override
@@ -121,10 +115,11 @@ public class UserService implements UserServiceInterface {
         if (user.getGroupDTO() == null) throw new UnauthorizedException("Gruppo non valido");
         if (user.getGroupDTO().getRoleDTO() == null) throw new UnauthorizedException("Ruolo non valido");
         if (!checkToken(token)) throw new UnauthorizedException("Token non presente");
-        User u = userDAO.getById(user.getId());
+        User u = objectService.getUserById(user.getId());
+        
         LOGGER.info("Modifica in corso per l'utente: " + user.getEmail());
         if (u == null) throw new UserMissingException("Utente non trovato");
-        Token t = tokenUserDAO.getTokenByValue(token.getValue());
+        Token t = objectService.getTokenByValue(token.getValue());
         if (t.getUser().getGroup().getRole().compareTo(new Role(user.getGroupDTO().getRoleDTO())) < 0) {
         	LOGGER.warn("Tentativo di modifica del ruolo con priorità maggiore");
             throw new UnauthorizedException("Non puoi cambiare il ruolo di un utente con uno di priorità maggiore al tuo");
@@ -155,16 +150,16 @@ public class UserService implements UserServiceInterface {
         	LOGGER.warn("Token non presente");
         	throw new UnauthorizedException("Token non presente");
         }
-        User u = userDAO.getById(user.getId());
+        User u = objectService.getUserById(user.getId());
         LOGGER.info("Cancellazione in corso per l'utente: " + user.getEmail());
         if (u == null) throw new UnauthorizedException("Utente non trovato");
-        Token t = tokenUserDAO.getTokenByValue(token.getValue());
+        Token t = objectService.getTokenByValue(token.getValue());
         if (t.getUser().getId().equals(user.getId())) {
             userDAO.delete(user.getId());
-            tokenUserDAO.getTokenByIdUser(user.getId()).forEach(tok -> tokenUserDAO.delete(tok.getId()));
+            objectService.getTokenByIdUser(user.getId()).forEach(tok -> tokenUserDAO.delete(tok.getId()));
         } else if (t.getUser().getGroup().getRole().compareTo(u.getGroup().getRole()) > 0) {
             userDAO.delete(user.getId());
-            tokenUserDAO.getTokenByIdUser(user.getId()).forEach(tok -> tokenUserDAO.delete(tok.getId()));
+            objectService.getTokenByIdUser(user.getId()).forEach(tok -> tokenUserDAO.delete(tok.getId()));
         } else {
         	LOGGER.warn("Tentativo di cancellazione di un utente con priorità maggiore");
             throw new UnauthorizedException("Non puoi cancellare un utente con priorità maggiore alla tua");
@@ -183,7 +178,7 @@ public class UserService implements UserServiceInterface {
         }
         User toSave = new User(user);
 
-        Group toPut = groupDAO.getById(user.getGroupDTO().getId());
+        Group toPut = objectService.getGroupById(user.getGroupDTO().getId());
 
         if (toPut == null) {
         	LOGGER.warn("Tentativo di creazione di un utente con gruppo non valido");
@@ -202,7 +197,7 @@ public class UserService implements UserServiceInterface {
         	throw new UnauthorizedException("Non possiedi i permessi per compiere questa azione.");
         }
         LOGGER.info("Recupero lista utenti in corso");
-        return userDAO.getAll().stream().map(user -> {
+        return objectService.getAllUsers().stream().map(user -> {
             UserDTO dto = new UserDTO(user);
             dto.setPassword(user.getPassword());
             return dto;
@@ -230,7 +225,7 @@ public class UserService implements UserServiceInterface {
         	LOGGER.warn("Tentativo di modifica di un gruppo non autorizzato");
         	throw new UnauthorizedException("Non possiedi i permessi per compiere questa azione.");
         }
-        Group g = groupDAO.getById(group.getId());
+        Group g = objectService.getGroupById(group.getId());
         if (g == null) {
         	LOGGER.warn("Tentativo di modifica di un gruppo non valido");
         	throw new GroupMissingException("Impossibile modificare un gruppo non presente");
@@ -252,7 +247,7 @@ public class UserService implements UserServiceInterface {
         	LOGGER.warn("Tentativo di cancellazione di un gruppo non autorizzato");
         	throw new UnauthorizedException("Non possiedi i permessi per compiere questa azione.");
         }
-        if (groupDAO.getById(group.getId()) == null) {
+        if (objectService.getGroupById(group.getId()) == null) {
         	LOGGER.warn("Tentativo di cancellazione di un gruppo non valido");
         	throw new GroupMissingException("Impossibile cancellare un gruppo non presente");
         }
@@ -272,7 +267,7 @@ public class UserService implements UserServiceInterface {
         	throw new UnauthorizedException("Non possiedi i permessi per compiere questa azione.");
         }
         LOGGER.info("Fine recupero lista gruppi");
-        return groupDAO.getAll().stream().map(group -> {
+        return objectService.getAllGroup().stream().map(group -> {
             GroupDTO dto = new GroupDTO(group);
             return dto;
         }).toList();
@@ -322,7 +317,7 @@ public class UserService implements UserServiceInterface {
         	LOGGER.warn("Tentativo di cancellazione di un ruolo non autorizzato");
         	throw new UnauthorizedException("Non possiedi i permessi per compiere questa azione.");
         }
-        Role r = roleDAO.getById(roleDTO.getId());
+        Role r = objectService.getRoleById(roleDTO.getId());
         if (r == null) {
         	LOGGER.warn("Tentativo di cancellazione di un ruolo non valido");
         	throw new RoleMissingException("Ruolo richiesto da cancellare non presente");
@@ -359,8 +354,6 @@ public class UserService implements UserServiceInterface {
         Token tokenUser = new Token();
         tokenUser.setValue(token);
         tokenUser.setUser(user);
-        tokenUser.setDataScandenza(LocalDateTime.now().plusMinutes(10).toInstant(ZoneOffset.UTC));
-    	
         LOGGER.info("Token generato con successo per l'utente: " + user.getEmail());
         return tokenUser;
     }

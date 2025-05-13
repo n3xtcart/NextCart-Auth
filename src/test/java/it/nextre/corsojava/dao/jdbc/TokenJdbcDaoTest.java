@@ -36,8 +36,8 @@ public class TokenJdbcDaoTest {
 		user.setId(1L);
 		token.setUser(user);
 		token.setValue("ddvdvdfvdfv");
-		dao.update(2L,token);
-		Token byId = dao.getById(2L);
+		dao.update(6L,token);
+		Token byId = dao.getById(6L);
 		assertNotEquals(token.getId(), byId.getId());
 		assertEquals(token.getUser().getId(), byId.getUser().getId());
 		assertEquals(token.getValue(), byId.getValue());

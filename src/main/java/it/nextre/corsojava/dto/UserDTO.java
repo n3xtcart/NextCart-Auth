@@ -15,6 +15,7 @@ public class UserDTO {
 		this.nome = user.getNome();
 		this.cognome = user.getCognome();
 		this.email = user.getEmail();
+		this.password=user.getPassword();
 		if (user.getGroup() != null) {
 			this.groupDTO = new GroupDTO(user.getGroup());
 		}
