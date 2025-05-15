@@ -7,7 +7,7 @@ import java.time.Instant;
 
 import it.nextre.corsojava.entity.annotation.Attribute;
 
-public class Entity {
+public abstract class Entity {
 	@Attribute(fieldName = "id",colName = "id",type = "long",className = Long.class,colClass = long.class,auto = true)
 			
     protected Long id;
