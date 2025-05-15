@@ -1,34 +1,27 @@
 package it.nextre.corsojava.controller;
-import java.util.ArrayList;
-import java.util.List;
 
-import it.nextre.corsojava.dao.jdbc.UserJdbcDao;
 import it.nextre.corsojava.dto.TokenDTO;
 import it.nextre.corsojava.dto.UserDTO;
-import it.nextre.corsojava.entity.User;
 import it.nextre.corsojava.service.UserService;
 import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
-import jakarta.ws.rs.NotFoundException;
-import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+
+import java.util.List;
 
 @Path("/users") // ✅ Definisce il percorso dell'API
 public class UserController {
 
-  
+
     public UserController() {
-        
+
     }
 
     @GET
-    
-@Produces(MediaType.APPLICATION_JSON) // ✅ Risponde con JSON
-@Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON) // ✅ Risponde con JSON
+    @Consumes(MediaType.APPLICATION_JSON)
     public List<UserDTO> getAllUsers(TokenDTO token) {
         return UserService.getInstance().getAllUsers(token); // ✅ Restituisce tutti gli utenti
     }
