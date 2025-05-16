@@ -1,5 +1,18 @@
 package it.nextre.corsojava.service;
 
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.List;
+import java.util.Optional;
+import java.util.Properties;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import org.jboss.logging.Logger;
+
+import io.quarkus.arc.lookup.LookupIfProperty;
 import it.nextre.corsojava.dao.jdbc.GroupJdbcDao;
 import it.nextre.corsojava.dao.jdbc.RoleJdbcDao;
 import it.nextre.corsojava.dao.jdbc.TokenJdbcDao;
@@ -16,36 +29,29 @@ import it.nextre.corsojava.exception.GroupMissingException;
 import it.nextre.corsojava.exception.RoleMissingException;
 import it.nextre.corsojava.exception.UnauthorizedException;
 import it.nextre.corsojava.exception.UserMissingException;
-import jakarta.mail.*;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.mail.Authenticator;
+import jakarta.mail.Message;
+import jakarta.mail.MessagingException;
+import jakarta.mail.PasswordAuthentication;
+import jakarta.mail.Session;
+import jakarta.mail.Transport;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.MimeMessage.RecipientType;
-import org.jboss.logging.Logger;
 
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.*;
-import java.util.stream.Collectors;
-
+@ApplicationScoped
+@LookupIfProperty(name = "source.Mem", stringValue = "db")
 public class UserServiceJdbc implements UserServiceInterface {
     private static final Logger LOGGER = Logger.getLogger(UserServiceJdbc.class);
     private static ObjectService objectService = ObjectService.getInstance();
-    private static UserServiceJdbc instance = new UserServiceJdbc();
     private final UserJdbcDao userDAO = UserJdbcDao.getInstance();
     private final TokenJdbcDao tokenUserDAO = TokenJdbcDao.getInstance();
     private final GroupJdbcDao groupDAO = GroupJdbcDao.getInstance();
     private final RoleJdbcDao roleDAO = RoleJdbcDao.getInstance();
 
 
-    private UserServiceJdbc() {
-
-
-    }
-
-    public static UserServiceJdbc getInstance() {
-        return instance;
-    }
+ 
 
 
     @Override

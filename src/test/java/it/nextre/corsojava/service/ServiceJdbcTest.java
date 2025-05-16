@@ -1,9 +1,13 @@
 package it.nextre.corsojava.service;
 
-import it.nextre.corsojava.dao.GroupDAO;
-import it.nextre.corsojava.dao.RoleDAO;
-import it.nextre.corsojava.dao.TokenUserDAO;
-import it.nextre.corsojava.dao.UserDAO;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import it.nextre.corsojava.dao.jdbc.GroupJdbcDao;
 import it.nextre.corsojava.dao.jdbc.RoleJdbcDao;
 import it.nextre.corsojava.dao.jdbc.TokenJdbcDao;
@@ -17,17 +21,9 @@ import it.nextre.corsojava.entity.Role;
 import it.nextre.corsojava.entity.Token;
 import it.nextre.corsojava.entity.User;
 import it.nextre.corsojava.exception.UnauthorizedException;
-import it.nextre.corsojava.exception.UserMissingException;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
-
-import java.util.HashMap;
-import java.util.Map;
 
 class ServiceJdbcTest {
-    UserServiceJdbc userService=UserServiceJdbc.getInstance();
+    UserServiceJdbc userService=new UserServiceJdbc();
     GroupJdbcDao groupDAO=GroupJdbcDao.getInstance();
     RoleJdbcDao roleDAO=RoleJdbcDao.getInstance();
     TokenJdbcDao tokenUserDAO=TokenJdbcDao.getInstance();

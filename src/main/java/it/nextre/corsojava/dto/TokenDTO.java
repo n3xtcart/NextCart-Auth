@@ -11,6 +11,9 @@ public class TokenDTO {
 		this.userDTO = new UserDTO(token.getUser());
 	
 	}
+    public TokenDTO() {
+    	
+    }
 
     public UserDTO getUserDTO() {
         return userDTO;

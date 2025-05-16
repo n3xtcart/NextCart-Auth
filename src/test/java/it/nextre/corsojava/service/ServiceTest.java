@@ -1,5 +1,16 @@
 package it.nextre.corsojava.service;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.util.HashMap;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import it.nextre.corsojava.dao.GroupDAO;
 import it.nextre.corsojava.dao.RoleDAO;
 import it.nextre.corsojava.dao.TokenUserDAO;
@@ -14,13 +25,6 @@ import it.nextre.corsojava.entity.Token;
 import it.nextre.corsojava.entity.User;
 import it.nextre.corsojava.exception.UnauthorizedException;
 import it.nextre.corsojava.exception.UserMissingException;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
-
-import java.util.HashMap;
-import java.util.Map;
 
 class ServiceTest {
     UserService userService;
@@ -36,7 +40,7 @@ class ServiceTest {
         roleDAO=RoleDAO.getIstance();
         tokenUserDAO=TokenUserDAO.getIstance();
         userDAO = UserDAO.getInstance();
-        userService = UserService.getInstance();
+        userService =new UserService();
         groupDAO.setDatabase(new HashMap<Long, Group>());
         roleDAO.setDatabase(new HashMap<Long, Role>());
         tokenUserDAO.setDatabase(new HashMap<Long, Token>());
