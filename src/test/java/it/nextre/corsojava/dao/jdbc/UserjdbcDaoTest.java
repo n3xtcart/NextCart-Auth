@@ -3,6 +3,8 @@ package it.nextre.corsojava.dao.jdbc;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
+import java.util.Optional;
+
 import org.junit.jupiter.api.Test;
 
 import it.nextre.corsojava.entity.Group;
@@ -96,6 +98,8 @@ public class UserjdbcDaoTest {
 		group.setId(3L);
 		user.setGroup(group);
 		int size = dao.getAll().size();
+		Optional<User> byEmailPassword = dao.findByEmailPassword("nuovaemail@example.com", "NuovaPassword");
+		System.out.println(byEmailPassword.get());
 		Long long1 = dao.add(user);
 		int size2 = dao.getAll().size();
 		assertEquals(size+1, size2);
