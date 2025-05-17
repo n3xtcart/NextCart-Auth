@@ -117,7 +117,7 @@ public class UserServiceJdbc implements UserServiceInterface {
             String button = "<html><body>"
                     + "<h2>Ciao!</h2>"
                     + "<p>Clicca sul bottone qui sotto per visitare il nostro sito:</p>"
-                    + "<a href='http//localhost:8080/confirmeRegistration/" + token.getValue() + "' style='"
+                    + "<a href='http://localhost:8080/users/confirmRegistration/" + token.getValue() + "' style='"
                     + "display: inline-block; padding: 10px 20px; font-size: 16px; "
                     + "color: white; background-color: #007bff; text-decoration: none; "
                     + "border-radius: 5px; font-family: Arial, sans-serif;'>"
@@ -435,5 +435,10 @@ public class UserServiceJdbc implements UserServiceInterface {
         return token;
 
     }
+
+	@Override
+	public TokenDTO findTokenByValue(String val) {
+		return new TokenDTO(objectService.getTokenByValue(val));
+	}
 
 }

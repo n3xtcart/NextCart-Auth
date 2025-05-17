@@ -18,6 +18,7 @@ public interface UserServiceInterface {
 
     public boolean checkToken(TokenDTO token);
 
+    public TokenDTO findTokenByValue(String val);
 
     public void updateUser(UserDTO user, TokenDTO token);
 

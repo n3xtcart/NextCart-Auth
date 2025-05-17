@@ -442,4 +442,9 @@ public class UserService implements UserServiceInterface {
 
     }
 
+	@Override
+	public TokenDTO findTokenByValue(String val) {
+		return new TokenDTO(tokenUserDAO.getTokenByValue(val));
+	}
+
 }
