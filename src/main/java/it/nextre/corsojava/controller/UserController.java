@@ -5,21 +5,21 @@ import java.util.List;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import it.nextre.corsojava.dao.jdbc.GroupJdbcDao;
 import it.nextre.corsojava.dto.GroupDTO;
 import it.nextre.corsojava.dto.LoginInfo;
 import it.nextre.corsojava.dto.TokenDTO;
 import it.nextre.corsojava.dto.UserDTO;
 import it.nextre.corsojava.service.ObjectService;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
 
 @Path("/users") 
 public class UserController extends Controller{
@@ -77,6 +77,25 @@ public class UserController extends Controller{
         TokenDTO tokenDTO=service.findTokenByValue(Token);
         service.confirmRegistration(tokenDTO);
         return new MessageResponse("Mail inviata");
+    }
+    
+    
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    public void createUser(UserDTO userDTO,TokenDTO tokenDTO) {
+    	service.createUser(userDTO, tokenDTO);
+    }
+    
+    @PUT
+    @Consumes(MediaType.APPLICATION_JSON)
+    public void updateUser(UserDTO userDTO,TokenDTO tokenDTO) {
+    	service.updateUser(userDTO, tokenDTO);
+    }
+    
+    @DELETE
+    @Consumes(MediaType.APPLICATION_JSON)
+    public void deleteGroup(UserDTO userDTO,TokenDTO tokenDTO) {
+    	service.deleteUser(userDTO, tokenDTO);
     }
 
 
