@@ -30,6 +30,7 @@ public class GroupController extends Controller{
 	ObjectMapper objectMapper=new ObjectMapper();
 	TokenDTO token = null;
 	try {
+		LOGGER.info(token);
 		token = objectMapper.readValue(authHeader, TokenDTO.class);
 		LOGGER.info("conversione header in tokenDto completata");
 		
@@ -38,24 +39,31 @@ public class GroupController extends Controller{
 	}
         return service.getAllGroup(token) ;
     }
+   
     
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    public void createGroup(GroupDTO groupDTO,TokenDTO tokenDTO) {
-    	service.createGroup(groupDTO, tokenDTO);
+    public void createGroup(GroupDTO groupDTO, @HeaderParam("Authorization") String authHeader) {
+    	TokenDTO token = new TokenDTO();
+    	token.setToken(authHeader);
+    	service.createGroup(groupDTO, token);
     }
     
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
-    public void updateGroup(GroupDTO groupDTO,TokenDTO tokenDTO) {
-    	service.updateGroup(groupDTO, tokenDTO);
+    public void updateGroup(GroupDTO groupDTO,@HeaderParam("Authorization") String authHeader) {
+    	TokenDTO token = new TokenDTO();
+    	token.setToken(authHeader);
+    	service.updateGroup(groupDTO, token);
     }
     
     
     @DELETE
     @Consumes(MediaType.APPLICATION_JSON)
-    public void deleteGroup(GroupDTO groupDTO,TokenDTO tokenDTO) {
-    	service.deleteGroup(groupDTO, tokenDTO);
+    public void deleteGroup(GroupDTO groupDTO,@HeaderParam("Authorization") String authHeader) {
+    	TokenDTO token = new TokenDTO();
+    	token.setToken(authHeader);
+    	service.deleteGroup(groupDTO, token);
     }
 
 

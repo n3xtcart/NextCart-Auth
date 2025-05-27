@@ -82,20 +82,29 @@ public class UserController extends Controller{
     
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    public void createUser(UserDTO userDTO,TokenDTO tokenDTO) {
-    	service.createUser(userDTO, tokenDTO);
+    public void createUser(UserDTO userDTO,@HeaderParam("Authorization") String authHeader) {
+    	TokenDTO token = new TokenDTO();
+    	token.setToken(authHeader);
+    
+    	service.createUser(userDTO, token);
     }
     
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
-    public void updateUser(UserDTO userDTO,TokenDTO tokenDTO) {
-    	service.updateUser(userDTO, tokenDTO);
+    public void updateUser(UserDTO userDTO,@HeaderParam("Authorization") String authHeader) {
+    	TokenDTO token = new TokenDTO();
+    	token.setToken(authHeader);
+    
+    	service.updateUser(userDTO, token);
     }
     
     @DELETE
     @Consumes(MediaType.APPLICATION_JSON)
-    public void deleteGroup(UserDTO userDTO,TokenDTO tokenDTO) {
-    	service.deleteUser(userDTO, tokenDTO);
+    public void deleteGroup(UserDTO userDTO,@HeaderParam("Authorization") String authHeader) {
+    	TokenDTO token = new TokenDTO();
+    	token.setToken(authHeader);
+    
+    	service.deleteUser(userDTO, token);
     }
 
 

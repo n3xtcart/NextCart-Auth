@@ -42,20 +42,28 @@ public class RoleController extends Controller{
     
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    public void createRole(RoleDTO roleDTO,TokenDTO tokenDTO) {
-    	service.createRole(roleDTO, tokenDTO);
+    public void createRole(RoleDTO roleDTO,@HeaderParam("Authorization") String authHeader) {
+    	TokenDTO token = new TokenDTO();
+    	token.setToken(authHeader);
+    
+    	service.createRole(roleDTO, token);
     }
     
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
-    public void updateRole(RoleDTO roleDTO,TokenDTO tokenDTO) {
-    	service.updateRole(roleDTO, tokenDTO);
+    public void updateRole(RoleDTO roleDTO,@HeaderParam("Authorization") String authHeader) {
+    	TokenDTO token = new TokenDTO();
+    	token.setToken(authHeader);
+    
+    	service.updateRole(roleDTO, token);
     }
     
     @DELETE
     @Consumes(MediaType.APPLICATION_JSON)
-    public void deleteRole(RoleDTO roleDTO,TokenDTO tokenDTO) {
-    	service.deleteRole(roleDTO, tokenDTO);
+    public void deleteRole(RoleDTO roleDTO,@HeaderParam("Authorization") String authHeader) {
+    	TokenDTO token = new TokenDTO();
+    	token.setToken(authHeader);
+    	service.deleteRole(roleDTO, token);
     }
 
    
