@@ -189,7 +189,7 @@ public abstract class JdbcDao<T extends Entity> implements DaoInterface<T> {
             }
         }
         String query = "SELECT(select count(*)  from "+tableName+"  ) as totale , " + sb.deleteCharAt(sb.length() - 1) + " FROM " + tableName+
-        		" order by id limit "+pagSize+" offset "+pag;
+        		" order by id limit "+pagSize+" offset "+pag*pagSize;
 
         PreparedStatement ps = null;
         ResultSet rs = null;

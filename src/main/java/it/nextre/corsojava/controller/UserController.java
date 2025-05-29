@@ -5,6 +5,7 @@ import java.util.List;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import it.nextre.corsojava.dao.jdbc.PagedResult;
 import it.nextre.corsojava.dto.GroupDTO;
 import it.nextre.corsojava.dto.LoginInfo;
 import it.nextre.corsojava.dto.TokenDTO;
@@ -39,6 +40,22 @@ public class UserController extends Controller{
 		throw new RuntimeException("errore trasformando l' header : "+e.getMessage(),e);
 	}
         return service.getAllUsers(token) ;
+    }
+    
+    @GET
+    @Path("/paginated/{page}/{size}")
+    @Produces(MediaType.APPLICATION_JSON) 
+    public PagedResult<UserDTO> getAllPag(@HeaderParam("Authorization") String authHeader,
+    		@PathParam("page") int page, @PathParam("size") int size) {
+	ObjectMapper objectMapper=new ObjectMapper();
+	TokenDTO token = null;
+	try {
+		token = objectMapper.readValue(authHeader, TokenDTO.class);
+		LOGGER.debug("conversione header in tokenDto completata");
+	}catch (JsonProcessingException e) {
+		throw new RuntimeException("errore trasformando l' header : "+e.getMessage(),e);
+	}
+        return service.getAllUsersPag(token,page, size) ;
     }
     
     @POST
