@@ -177,8 +177,101 @@ public abstract class JdbcDao<T extends Entity> implements DaoInterface<T> {
     }
 
 
-    //TODO gestire active di user
+    
+    public PagedResult<T> getAllPag(int pag,int pagSize) {
+        List<Field> fields = new ArrayList<>(Arrays.asList(clazz.getDeclaredFields()));
+        fields.addAll(Arrays.asList(clazz.getSuperclass().getDeclaredFields()));
+        StringBuilder sb = new StringBuilder();
+        for (Field field : fields) {
+            Attribute annotations = field.getAnnotation(Attribute.class);
+            if (annotations != null) {
+                sb.append(annotations.colName()).append(",");
+            }
+        }
+        String query = "SELECT(select count(*)  from "+tableName+"  ) as totale , " + sb.deleteCharAt(sb.length() - 1) + " FROM " + tableName+
+        		" order by id limit "+pagSize+" offset "+pag;
 
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try (Connection connection = getConnection()) {
+            ps = connection.prepareStatement(query);
+            rs = ps.executeQuery();
+            Integer totalElement=null;
+            ArrayList<T> list = new ArrayList<>();
+            while (rs.next()) {
+            	if(totalElement==null) totalElement=rs.getInt("totale");
+                T item = (T) clazz.getDeclaredConstructor().newInstance();
+                for (Field field : fields) {
+                    Attribute annotations = field.getAnnotation(Attribute.class);
+                    if (annotations != null) {
+                        String fieldName = annotations.fieldName();
+                        String methodName = "set" + fieldName.substring(0, 1).toUpperCase()
+                                + fieldName.substring(1);
+
+                        var setter = clazz.getMethod(methodName, annotations.className());
+                        String typeCol = annotations.type();
+                        Method method = ResultSet.class.getMethod("get"
+                                        + typeCol.substring(0, 1).toUpperCase() + typeCol.substring(1),
+                                String.class);
+                        Object me = method.invoke(rs, annotations.colName());
+                        if (annotations.className().getSuperclass() == Entity.class) {
+                            var entity = annotations.className().getDeclaredConstructor().newInstance();
+                            Method setId = annotations.className().getMethod("setId", Long.class);
+                            setId.invoke(entity, me);
+                            setter.invoke(item, entity);
+                        } else {
+                            if (annotations.className() == Instant.class) {
+                                LocalDateTime localDateTime = ((Timestamp) me).toLocalDateTime();
+                                me = localDateTime.toInstant(ZoneOffset.UTC);
+                            }
+                            setter.invoke(item, me);
+                        }
+
+                    }
+                }
+                list.add(item);
+            }
+            PagedResult<T> pagedResult=new PagedResult<T>(pagSize, list, totalElement);
+            return pagedResult;
+        } catch (FileNotFoundException e) {
+            throw new JdbcDaoException("File not found" + e.getMessage(), e);
+        } catch (SQLException e) {
+            throw new JdbcDaoException("SQL error" + e.getMessage(), e);
+        } catch (IOException e) {
+            throw new JdbcDaoException("IO error" + e.getMessage(), e);
+        } catch (InstantiationException e) {
+            throw new JdbcDaoException("Instantiation error" + e.getMessage(), e);
+        } catch (IllegalAccessException e) {
+
+            throw new JdbcDaoException("Illegal access error" + e.getMessage(), e);
+        } catch (InvocationTargetException e) {
+            throw new JdbcDaoException("Invocation target error" + e.getMessage(), e);
+        } catch (NoSuchMethodException e) {
+            throw new JdbcDaoException("No such method error" + e.getMessage(), e);
+        } catch (SecurityException e) {
+            throw new JdbcDaoException("Security error" + e.getMessage(), e);
+        } finally {
+
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                    LOGGER.debug("errore in chiusura ps");
+                }
+            }
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                    LOGGER.debug("errore in chiusura rs");
+                }
+            }
+        }
+
+
+    }
+    
+    
     @Override
     public List<T> getAll() {
         List<Field> fields = new ArrayList<>(Arrays.asList(clazz.getDeclaredFields()));
@@ -268,6 +361,9 @@ public abstract class JdbcDao<T extends Entity> implements DaoInterface<T> {
 
 
     }
+    
+    
+    
 
     @Override
     public void update(Long id, T item) {

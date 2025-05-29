@@ -12,6 +12,15 @@ import it.nextre.corsojava.entity.User;
 
 public class UserjdbcDaoTest {
 	
+	
+	@Test
+	public void testPag() {
+		UserJdbcDao dao=UserJdbcDao.getInstance();
+		PagedResult<User> allPag = dao.getAllPag(1, 10);
+		System.out.println(allPag);
+	}
+	
+	
 	@Test
 	public void testSaveUser() {
 		UserJdbcDao dao = UserJdbcDao.getInstance();

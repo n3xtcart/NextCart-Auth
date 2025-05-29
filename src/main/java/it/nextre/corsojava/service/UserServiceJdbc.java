@@ -14,6 +14,7 @@ import org.jboss.logging.Logger;
 
 import io.quarkus.arc.lookup.LookupIfProperty;
 import it.nextre.corsojava.dao.jdbc.GroupJdbcDao;
+import it.nextre.corsojava.dao.jdbc.PagedResult;
 import it.nextre.corsojava.dao.jdbc.RoleJdbcDao;
 import it.nextre.corsojava.dao.jdbc.TokenJdbcDao;
 import it.nextre.corsojava.dao.jdbc.UserJdbcDao;
@@ -268,6 +269,24 @@ public class UserServiceJdbc implements UserServiceInterface {
             return dto;
         }).toList();
     }
+    
+
+    @Override
+    public PagedResult<UserDTO> getAllUsersPag(TokenDTO token,int pag,int pagSize) {
+    	if (!checkToken(token) || !token.getUserDTO().getGroupDTO().getRoleDTO().getAdmin()) {
+    		LOGGER.warn("Tentativo di accesso alla lista utenti non autorizzato");
+    		throw new UnauthorizedException("Non possiedi i permessi per compiere questa azione.");
+    	}
+    	LOGGER.info("Recupero lista utenti in corso");
+		PagedResult<User> allUsersPaged = objectService.getAllUsersPaged(pag,pagSize);
+		PagedResult<UserDTO> copy = PagedResult.copy(allUsersPaged);
+		copy.setContent(allUsersPaged.getContent().stream().filter(a -> a.getActive()).map(user -> {
+    		UserDTO dto = new UserDTO(user);
+    		dto.setPassword(user.getPassword());
+    		return dto;
+    	}).toList());
+		return copy;
+    }
 
     @Override
     public void createGroup(GroupDTO group, TokenDTO token) {
@@ -336,6 +355,29 @@ public class UserServiceJdbc implements UserServiceInterface {
             GroupDTO dto = new GroupDTO(group);
             return dto;
         }).toList();
+    }
+    
+
+    @Override
+    public PagedResult<GroupDTO> getAllGroupsPag(TokenDTO token,int pag,int pagSize) {
+    	LOGGER.info("Recupero lista gruppi in corso");
+    	if (!checkToken(token)) {
+    		LOGGER.warn("Tentativo di accesso alla lista gruppi non autorizzato");
+    		throw new UnauthorizedException("Token non presente");
+    	}
+    	if (!token.getUserDTO().getGroupDTO().getRoleDTO().getAdmin()) {
+    		LOGGER.warn("Tentativo di accesso alla lista gruppi non autorizzato");
+    		throw new UnauthorizedException("Non possiedi i permessi per compiere questa azione.");
+    	}
+    	LOGGER.info("Fine recupero lista gruppi");
+    	PagedResult<Group> allGroupsPaged = objectService.getAllGroupPaged(pag,pagSize);
+		PagedResult<GroupDTO> copy = PagedResult.copy(allGroupsPaged);
+		copy.setContent(allGroupsPaged.getContent().stream().map(group -> {
+    		GroupDTO dto = new GroupDTO(group);
+    		return dto;
+    	}).toList());
+		return copy;
+    
     }
 
     @Override
@@ -407,6 +449,26 @@ public class UserServiceJdbc implements UserServiceInterface {
             RoleDTO dto = new RoleDTO(role);
             return dto;
         }).toList();
+    }
+    @Override
+    public PagedResult<RoleDTO> getAllRolesPag(TokenDTO token,int pag,int pagSize) {
+    	LOGGER.info("Recupero lista ruoli in corso");
+    	if (!checkToken(token)) {
+    		LOGGER.warn("Tentativo di accesso alla lista ruoli non autorizzato");
+    		throw new UnauthorizedException("Token non presente");
+    	}
+    	if (!token.getUserDTO().getGroupDTO().getRoleDTO().getAdmin()) {
+    		LOGGER.warn("Tentativo di accesso alla lista ruoli non autorizzato");
+    		throw new UnauthorizedException("Non possiedi i permessi per compiere questa azione.");
+    	}
+    	LOGGER.info("Fine recupero lista ruoli");
+    	PagedResult<Role> allGroupsPaged = objectService.getAllRolePaged(pag,pagSize);
+		PagedResult<RoleDTO> copy = PagedResult.copy(allGroupsPaged);
+		copy.setContent(allGroupsPaged.getContent().stream().map(role -> {
+    		RoleDTO dto = new RoleDTO(role);
+    		return dto;
+    	}).toList());
+		return copy;
     }
 
     public Token generateToken(User user) {

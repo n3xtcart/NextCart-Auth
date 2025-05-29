@@ -17,6 +17,7 @@ import it.nextre.corsojava.dao.GroupDAO;
 import it.nextre.corsojava.dao.RoleDAO;
 import it.nextre.corsojava.dao.TokenUserDAO;
 import it.nextre.corsojava.dao.UserDAO;
+import it.nextre.corsojava.dao.jdbc.PagedResult;
 import it.nextre.corsojava.dto.GroupDTO;
 import it.nextre.corsojava.dto.RoleDTO;
 import it.nextre.corsojava.dto.TokenDTO;
@@ -445,6 +446,24 @@ public class UserService implements UserServiceInterface {
 	@Override
 	public TokenDTO findTokenByValue(String val) {
 		return new TokenDTO(tokenUserDAO.getTokenByValue(val));
+	}
+
+	@Override
+	public PagedResult<UserDTO> getAllUsersPag(TokenDTO token, int page, int size) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public PagedResult<GroupDTO> getAllGroupsPag(TokenDTO token, int page, int size) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public PagedResult<RoleDTO> getAllRolesPag(TokenDTO token, int page, int size) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

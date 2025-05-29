@@ -1,6 +1,7 @@
 package it.nextre.corsojava.service;
 
 import it.nextre.corsojava.dao.jdbc.GroupJdbcDao;
+import it.nextre.corsojava.dao.jdbc.PagedResult;
 import it.nextre.corsojava.dao.jdbc.RoleJdbcDao;
 import it.nextre.corsojava.dao.jdbc.TokenJdbcDao;
 import it.nextre.corsojava.dao.jdbc.UserJdbcDao;
@@ -130,6 +131,30 @@ public class ObjectService {
             setRole(t);
         }
         return groups;
+    }
+    
+    public PagedResult<User> getAllUsersPaged(int pag,int pagSize) {
+    	PagedResult<User> users = userDAO.getAllPag(pag,pagSize);
+    	if (users == null) return null;
+    	for (User t : users.getContent()) {
+    		
+    		setGroup(t);
+    	}
+    	return users;
+    }
+    
+    public PagedResult<Group> getAllGroupPaged(int pag,int pagSize) {
+    	PagedResult<Group> groups = groupDAO.getAllPag(pag,pagSize);
+    	if (groups == null) return null;
+    	for (Group t : groups.getContent()) {
+    		
+    		setRole(t);
+    	}
+    	return groups;
+    }
+    public PagedResult<Role> getAllRolePaged(int pag,int pagSize) {
+    	return  roleDAO.getAllPag(pag,pagSize);
+    	
     }
 
 }

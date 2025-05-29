@@ -1,6 +1,7 @@
 package it.nextre.corsojava.service;
 
 
+import it.nextre.corsojava.dao.jdbc.PagedResult;
 import it.nextre.corsojava.dto.GroupDTO;
 import it.nextre.corsojava.dto.RoleDTO;
 import it.nextre.corsojava.dto.TokenDTO;
@@ -48,6 +49,10 @@ public interface UserServiceInterface {
 
     //solo admin
     public List<RoleDTO> getAllRole(TokenDTO token);
+    
+    public PagedResult<UserDTO> getAllUsersPag(TokenDTO token, int page, int size);
+    public PagedResult<GroupDTO> getAllGroupsPag(TokenDTO token, int page, int size);
+    public PagedResult<RoleDTO> getAllRolesPag(TokenDTO token, int page, int size);
 
 
 }
