@@ -1,5 +1,6 @@
 package it.nextre.corsojava.dao;
 
+import it.nextre.corsojava.dao.memory.UserDAO;
 import it.nextre.corsojava.entity.Group;
 import it.nextre.corsojava.entity.User;
 import org.junit.jupiter.api.BeforeEach;

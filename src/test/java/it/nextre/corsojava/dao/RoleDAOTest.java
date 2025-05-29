@@ -1,5 +1,6 @@
 package it.nextre.corsojava.dao;
 
+import it.nextre.corsojava.dao.memory.RoleDAO;
 import it.nextre.corsojava.entity.Role;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

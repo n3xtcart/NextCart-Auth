@@ -1,6 +1,6 @@
 package it.nextre.corsojava.dao.jdbc;
 
-import it.nextre.corsojava.dao.DaoInterface;
+import it.nextre.corsojava.dao.memory.DaoInterface;
 import it.nextre.corsojava.entity.Entity;
 import it.nextre.corsojava.entity.annotation.Attribute;
 import it.nextre.corsojava.exception.JdbcDaoException;

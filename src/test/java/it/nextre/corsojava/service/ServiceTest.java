@@ -11,10 +11,10 @@ import java.util.HashMap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import it.nextre.corsojava.dao.GroupDAO;
-import it.nextre.corsojava.dao.RoleDAO;
-import it.nextre.corsojava.dao.TokenUserDAO;
-import it.nextre.corsojava.dao.UserDAO;
+import it.nextre.corsojava.dao.memory.GroupDAO;
+import it.nextre.corsojava.dao.memory.RoleDAO;
+import it.nextre.corsojava.dao.memory.TokenUserDAO;
+import it.nextre.corsojava.dao.memory.UserDAO;
 import it.nextre.corsojava.dto.GroupDTO;
 import it.nextre.corsojava.dto.RoleDTO;
 import it.nextre.corsojava.dto.TokenDTO;

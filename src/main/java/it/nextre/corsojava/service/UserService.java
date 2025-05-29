@@ -13,10 +13,10 @@ import java.util.stream.Collectors;
 import org.jboss.logging.Logger;
 
 import io.quarkus.arc.lookup.LookupIfProperty;
-import it.nextre.corsojava.dao.GroupDAO;
-import it.nextre.corsojava.dao.RoleDAO;
-import it.nextre.corsojava.dao.TokenUserDAO;
-import it.nextre.corsojava.dao.UserDAO;
+import it.nextre.corsojava.dao.memory.GroupDAO;
+import it.nextre.corsojava.dao.memory.RoleDAO;
+import it.nextre.corsojava.dao.memory.TokenUserDAO;
+import it.nextre.corsojava.dao.memory.UserDAO;
 import it.nextre.corsojava.dao.jdbc.PagedResult;
 import it.nextre.corsojava.dto.GroupDTO;
 import it.nextre.corsojava.dto.RoleDTO;
