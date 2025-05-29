@@ -1,64 +1,34 @@
 package it.nextre.corsojava.entity;
 
-import it.nextre.corsojava.dto.UserDTO;
 import it.nextre.corsojava.entity.annotation.Attribute;
 
 public class User extends Entity {
-	@Attribute(colName = "nome",fieldName = "nome")
+    @Attribute(colName = "nome", fieldName = "nome")
     private String nome;
-		@Attribute(colName = "cognome",fieldName = "cognome")
+    @Attribute(colName = "cognome", fieldName = "cognome")
     private String cognome;
-		@Attribute(colName = "email",fieldName = "email")
+    @Attribute(colName = "email", fieldName = "email")
     private String email;
-		@Attribute(colName = "password",fieldName = "password")
+    @Attribute(colName = "password", fieldName = "password")
     private String password;
-		@Attribute(colName = "groupId",fieldName = "group" ,type = "long", className = Group.class,colClass = long.class)
+    @Attribute(colName = "groupId", fieldName = "group", type = "long", className = Group.class, colClass = long.class)
     private Group group;
-		@Attribute(fieldName = "active",colName = "active",className = Boolean.class,colClass = boolean.class,type="boolean")
-	    private Boolean active;
+    @Attribute(fieldName = "active", colName = "active", className = Boolean.class, colClass = boolean.class, type = "boolean")
+    private Boolean active;
 
 
-    public User(UserDTO user) {
-    			this.id = user.getId();
-		this.nome = user.getNome();
-		this.cognome = user.getCognome();
-		this.email = user.getEmail();
-		this.password = user.getPassword();
-		if (user.getGroupDTO() != null) {
-			this.group = new Group(user.getGroupDTO());
-		}
-	}
-    
-    
-    
-	
+    public User() {
+    }
 
+    public Boolean getActive() {
+        return active;
+    }
 
-	public Boolean getActive() {
-		return active;
-	}
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
 
-
-
-
-
-
-	public void setActive(Boolean active) {
-		this.active = active;
-	}
-
-
-
-
-
-
-	public User() {
-		// TODO Auto-generated constructor stub
-	}
-
-
-
-	public Group getGroup() {
+    public Group getGroup() {
         return group;
     }
 
