@@ -1,5 +1,6 @@
 package it.nextre.corsojava.entity;
 
+import it.nextre.aut.dto.RoleDTO;
 import it.nextre.corsojava.entity.annotation.Attribute;
 
 public class Role extends Entity {
@@ -9,11 +10,34 @@ public class Role extends Entity {
     private Boolean admin;
     @Attribute(fieldName = "priority", colName = "priority", type = "long", className = Long.class, colClass = long.class)
     private Long priority;
+    @Attribute(fieldName = "group", colName = "groupId", type = "long", className = Group.class, colClass = long.class)
+    private Group group;
 
-    public Role() {
+    
+
+	
+
+	public Group getGroup() {
+		return group;
+	}
+
+	public void setGroup(Group group) {
+		this.group = group;
+	}
+
+	public Role() {
     }
 
-    public String getDescrizione() {
+    public Role(RoleDTO roleDTO) {
+		this.id = roleDTO.getId();
+		this.descrizione = roleDTO.getDescrizione();
+		this.admin = roleDTO.getAdmin();
+		this.priority = roleDTO.getPriority();
+		
+		
+	}
+
+	public String getDescrizione() {
         return descrizione;
     }
 

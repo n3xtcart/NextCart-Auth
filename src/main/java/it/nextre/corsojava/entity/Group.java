@@ -1,22 +1,31 @@
 package it.nextre.corsojava.entity;
 
-import it.nextre.corsojava.entity.annotation.Attribute;
+import java.util.Set;
+
+import it.nextre.aut.dto.GroupDTO;
 
 public class Group extends Entity {
 
-    @Attribute(fieldName = "role", colName = "roleId", className = Role.class, colClass = long.class, type = "long")
-    private Role role;
+    private Set<Role> roles;
 
     public Group() {
     }
 
-    public Role getRole() {
-        return role;
+    public Group(GroupDTO group) {
+		this.id = group.getId();
+		this.roles = group.getRoleDTO().stream()
+				.map(roleDTO -> new Role(roleDTO))
+				.collect(java.util.stream.Collectors.toSet());
+	
+	}
+
+	public Set<Role> getRoles() {
+        return roles;
     }
 
-    public void setRole(Role role) {
+    public void setRole(Set<Role> roles) {
         aggiornaUltimaModifica();
-        this.role = role;
+        this.roles = roles;
     }
 
 }

@@ -2,12 +2,13 @@ package it.nextre.corsojava.service;
 
 
 import java.util.List;
+
+import it.nextre.aut.dto.GroupDTO;
+import it.nextre.aut.dto.RoleDTO;
+import it.nextre.aut.dto.UserDTO;
 import it.nextre.corsojava.dao.jdbc.PagedResult;
-import it.nextre.corsojava.dto.GroupDTO;
-import it.nextre.corsojava.dto.RoleDTO;
-import it.nextre.corsojava.dto.TokenDTO;
 import it.nextre.corsojava.dto.TokensJwt;
-import it.nextre.corsojava.dto.UserDTO;
+import it.nextre.corsojava.entity.Token;
 
 public interface UserServiceInterface {
 
@@ -15,11 +16,11 @@ public interface UserServiceInterface {
 
     public void register(UserDTO user);
     
-    public TokensJwt confirmRegistration(TokenDTO token);
+    public TokensJwt confirmRegistration(Token token);
 
-    public boolean checkToken(TokenDTO token);
+    public boolean checkToken(Token token);
 
-    public TokenDTO findTokenByValue(String val);
+    public Token findTokenByValue(String val);
 
     public void updateUser(UserDTO user);
 

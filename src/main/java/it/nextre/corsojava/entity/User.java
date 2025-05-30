@@ -1,5 +1,8 @@
 package it.nextre.corsojava.entity;
 
+import java.util.Set;
+
+import it.nextre.aut.dto.UserDTO;
 import it.nextre.corsojava.entity.annotation.Attribute;
 
 public class User extends Entity {
@@ -15,12 +18,23 @@ public class User extends Entity {
     private Group group;
     @Attribute(fieldName = "active", colName = "active", className = Boolean.class, colClass = boolean.class, type = "boolean")
     private Boolean active;
+    @Attribute(fieldName = "role", colName = "roleId", type = "long", className = Role.class, colClass = long.class)
+    private Role role;
 
 
     public User() {
     }
 
-    public Boolean getActive() {
+    public User(UserDTO user) {
+
+    			this.nome = user.getNome();
+		this.cognome = user.getCognome();
+		this.email = user.getEmail();
+		this.password = user.getPassword();
+		
+	}
+
+	public Boolean getActive() {
         return active;
     }
 
@@ -72,6 +86,24 @@ public class User extends Entity {
         aggiornaUltimaModifica();
         this.password = password;
     }
+    
+    public Set<Role> getRoles() {
+    	Set<Role> roles = group.getRoles();
+		if (role != null) {
+			roles.add(role);
+		}
+		return roles;
+	}
+
+	public Role getRole() {
+		return role;
+	}
+
+	public void setRole(Role role) {
+		this.role = role;
+	}
+    
+   
 
 
 }

@@ -2,11 +2,12 @@ package it.nextre.corsojava.controller;
 
 import java.util.List;
 
+import io.quarkus.security.Authenticated;
+import it.nextre.aut.dto.LoginInfo;
+import it.nextre.aut.dto.UserDTO;
 import it.nextre.corsojava.dao.jdbc.PagedResult;
-import it.nextre.corsojava.dto.LoginInfo;
-import it.nextre.corsojava.dto.TokenDTO;
 import it.nextre.corsojava.dto.TokensJwt;
-import it.nextre.corsojava.dto.UserDTO;
+import it.nextre.corsojava.entity.Token;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -33,6 +34,7 @@ public class UserController extends Controller{
     @GET
     @Path("/paginated/{page}/{size}")
     @Produces(MediaType.APPLICATION_JSON) 
+    @Authenticated
     public PagedResult<UserDTO> getAllPag(@PathParam("page") int page, @PathParam("size") int size) {
 
         return service.getAllUsersPag(page, size) ;
@@ -70,7 +72,7 @@ public class UserController extends Controller{
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public MessageResponse confirmRegistration(@PathParam("token") String Token) {
-        TokenDTO tokenDTO=service.findTokenByValue(Token);
+    	Token tokenDTO=service.findTokenByValue(Token);
         service.confirmRegistration(tokenDTO);
         return new MessageResponse("Mail inviata");
     }

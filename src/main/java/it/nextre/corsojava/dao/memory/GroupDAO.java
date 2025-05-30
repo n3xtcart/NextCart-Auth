@@ -19,7 +19,7 @@ public class GroupDAO extends Dao<Group> {
 	@Override
 	public void update(Long id, Group item) {
 		Group group = database.get(id);
-		if(item.getRole()!=null)group.setRole(item.getRole());
+		if(item.getRoles()!=null)group.setRole(item.getRoles());
 		
 	}
 	}

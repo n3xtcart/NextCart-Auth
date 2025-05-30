@@ -41,7 +41,6 @@ public class RoleJdbcDao extends JdbcDao<Role> {
 					role.setPriority(rs.getLong("priority"));
 					User user = new User();
 					user.setId( rs.getLong("userId"));
-					role.setUser(user);
 					Group group = new Group();
 					group.setId(rs.getLong("groupId"));
 					role.setGroup(group);

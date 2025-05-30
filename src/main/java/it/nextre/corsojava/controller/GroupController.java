@@ -5,10 +5,9 @@ import java.util.List;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import it.nextre.aut.dto.GroupDTO;
 import it.nextre.corsojava.dao.jdbc.PagedResult;
-import it.nextre.corsojava.dto.GroupDTO;
-import it.nextre.corsojava.dto.TokenDTO;
-import it.nextre.corsojava.dto.UserDTO;
+import it.nextre.corsojava.entity.Token;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -29,43 +28,27 @@ public class GroupController extends Controller{
 
     @GET
     @Produces(MediaType.APPLICATION_JSON) 
-    public List<GroupDTO> getAll(@HeaderParam("Authorization") String authHeader) {
-	ObjectMapper objectMapper=new ObjectMapper();
-	TokenDTO token = null;
-	try {
-		LOGGER.info(token);
-		token = objectMapper.readValue(authHeader, TokenDTO.class);
-		LOGGER.info("conversione header in tokenDto completata");
-		
-	} catch (JsonProcessingException e) {
-		throw new RuntimeException("errore trasformando l' header : "+e.getMessage(),e);
-	}
+    public List<GroupDTO> getAll() {
         return service.getAllGroup() ;
     }
    
     
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    public void createGroup(GroupDTO groupDTO, @HeaderParam("Authorization") String authHeader) {
-    	TokenDTO token = new TokenDTO();
-    	token.setToken(authHeader);
+    public void createGroup(GroupDTO groupDTO) {
     	service.createGroup(groupDTO);
     }
     
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
-    public void updateGroup(GroupDTO groupDTO,@HeaderParam("Authorization") String authHeader) {
-    	TokenDTO token = new TokenDTO();
-    	token.setToken(authHeader);
+    public void updateGroup(GroupDTO groupDTO) {
     	service.updateGroup(groupDTO);
     }
     
     
     @DELETE
     @Consumes(MediaType.APPLICATION_JSON)
-    public void deleteGroup(GroupDTO groupDTO,@HeaderParam("Authorization") String authHeader) {
-    	TokenDTO token = new TokenDTO();
-    	token.setToken(authHeader);
+    public void deleteGroup(GroupDTO groupDTO) {
     	service.deleteGroup(groupDTO);
     }
 
@@ -73,16 +56,8 @@ public class GroupController extends Controller{
     @GET
     @Path("/paginated/{page}/{size}")
     @Produces(MediaType.APPLICATION_JSON) 
-    public PagedResult<GroupDTO> getAllPag(@HeaderParam("Authorization") String authHeader,
-    		@PathParam("page") int page, @PathParam("size") int size) {
-	ObjectMapper objectMapper=new ObjectMapper();
-	TokenDTO token = null;
-	try {
-		token = objectMapper.readValue(authHeader, TokenDTO.class);
-		LOGGER.debug("conversione header in tokenDto completata");
-	}catch (JsonProcessingException e) {
-		throw new RuntimeException("errore trasformando l' header : "+e.getMessage(),e);
-	}
+    public PagedResult<GroupDTO> getAllPag(@PathParam("page") int page, @PathParam("size") int size) {
+	
         return service.getAllGroupsPag(page, size) ;
     }
 

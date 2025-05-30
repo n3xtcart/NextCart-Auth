@@ -13,16 +13,15 @@ import java.util.stream.Collectors;
 import org.jboss.logging.Logger;
 
 import io.quarkus.arc.lookup.LookupIfProperty;
+import it.nextre.aut.dto.GroupDTO;
+import it.nextre.aut.dto.RoleDTO;
+import it.nextre.aut.dto.UserDTO;
 import it.nextre.corsojava.dao.jdbc.GroupJdbcDao;
 import it.nextre.corsojava.dao.jdbc.PagedResult;
 import it.nextre.corsojava.dao.jdbc.RoleJdbcDao;
 import it.nextre.corsojava.dao.jdbc.TokenJdbcDao;
 import it.nextre.corsojava.dao.jdbc.UserJdbcDao;
-import it.nextre.corsojava.dto.GroupDTO;
-import it.nextre.corsojava.dto.RoleDTO;
-import it.nextre.corsojava.dto.TokenDTO;
 import it.nextre.corsojava.dto.TokensJwt;
-import it.nextre.corsojava.dto.UserDTO;
 import it.nextre.corsojava.entity.Group;
 import it.nextre.corsojava.entity.Role;
 import it.nextre.corsojava.entity.Token;
@@ -74,13 +73,13 @@ public class UserServiceJdbc implements UserServiceInterface {
         return new TokensJwt(u.getEmail(), u.getRoles());
     }
 
-    public void logout(TokenDTO token) {
+    public void logout(Token token) {
         if (token == null) throw new UnauthorizedException("Token mancante");
-        LOGGER.info("Logout in corso per l'utente: " + token.getUserDTO().getEmail());
+        LOGGER.info("Logout in corso per l'utente: " + token.getUser().getEmail());
         Token t = objectService.getTokenByValue(token.getValue());
         if (t == null) throw new UnauthorizedException("token non presente");
         tokenUserDAO.delete(t.getId());
-        LOGGER.info("Logout effettuato con successo per l'utente: " + token.getUserDTO().getEmail());
+        LOGGER.info("Logout effettuato con successo per l'utente: " + token.getUser().getEmail());
     }
 
 
@@ -162,8 +161,8 @@ public class UserServiceJdbc implements UserServiceInterface {
     }
 
     @Override
-    public boolean checkToken(TokenDTO token) {
-        LOGGER.info("Controllo token in corso per l'utente: " + token.getUserDTO().getEmail());
+    public boolean checkToken(Token token) {
+        LOGGER.info("Controllo token in corso per l'utente: " + token.getUser().getEmail());
         Token token2 = objectService.getTokenByValue(token.getValue());
         if (token2 == null || !token2.getDataScadenza().isAfter(LocalDateTime.now().toInstant(ZoneOffset.UTC)))
             return false;
@@ -190,8 +189,7 @@ public class UserServiceJdbc implements UserServiceInterface {
     @Override
     public void deleteUser(UserDTO user) {
         if (user == null) throw new UnauthorizedException("Utente non valido");
-        if (user.getGroupDTO() == null) throw new UnauthorizedException("Gruppo non valido");
-        if (user.getGroupDTO().getRoleDTO() == null) throw new UnauthorizedException("Ruolo non valido");
+        if (user.getRuoli() == null) throw new UnauthorizedException("Ruolo non valido");
        
         User u = objectService.getUserById(user.getId());
         LOGGER.info("Cancellazione in corso per l'utente: " + user.getEmail());
@@ -224,7 +222,20 @@ public class UserServiceJdbc implements UserServiceInterface {
        
         LOGGER.info("Recupero lista utenti in corso");
         return objectService.getAllUsers().stream().filter(a -> a.getActive()).map(user -> {
-            UserDTO dto = new UserDTO(user);
+            UserDTO dto=UserDTO.of().cognome(user.getNome())
+            		.nome(user.getCognome())
+            		.email(user.getEmail())
+            		.id(user.getId())
+            		.ruoli(user.getRoles().stream().map(role -> {
+						RoleDTO roleDTO =RoleDTO.of()
+								.id(role.getId())
+								.admin(role.getAdmin())
+								.descrizione(role.getDescrizione())
+								.priority(role.getPriority())
+								.build();
+						return roleDTO;
+					}).collect(Collectors.toSet()))
+            		.build();
             dto.setPassword(user.getPassword());
             return dto;
         }).toList();
@@ -238,7 +249,20 @@ public class UserServiceJdbc implements UserServiceInterface {
 		PagedResult<User> allUsersPaged = objectService.getAllUsersPaged(pag,pagSize);
 		PagedResult<UserDTO> copy = PagedResult.copy(allUsersPaged);
 		copy.setContent(allUsersPaged.getContent().stream().filter(a -> a.getActive()).map(user -> {
-    		UserDTO dto = new UserDTO(user);
+    		UserDTO dto =UserDTO.of().cognome(user.getNome())
+            		.nome(user.getCognome())
+            		.email(user.getEmail())
+            		.id(user.getId())
+            		.ruoli(user.getRoles().stream().map(role -> {
+						RoleDTO roleDTO =RoleDTO.of()
+								.id(role.getId())
+								.admin(role.getAdmin())
+								.descrizione(role.getDescrizione())
+								.priority(role.getPriority())
+								.build();
+						return roleDTO;
+					}).collect(Collectors.toSet()))
+            		.build();
     		dto.setPassword(user.getPassword());
     		return dto;
     	}).toList());
@@ -264,7 +288,7 @@ public class UserServiceJdbc implements UserServiceInterface {
             throw new GroupMissingException("Impossibile modificare un gruppo non presente");
         }
         Group group2 = new Group(group);
-        g.setRole(group2.getRole());
+        g.setRole(group2.getRoles());
         groupDAO.update(group.getId(), g);
         LOGGER.info("Modifica effettuata con successo per il gruppo: " + group.getId());
     }
@@ -287,7 +311,10 @@ public class UserServiceJdbc implements UserServiceInterface {
        
         LOGGER.info("Fine recupero lista gruppi");
         return objectService.getAllGroup().stream().map(group -> {
-            GroupDTO dto = new GroupDTO(group);
+            GroupDTO dto =GroupDTO.of().id(group.getId())
+           // TODO aggiungere ruoli
+            		
+            		.build();
             return dto;
         }).toList();
     }
@@ -301,7 +328,10 @@ public class UserServiceJdbc implements UserServiceInterface {
     	PagedResult<Group> allGroupsPaged = objectService.getAllGroupPaged(pag,pagSize);
 		PagedResult<GroupDTO> copy = PagedResult.copy(allGroupsPaged);
 		copy.setContent(allGroupsPaged.getContent().stream().map(group -> {
-    		GroupDTO dto = new GroupDTO(group);
+    		GroupDTO dto  =GroupDTO.of().id(group.getId())
+           // TODO aggiungere ruoli
+            		
+            		.build();
     		return dto;
     	}).toList());
 		return copy;
@@ -346,7 +376,12 @@ public class UserServiceJdbc implements UserServiceInterface {
       
         LOGGER.info("Fine recupero lista ruoli");
         return roleDAO.getAll().stream().map(role -> {
-            RoleDTO dto = new RoleDTO(role);
+            RoleDTO dto = RoleDTO.of()
+					.id(role.getId())
+					.admin(role.getAdmin())
+					.descrizione(role.getDescrizione())
+					.priority(role.getPriority())
+					.build();
             return dto;
         }).toList();
     }
@@ -358,7 +393,12 @@ public class UserServiceJdbc implements UserServiceInterface {
     	PagedResult<Role> allGroupsPaged = objectService.getAllRolePaged(pag,pagSize);
 		PagedResult<RoleDTO> copy = PagedResult.copy(allGroupsPaged);
 		copy.setContent(allGroupsPaged.getContent().stream().map(role -> {
-    		RoleDTO dto = new RoleDTO(role);
+			RoleDTO dto = RoleDTO.of()
+					.id(role.getId())
+					.admin(role.getAdmin())
+					.descrizione(role.getDescrizione())
+					.priority(role.getPriority())
+					.build();
     		return dto;
     	}).toList());
 		return copy;
@@ -380,7 +420,7 @@ public class UserServiceJdbc implements UserServiceInterface {
     }
 
     @Override
-    public TokensJwt confirmRegistration(TokenDTO token) {
+    public TokensJwt confirmRegistration(Token token) {
         Token token2 = objectService.getTokenByValue(token.getValue());
         if (token2 == null || !token2.getDataScadenza().isAfter(LocalDateTime.now().toInstant(ZoneOffset.UTC)))
             throw new RuntimeException("token scaduto :rifare la registrazione");
@@ -392,8 +432,8 @@ public class UserServiceJdbc implements UserServiceInterface {
     }
 
 	@Override
-	public TokenDTO findTokenByValue(String val) {
-		return new TokenDTO(objectService.getTokenByValue(val));
+	public Token findTokenByValue(String val) {
+		return objectService.getTokenByValue(val);
 	}
 
 }
