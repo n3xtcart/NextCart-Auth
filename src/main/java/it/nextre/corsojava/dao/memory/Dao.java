@@ -1,4 +1,4 @@
-package it.nextre.corsojava.dao;
+package it.nextre.corsojava.dao.memory;
 
 import it.nextre.corsojava.dao.jdbc.PagedResult;
 import it.nextre.corsojava.entity.Entity;

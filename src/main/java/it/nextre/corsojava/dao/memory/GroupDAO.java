@@ -1,4 +1,4 @@
-package it.nextre.corsojava.dao;
+package it.nextre.corsojava.dao.memory;
 
 
 

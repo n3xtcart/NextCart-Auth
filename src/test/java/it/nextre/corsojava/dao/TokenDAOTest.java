@@ -1,5 +1,6 @@
 package it.nextre.corsojava.dao;
 
+import it.nextre.corsojava.dao.memory.TokenUserDAO;
 import it.nextre.corsojava.entity.Token;
 import it.nextre.corsojava.entity.User;
 import org.junit.jupiter.api.Assertions;

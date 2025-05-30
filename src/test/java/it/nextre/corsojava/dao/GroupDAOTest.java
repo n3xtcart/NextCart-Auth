@@ -2,6 +2,7 @@ package it.nextre.corsojava.dao;
 
 import java.util.HashMap;
 
+import it.nextre.corsojava.dao.memory.GroupDAO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
