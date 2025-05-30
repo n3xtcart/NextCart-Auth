@@ -6,16 +6,22 @@ public class TokenDTO {
     private String value;
     private UserDTO userDTO;
 
-    public TokenDTO(Token token) {
-		this.value = token.getValue();
-		this.userDTO = new UserDTO(token.getUser());
-	
-	}
+  
     public TokenDTO() {
     	
     }
 
-    public UserDTO getUserDTO() {
+    public TokenDTO(Token tokenByValue) {
+
+    			this.value = tokenByValue.getValue();
+		if (tokenByValue.getUser() != null) {
+			this.userDTO = new UserDTO(tokenByValue.getUser());
+		} else {
+			this.userDTO = null;
+		}
+	}
+
+	public UserDTO getUserDTO() {
         return userDTO;
     }
 

@@ -2,19 +2,14 @@ package it.nextre.corsojava.controller;
 
 import java.util.List;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import it.nextre.corsojava.dao.jdbc.PagedResult;
-import it.nextre.corsojava.dto.GroupDTO;
 import it.nextre.corsojava.dto.LoginInfo;
 import it.nextre.corsojava.dto.TokenDTO;
+import it.nextre.corsojava.dto.TokensJwt;
 import it.nextre.corsojava.dto.UserDTO;
-import it.nextre.corsojava.service.ObjectService;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
-import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
@@ -30,39 +25,24 @@ public class UserController extends Controller{
 
     @GET
     @Produces(MediaType.APPLICATION_JSON) 
-    public List<UserDTO> getAll(@HeaderParam("Authorization") String authHeader) {
-	ObjectMapper objectMapper=new ObjectMapper();
-	TokenDTO token = null;
-	try {
-		token = objectMapper.readValue(authHeader, TokenDTO.class);
-		LOGGER.debug("conversione header in tokenDto completata");
-	}catch (JsonProcessingException e) {
-		throw new RuntimeException("errore trasformando l' header : "+e.getMessage(),e);
-	}
-        return service.getAllUsers(token) ;
+    public List<UserDTO> getAll() {
+	
+        return service.getAllUsers() ;
     }
     
     @GET
     @Path("/paginated/{page}/{size}")
     @Produces(MediaType.APPLICATION_JSON) 
-    public PagedResult<UserDTO> getAllPag(@HeaderParam("Authorization") String authHeader,
-    		@PathParam("page") int page, @PathParam("size") int size) {
-	ObjectMapper objectMapper=new ObjectMapper();
-	TokenDTO token = null;
-	try {
-		token = objectMapper.readValue(authHeader, TokenDTO.class);
-		LOGGER.debug("conversione header in tokenDto completata");
-	}catch (JsonProcessingException e) {
-		throw new RuntimeException("errore trasformando l' header : "+e.getMessage(),e);
-	}
-        return service.getAllUsersPag(token,page, size) ;
+    public PagedResult<UserDTO> getAllPag(@PathParam("page") int page, @PathParam("size") int size) {
+
+        return service.getAllUsersPag(page, size) ;
     }
     
     @POST
     @Path("/login")
 @Produces(MediaType.APPLICATION_JSON) 
 @Consumes(MediaType.APPLICATION_JSON)
-    public TokenDTO login(LoginInfo info) {
+    public TokensJwt login(LoginInfo info) {
     	UserDTO userDTO=new UserDTO();
     	userDTO.setEmail(info.getEmail());
     	userDTO.setPassword(info.getPassword());
@@ -81,7 +61,6 @@ public class UserController extends Controller{
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public MessageResponse register(UserDTO userDTO) {
-        userDTO.setGroupDTO(new GroupDTO(ObjectService.getInstance().getGroupById(2L)));
         service.register(userDTO);
         return new MessageResponse("Mail inviata");
     }
@@ -99,29 +78,23 @@ public class UserController extends Controller{
     
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    public void createUser(UserDTO userDTO,@HeaderParam("Authorization") String authHeader) {
-    	TokenDTO token = new TokenDTO();
-    	token.setToken(authHeader);
+    public void createUser(UserDTO userDTO) {
     
-    	service.createUser(userDTO, token);
+    	service.createUser(userDTO);
     }
     
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
-    public void updateUser(UserDTO userDTO,@HeaderParam("Authorization") String authHeader) {
-    	TokenDTO token = new TokenDTO();
-    	token.setToken(authHeader);
-    
-    	service.updateUser(userDTO, token);
+    public void updateUser(UserDTO userDTO) {
+    	
+    	service.updateUser(userDTO);
     }
     
     @DELETE
     @Consumes(MediaType.APPLICATION_JSON)
-    public void deleteGroup(UserDTO userDTO,@HeaderParam("Authorization") String authHeader) {
-    	TokenDTO token = new TokenDTO();
-    	token.setToken(authHeader);
+    public void deleteGroup(UserDTO userDTO) {
     
-    	service.deleteUser(userDTO, token);
+    	service.deleteUser(userDTO);
     }
 
 

@@ -1,5 +1,6 @@
 package it.nextre.corsojava.dao;
 
+import it.nextre.corsojava.dao.jdbc.PagedResult;
 import it.nextre.corsojava.entity.Entity;
 
 import java.util.HashMap;
@@ -49,6 +50,16 @@ public abstract class Dao<T extends Entity> implements DaoInterface<T> {
 		this.database=database;
 		this.idGenerator=1L;
 	}
+
+
+	public PagedResult<T>getAllPag(int page, int size) {
+		int total = database.size();
+		int start = (page - 1) * size;
+		int end = Math.min(start + size, total);
+		List<T> items = database.values().stream().skip(start).limit(size).toList();
+		return new PagedResult<T>(total, items, size);
+	}
+	
 
 
 }

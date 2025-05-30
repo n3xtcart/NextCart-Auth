@@ -12,6 +12,7 @@ import it.nextre.corsojava.entity.User;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public class ObjectService {
     private static ObjectService instance = new ObjectService();
@@ -45,9 +46,9 @@ public class ObjectService {
 
 
     private void setRole(Group group) {
-        Role role = RoleJdbcDao.getInstance().getById(group.getRole().getId());
-        if (role == null) throw new IllegalAccessError("role non trovato");
-        group.setRole(role);
+        Set<Role> roles = RoleJdbcDao.getInstance().getByGroupId(group.getId());
+        if (roles == null) throw new IllegalAccessError("role non trovato");
+        group.setRole(roles);
     }
 
     public User getUserById(Long id) {

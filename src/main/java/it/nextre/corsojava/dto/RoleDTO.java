@@ -7,6 +7,8 @@ public class RoleDTO {
 	private Boolean admin;
 	private Long priority;
 	private Long id;
+	private UserDTO user;
+	private GroupDTO group;
 
 	public RoleDTO(Role role) {
 		this.id = role.getId();
@@ -14,6 +16,22 @@ public class RoleDTO {
 		this.admin = role.isAdmin();
 		this.priority = role.getPriority();
 
+	}
+
+	public UserDTO getUser() {
+		return user;
+	}
+
+	public void setUser(UserDTO user) {
+		this.user = user;
+	}
+
+	public GroupDTO getGroup() {
+		return group;
+	}
+
+	public void setGroup(GroupDTO group) {
+		this.group = group;
 	}
 
 	public RoleDTO() {

@@ -40,7 +40,7 @@ public class RoleController extends Controller{
 	} catch (JsonProcessingException e) {
 		throw new RuntimeException("errore trasformando l' header : "+e.getMessage(),e);
 	}
-        return service.getAllRole(token) ;
+        return service.getAllRole() ;
     }
     
     @POST
@@ -49,7 +49,7 @@ public class RoleController extends Controller{
     	TokenDTO token = new TokenDTO();
     	token.setToken(authHeader);
     
-    	service.createRole(roleDTO, token);
+    	service.createRole(roleDTO);
     }
     
     @PUT
@@ -58,7 +58,7 @@ public class RoleController extends Controller{
     	TokenDTO token = new TokenDTO();
     	token.setToken(authHeader);
     
-    	service.updateRole(roleDTO, token);
+    	service.updateRole(roleDTO);
     }
     
     @DELETE
@@ -66,7 +66,7 @@ public class RoleController extends Controller{
     public void deleteRole(RoleDTO roleDTO,@HeaderParam("Authorization") String authHeader) {
     	TokenDTO token = new TokenDTO();
     	token.setToken(authHeader);
-    	service.deleteRole(roleDTO, token);
+    	service.deleteRole(roleDTO);
     }
     
     @GET
@@ -82,7 +82,7 @@ public class RoleController extends Controller{
 	}catch (JsonProcessingException e) {
 		throw new RuntimeException("errore trasformando l' header : "+e.getMessage(),e);
 	}
-        return service.getAllRolesPag(token,page, size) ;
+        return service.getAllRolesPag(page, size) ;
     }
 
    

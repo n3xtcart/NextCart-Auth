@@ -40,7 +40,7 @@ public class GroupController extends Controller{
 	} catch (JsonProcessingException e) {
 		throw new RuntimeException("errore trasformando l' header : "+e.getMessage(),e);
 	}
-        return service.getAllGroup(token) ;
+        return service.getAllGroup() ;
     }
    
     
@@ -49,7 +49,7 @@ public class GroupController extends Controller{
     public void createGroup(GroupDTO groupDTO, @HeaderParam("Authorization") String authHeader) {
     	TokenDTO token = new TokenDTO();
     	token.setToken(authHeader);
-    	service.createGroup(groupDTO, token);
+    	service.createGroup(groupDTO);
     }
     
     @PUT
@@ -57,7 +57,7 @@ public class GroupController extends Controller{
     public void updateGroup(GroupDTO groupDTO,@HeaderParam("Authorization") String authHeader) {
     	TokenDTO token = new TokenDTO();
     	token.setToken(authHeader);
-    	service.updateGroup(groupDTO, token);
+    	service.updateGroup(groupDTO);
     }
     
     
@@ -66,7 +66,7 @@ public class GroupController extends Controller{
     public void deleteGroup(GroupDTO groupDTO,@HeaderParam("Authorization") String authHeader) {
     	TokenDTO token = new TokenDTO();
     	token.setToken(authHeader);
-    	service.deleteGroup(groupDTO, token);
+    	service.deleteGroup(groupDTO);
     }
 
     
@@ -83,7 +83,7 @@ public class GroupController extends Controller{
 	}catch (JsonProcessingException e) {
 		throw new RuntimeException("errore trasformando l' header : "+e.getMessage(),e);
 	}
-        return service.getAllGroupsPag(token,page, size) ;
+        return service.getAllGroupsPag(page, size) ;
     }
 
 }

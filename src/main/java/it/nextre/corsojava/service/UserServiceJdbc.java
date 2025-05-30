@@ -21,6 +21,7 @@ import it.nextre.corsojava.dao.jdbc.UserJdbcDao;
 import it.nextre.corsojava.dto.GroupDTO;
 import it.nextre.corsojava.dto.RoleDTO;
 import it.nextre.corsojava.dto.TokenDTO;
+import it.nextre.corsojava.dto.TokensJwt;
 import it.nextre.corsojava.dto.UserDTO;
 import it.nextre.corsojava.entity.Group;
 import it.nextre.corsojava.entity.Role;
@@ -29,7 +30,6 @@ import it.nextre.corsojava.entity.User;
 import it.nextre.corsojava.exception.GroupMissingException;
 import it.nextre.corsojava.exception.RoleMissingException;
 import it.nextre.corsojava.exception.UnauthorizedException;
-import it.nextre.corsojava.exception.UserMissingException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.mail.Authenticator;
 import jakarta.mail.Message;
@@ -56,25 +56,22 @@ public class UserServiceJdbc implements UserServiceInterface {
 
 
     @Override
-    public TokenDTO login(UserDTO user) {
+    public TokensJwt login(UserDTO user) {
         LOGGER.info("Login in corso per l'utente: " + user.getEmail());
-        TokenDTO tokenDTO = null;
         if (user.getEmail().isBlank() || user.getPassword().isBlank()) {
             LOGGER.warn("Email o password non validi");
             throw new UnauthorizedException("Email o password non validi");
         }
         Optional<User> byEmailPassword = objectService.getUserByEmailPassword(user.getEmail(), user.getPassword());
+        User u;
         if (byEmailPassword.isPresent() && byEmailPassword.get().getActive()) {
-            User u = byEmailPassword.get();
-            Token token = generateToken(u);
-            tokenUserDAO.add(token);
-            tokenDTO = new TokenDTO(token);
+            u = byEmailPassword.get();
         } else {
             LOGGER.warn("Credenziali non valide");
             throw new UnauthorizedException("Credenziali non valide");
         }
         LOGGER.info("Login effettuato con successo per l'utente: " + user.getEmail());
-        return tokenDTO;
+        return new TokensJwt(u.getEmail(), u.getRoles());
     }
 
     public void logout(TokenDTO token) {
@@ -140,20 +137,21 @@ public class UserServiceJdbc implements UserServiceInterface {
         if (user == null) {
             throw new UnauthorizedException("Utente non valido");
         }
-        if (user.getGroupDTO() == null || user.getGroupDTO().getId() == null || groupDAO.getById(user.getGroupDTO().getId()) == null) {
-            throw new UnauthorizedException("Gruppo non valido");
-        }
-        Group group = objectService.getGroupById(user.getGroupDTO().getId());
         LOGGER.info("Registrazione in corso per l'utente: " + user.getEmail());
-        if (group.getRole().isAdmin() == true) {
-            LOGGER.warn("Tentativo di registrazione come admin");
-            throw new UnauthorizedException("Non puoi registrarti come admin");
-        }
+       
         if (objectService.getUserByEmail(user.getEmail()) != null) {
             LOGGER.warn("Utente già registrato con l'email: " + user.getEmail());
             throw new UnauthorizedException("Utente già registrato");
         }
-        User user2 = new User(user);
+        User user2 = new User();
+        user2.setNome(user.getNome());
+        user2.setCognome(user.getCognome());
+        user2.setEmail(user.getEmail());
+        user2.setPassword(user.getPassword());
+        //TODO: gestire il gruppo di default
+        user2.setGroup(null);
+        //TODO: gestire il ruolo di default
+        user2.setRole(null);
         user2.setActive(false);
         userDAO.add(user2);
         Token token = generateToken(objectService.getUserByEmail(user2.getEmail()));
@@ -175,72 +173,37 @@ public class UserServiceJdbc implements UserServiceInterface {
     }
 
     @Override
-    public void updateUser(UserDTO user, TokenDTO token) {
-        if (user == null) throw new UnauthorizedException("Utente non valido");
-        if (user.getGroupDTO() == null) throw new UnauthorizedException("Gruppo non valido");
-        if (user.getGroupDTO().getRoleDTO() == null) throw new UnauthorizedException("Ruolo non valido");
-        if (!checkToken(token)) throw new UnauthorizedException("Token non presente");
-        User u = objectService.getUserById(user.getId());
+    public void updateUser(UserDTO user) {
+       User u = objectService.getUserById(user.getId());
 
         LOGGER.info("Modifica in corso per l'utente: " + user.getEmail());
-        if (u == null || !u.getActive()) throw new UserMissingException("Utente non trovato");
-        Token t = objectService.getTokenByValue(token.getValue());
-        if (t.getUser().getGroup().getRole().compareTo(new Role(user.getGroupDTO().getRoleDTO())) < 0) {
-            LOGGER.warn("Tentativo di modifica del ruolo con priorità maggiore");
-            throw new UnauthorizedException("Non puoi cambiare il ruolo di un utente con uno di priorità maggiore al tuo");
-        }
-        if (t.getUser().getGroup().getRole().compareTo(u.getGroup().getRole()) < 0) {
-            LOGGER.warn("Tentativo di modifica di un utente con priorità maggiore");
-            throw new UnauthorizedException("Non puoi modificare un utente con priorità maggiore alla tua");
-        }
-        if (!t.getUser().getId().equals(u.getId()) && !t.getUser().getGroup().getRole().isAdmin()) {
-            LOGGER.warn("Tentativo di modifica di un utente con priorità maggiore");
-            throw new UnauthorizedException("Non puoi cambiare il ruolo di un utente se il tuo è più basso");
-        }
+        
+        
         u.setNome(user.getNome());
         u.setCognome(user.getCognome());
         u.setEmail(user.getEmail());
         u.setPassword(user.getPassword());
-        u.setGroup(new Group(user.getGroupDTO()));
         userDAO.update(user.getId(), u);
         LOGGER.info("Modifica effettuata con successo per l'utente: " + user.getEmail());
     }
 
     @Override
-    public void deleteUser(UserDTO user, TokenDTO token) {
+    public void deleteUser(UserDTO user) {
         if (user == null) throw new UnauthorizedException("Utente non valido");
         if (user.getGroupDTO() == null) throw new UnauthorizedException("Gruppo non valido");
         if (user.getGroupDTO().getRoleDTO() == null) throw new UnauthorizedException("Ruolo non valido");
-        if (!checkToken(token)) {
-            LOGGER.warn("Token non presente");
-            throw new UnauthorizedException("Token non presente");
-        }
+       
         User u = objectService.getUserById(user.getId());
         LOGGER.info("Cancellazione in corso per l'utente: " + user.getEmail());
         if (u == null || !u.getActive()) throw new UnauthorizedException("Utente non trovato");
-        Token t = objectService.getTokenByValue(token.getValue());
-        if (t.getUser().getId().equals(user.getId())) {
-            userDAO.delete(user.getId());
-            objectService.getTokenByIdUser(user.getId()).forEach(tok -> tokenUserDAO.delete(tok.getId()));
-        } else if (t.getUser().getGroup().getRole().compareTo(u.getGroup().getRole()) > 0) {
-            userDAO.delete(user.getId());
-            objectService.getTokenByIdUser(user.getId()).forEach(tok -> tokenUserDAO.delete(tok.getId()));
-        } else {
-            LOGGER.warn("Tentativo di cancellazione di un utente con priorità maggiore");
-            throw new UnauthorizedException("Non puoi cancellare un utente con priorità maggiore alla tua");
-        }
+        
         LOGGER.info("Cancellazione effettuata con successo per l'utente: " + user.getEmail());
     }
 
     @Override
-    public void createUser(UserDTO user, TokenDTO token) {
+    public void createUser(UserDTO user) {
         LOGGER.info("Creazione in corso per l'utente: " + user.getEmail());
-        if (!checkToken(token)) throw new UnauthorizedException("Token non presente");
-        RoleDTO roleDTO = token.getUserDTO().getGroupDTO().getRoleDTO();
-        if (!roleDTO.getAdmin() || roleDTO.getPriority() < user.getGroupDTO().getRoleDTO().getPriority()) {
-            LOGGER.warn("Tentativo di creazione di un utente con priorità maggiore");
-            throw new UnauthorizedException("Non possiedi i permessi per compiere questa azione.");
-        }
+        
         User toSave = new User(user);
         toSave.setActive(true);
 
@@ -257,11 +220,8 @@ public class UserServiceJdbc implements UserServiceInterface {
     }
 
     @Override
-    public List<UserDTO> getAllUsers(TokenDTO token) {
-        if (!checkToken(token) || !token.getUserDTO().getGroupDTO().getRoleDTO().getAdmin()) {
-            LOGGER.warn("Tentativo di accesso alla lista utenti non autorizzato");
-            throw new UnauthorizedException("Non possiedi i permessi per compiere questa azione.");
-        }
+    public List<UserDTO> getAllUsers() {
+       
         LOGGER.info("Recupero lista utenti in corso");
         return objectService.getAllUsers().stream().filter(a -> a.getActive()).map(user -> {
             UserDTO dto = new UserDTO(user);
@@ -272,11 +232,8 @@ public class UserServiceJdbc implements UserServiceInterface {
     
 
     @Override
-    public PagedResult<UserDTO> getAllUsersPag(TokenDTO token,int pag,int pagSize) {
-    	if (!checkToken(token) || !token.getUserDTO().getGroupDTO().getRoleDTO().getAdmin()) {
-    		LOGGER.warn("Tentativo di accesso alla lista utenti non autorizzato");
-    		throw new UnauthorizedException("Non possiedi i permessi per compiere questa azione.");
-    	}
+    public PagedResult<UserDTO> getAllUsersPag(int pag,int pagSize) {
+    	
     	LOGGER.info("Recupero lista utenti in corso");
 		PagedResult<User> allUsersPaged = objectService.getAllUsersPaged(pag,pagSize);
 		PagedResult<UserDTO> copy = PagedResult.copy(allUsersPaged);
@@ -289,26 +246,18 @@ public class UserServiceJdbc implements UserServiceInterface {
     }
 
     @Override
-    public void createGroup(GroupDTO group, TokenDTO token) {
+    public void createGroup(GroupDTO group) {
         LOGGER.info("Creazione in corso per il gruppo: " + group.getId());
-        if (!checkToken(token)) throw new UnauthorizedException("Token non presente");
-        if (!token.getUserDTO().getGroupDTO().getRoleDTO().getAdmin()) {
-            LOGGER.warn("Tentativo di creazione di un gruppo non autorizzato");
-            throw new UnauthorizedException("Non possiedi i permessi per compiere questa azione.");
-        }
+      
         Group toSave = new Group(group);
         groupDAO.add(toSave);
         LOGGER.info("Creazione effettuata con successo per il gruppo: " + group.getId());
     }
 
     @Override
-    public void updateGroup(GroupDTO group, TokenDTO token) {
+    public void updateGroup(GroupDTO group) {
         LOGGER.info("Modifica in corso per il gruppo: " + group.getId());
-        if (!checkToken(token)) throw new UnauthorizedException("Token non presente");
-        if (!token.getUserDTO().getGroupDTO().getRoleDTO().getAdmin()) {
-            LOGGER.warn("Tentativo di modifica di un gruppo non autorizzato");
-            throw new UnauthorizedException("Non possiedi i permessi per compiere questa azione.");
-        }
+      
         Group g = objectService.getGroupById(group.getId());
         if (g == null) {
             LOGGER.warn("Tentativo di modifica di un gruppo non valido");
@@ -321,16 +270,9 @@ public class UserServiceJdbc implements UserServiceInterface {
     }
 
     @Override
-    public void deleteGroup(GroupDTO group, TokenDTO token) {
+    public void deleteGroup(GroupDTO group) {
         LOGGER.info("Cancellazione in corso per il gruppo: " + group.getId());
-        if (!checkToken(token)) {
-            LOGGER.warn("Tentativo di cancellazione di un gruppo non autorizzato");
-            throw new UnauthorizedException("Token non presente");
-        }
-        if (!token.getUserDTO().getGroupDTO().getRoleDTO().getAdmin()) {
-            LOGGER.warn("Tentativo di cancellazione di un gruppo non autorizzato");
-            throw new UnauthorizedException("Non possiedi i permessi per compiere questa azione.");
-        }
+       
         if (objectService.getGroupById(group.getId()) == null) {
             LOGGER.warn("Tentativo di cancellazione di un gruppo non valido");
             throw new GroupMissingException("Impossibile cancellare un gruppo non presente");
@@ -340,16 +282,9 @@ public class UserServiceJdbc implements UserServiceInterface {
     }
 
     @Override
-    public List<GroupDTO> getAllGroup(TokenDTO token) {
+    public List<GroupDTO> getAllGroup() {
         LOGGER.info("Recupero lista gruppi in corso");
-        if (!checkToken(token)) {
-            LOGGER.warn("Tentativo di accesso alla lista gruppi non autorizzato");
-            throw new UnauthorizedException("Token non presente");
-        }
-        if (!token.getUserDTO().getGroupDTO().getRoleDTO().getAdmin()) {
-            LOGGER.warn("Tentativo di accesso alla lista gruppi non autorizzato");
-            throw new UnauthorizedException("Non possiedi i permessi per compiere questa azione.");
-        }
+       
         LOGGER.info("Fine recupero lista gruppi");
         return objectService.getAllGroup().stream().map(group -> {
             GroupDTO dto = new GroupDTO(group);
@@ -359,16 +294,9 @@ public class UserServiceJdbc implements UserServiceInterface {
     
 
     @Override
-    public PagedResult<GroupDTO> getAllGroupsPag(TokenDTO token,int pag,int pagSize) {
+    public PagedResult<GroupDTO> getAllGroupsPag(int pag,int pagSize) {
     	LOGGER.info("Recupero lista gruppi in corso");
-    	if (!checkToken(token)) {
-    		LOGGER.warn("Tentativo di accesso alla lista gruppi non autorizzato");
-    		throw new UnauthorizedException("Token non presente");
-    	}
-    	if (!token.getUserDTO().getGroupDTO().getRoleDTO().getAdmin()) {
-    		LOGGER.warn("Tentativo di accesso alla lista gruppi non autorizzato");
-    		throw new UnauthorizedException("Non possiedi i permessi per compiere questa azione.");
-    	}
+    
     	LOGGER.info("Fine recupero lista gruppi");
     	PagedResult<Group> allGroupsPaged = objectService.getAllGroupPaged(pag,pagSize);
 		PagedResult<GroupDTO> copy = PagedResult.copy(allGroupsPaged);
@@ -381,32 +309,18 @@ public class UserServiceJdbc implements UserServiceInterface {
     }
 
     @Override
-    public void createRole(RoleDTO roleDTO, TokenDTO token) {
+    public void createRole(RoleDTO roleDTO) {
         LOGGER.info("Creazione in corso per il ruolo: " + roleDTO.getId());
-        if (!checkToken(token)) {
-            LOGGER.warn("Tentativo di creazione di un ruolo non autorizzato");
-            throw new UnauthorizedException("Token non presente");
-        }
-        if (!token.getUserDTO().getGroupDTO().getRoleDTO().getAdmin()) {
-            LOGGER.warn("Tentativo di creazione di un ruolo non autorizzato");
-            throw new UnauthorizedException("Non possiedi i permessi per compiere questa azione.");
-        }
+       
         Role toSave = new Role(roleDTO);
         roleDAO.add(toSave);
         LOGGER.info("Creazione effettuata con successo per il ruolo: " + roleDTO.getId());
     }
 
     @Override
-    public void updateRole(RoleDTO roleDTO, TokenDTO token) {
+    public void updateRole(RoleDTO roleDTO) {
         LOGGER.info("Modifica in corso per il ruolo: " + roleDTO.getId());
-        if (!checkToken(token)) {
-            LOGGER.warn("Tentativo di modifica di un ruolo non autorizzato");
-            throw new UnauthorizedException("Token non presente");
-        }
-        if (!token.getUserDTO().getGroupDTO().getRoleDTO().getAdmin()) {
-            LOGGER.warn("Tentativo di modifica di un ruolo non autorizzato");
-            throw new UnauthorizedException("Non possiedi i permessi per compiere questa azione.");
-        }
+       
         Role role = new Role(roleDTO);
 
         roleDAO.update(roleDTO.getId(), role);
@@ -414,16 +328,9 @@ public class UserServiceJdbc implements UserServiceInterface {
     }
 
     @Override
-    public void deleteRole(RoleDTO roleDTO, TokenDTO token) {
+    public void deleteRole(RoleDTO roleDTO) {
         LOGGER.info("Cancellazione in corso per il ruolo: " + roleDTO.getId());
-        if (!checkToken(token)) {
-            LOGGER.warn("Tentativo di cancellazione di un ruolo non autorizzato");
-            throw new UnauthorizedException("Token non presente");
-        }
-        if (!token.getUserDTO().getGroupDTO().getRoleDTO().getAdmin()) {
-            LOGGER.warn("Tentativo di cancellazione di un ruolo non autorizzato");
-            throw new UnauthorizedException("Non possiedi i permessi per compiere questa azione.");
-        }
+       
         Role r = objectService.getRoleById(roleDTO.getId());
         if (r == null) {
             LOGGER.warn("Tentativo di cancellazione di un ruolo non valido");
@@ -434,16 +341,9 @@ public class UserServiceJdbc implements UserServiceInterface {
     }
 
     @Override
-    public List<RoleDTO> getAllRole(TokenDTO token) {
+    public List<RoleDTO> getAllRole() {
         LOGGER.info("Recupero lista ruoli in corso");
-        if (!checkToken(token)) {
-            LOGGER.warn("Tentativo di accesso alla lista ruoli non autorizzato");
-            throw new UnauthorizedException("Token non presente");
-        }
-        if (!token.getUserDTO().getGroupDTO().getRoleDTO().getAdmin()) {
-            LOGGER.warn("Tentativo di accesso alla lista ruoli non autorizzato");
-            throw new UnauthorizedException("Non possiedi i permessi per compiere questa azione.");
-        }
+      
         LOGGER.info("Fine recupero lista ruoli");
         return roleDAO.getAll().stream().map(role -> {
             RoleDTO dto = new RoleDTO(role);
@@ -451,16 +351,9 @@ public class UserServiceJdbc implements UserServiceInterface {
         }).toList();
     }
     @Override
-    public PagedResult<RoleDTO> getAllRolesPag(TokenDTO token,int pag,int pagSize) {
+    public PagedResult<RoleDTO> getAllRolesPag(int pag,int pagSize) {
     	LOGGER.info("Recupero lista ruoli in corso");
-    	if (!checkToken(token)) {
-    		LOGGER.warn("Tentativo di accesso alla lista ruoli non autorizzato");
-    		throw new UnauthorizedException("Token non presente");
-    	}
-    	if (!token.getUserDTO().getGroupDTO().getRoleDTO().getAdmin()) {
-    		LOGGER.warn("Tentativo di accesso alla lista ruoli non autorizzato");
-    		throw new UnauthorizedException("Non possiedi i permessi per compiere questa azione.");
-    	}
+    	
     	LOGGER.info("Fine recupero lista ruoli");
     	PagedResult<Role> allGroupsPaged = objectService.getAllRolePaged(pag,pagSize);
 		PagedResult<RoleDTO> copy = PagedResult.copy(allGroupsPaged);
@@ -487,14 +380,14 @@ public class UserServiceJdbc implements UserServiceInterface {
     }
 
     @Override
-    public TokenDTO confirmRegistration(TokenDTO token) {
+    public TokensJwt confirmRegistration(TokenDTO token) {
         Token token2 = objectService.getTokenByValue(token.getValue());
         if (token2 == null || !token2.getDataScadenza().isAfter(LocalDateTime.now().toInstant(ZoneOffset.UTC)))
             throw new RuntimeException("token scaduto :rifare la registrazione");
         User user = token2.getUser();
         user.setActive(true);
         userDAO.update(user.getId(), user);
-        return token;
+        return new TokensJwt(user.getEmail(), user.getRoles());
 
     }
 

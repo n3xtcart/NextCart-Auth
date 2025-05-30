@@ -1,5 +1,7 @@
 package it.nextre.corsojava.entity;
 
+import java.util.Set;
+
 import it.nextre.corsojava.dto.UserDTO;
 import it.nextre.corsojava.entity.annotation.Attribute;
 
@@ -12,22 +14,15 @@ public class User extends Entity {
     private String email;
 		@Attribute(colName = "password",fieldName = "password")
     private String password;
+		@Attribute(fieldName = "role",colName = "roleId",className = Role.class,colClass = long.class,type = "long")
+		private Role role;
 		@Attribute(colName = "groupId",fieldName = "group" ,type = "long", className = Group.class,colClass = long.class)
     private Group group;
 		@Attribute(fieldName = "active",colName = "active",className = Boolean.class,colClass = boolean.class,type="boolean")
 	    private Boolean active;
 
 
-    public User(UserDTO user) {
-    			this.id = user.getId();
-		this.nome = user.getNome();
-		this.cognome = user.getCognome();
-		this.email = user.getEmail();
-		this.password = user.getPassword();
-		if (user.getGroupDTO() != null) {
-			this.group = new Group(user.getGroupDTO());
-		}
-	}
+
     
     
     
@@ -55,6 +50,19 @@ public class User extends Entity {
 	public User() {
 		// TODO Auto-generated constructor stub
 	}
+
+
+
+	public User(UserDTO user) {
+		this.nome = user.getNome();
+		this.cognome = user.getCognome();
+		this.email = user.getEmail();
+		this.password = user.getPassword();
+		aggiornaUltimaModifica();
+	}
+
+
+
 
 
 
@@ -102,6 +110,19 @@ public class User extends Entity {
         aggiornaUltimaModifica();
         this.password = password;
     }
+    public Role getRole() {
+		return role;
+	}
+    	public void setRole(Role role) {
+		aggiornaUltimaModifica();
+		this.role = role;
+	}
+    	
+    	public Set<Role> getRoles() {
+    		Set<Role> role2 = group.getRole();
+    		if(role!=null)role2.add(role);
+    		return role2;
+		}
 
 
 }
