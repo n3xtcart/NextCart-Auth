@@ -29,6 +29,7 @@ import it.nextre.corsojava.entity.User;
 import it.nextre.corsojava.exception.GroupMissingException;
 import it.nextre.corsojava.exception.RoleMissingException;
 import it.nextre.corsojava.exception.UnauthorizedException;
+import it.nextre.corsojava.utils.EntityConverter;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.mail.Authenticator;
 import jakarta.mail.Message;
@@ -44,11 +45,15 @@ import jakarta.mail.internet.MimeMessage.RecipientType;
 @LookupIfProperty(name = "source.Mem", stringValue = "db")
 public class UserServiceJdbc implements UserServiceInterface {
     private static final Logger LOGGER = Logger.getLogger(UserServiceJdbc.class);
-    private static ObjectService objectService = ObjectService.getInstance();
     private final UserJdbcDao userDAO = UserJdbcDao.getInstance();
     private final TokenJdbcDao tokenUserDAO = TokenJdbcDao.getInstance();
     private final GroupJdbcDao groupDAO = GroupJdbcDao.getInstance();
     private final RoleJdbcDao roleDAO = RoleJdbcDao.getInstance();
+    private final EntityConverter entityConverter;
+    
+    public UserServiceJdbc(EntityConverter entityConverter) {
+		this.entityConverter = new EntityConverter();
+	}
 
 
  
@@ -61,7 +66,7 @@ public class UserServiceJdbc implements UserServiceInterface {
             LOGGER.warn("Email o password non validi");
             throw new UnauthorizedException("Email o password non validi");
         }
-        Optional<User> byEmailPassword = objectService.getUserByEmailPassword(user.getEmail(), user.getPassword());
+        Optional<User> byEmailPassword = userDAO.findByEmailPassword(user.getEmail(), user.getPassword());
         User u;
         if (byEmailPassword.isPresent() && byEmailPassword.get().getActive()) {
             u = byEmailPassword.get();
@@ -81,6 +86,16 @@ public class UserServiceJdbc implements UserServiceInterface {
         tokenUserDAO.delete(t.getId());
         LOGGER.info("Logout effettuato con successo per l'utente: " + token.getUser().getEmail());
     }
+    
+    //TODO: implementare il logout co jwt
+//    public void logout(Token token) {
+//        if (token == null) throw new UnauthorizedException("Token mancante");
+//        LOGGER.info("Logout in corso per l'utente: " + token.getUser().getEmail());
+//        Token t = objectService.getTokenByValue(token.getValue());
+//        if (t == null) throw new UnauthorizedException("token non presente");
+//        tokenUserDAO.delete(t.getId());
+//        LOGGER.info("Logout effettuato con successo per l'utente: " + token.getUser().getEmail());
+//    }
 
 
     public void sendMail(User user, Token token) {
@@ -138,7 +153,7 @@ public class UserServiceJdbc implements UserServiceInterface {
         }
         LOGGER.info("Registrazione in corso per l'utente: " + user.getEmail());
        
-        if (objectService.getUserByEmail(user.getEmail()) != null) {
+        if (userDAO.getByEmail(user.getEmail()) != null) {
             LOGGER.warn("Utente già registrato con l'email: " + user.getEmail());
             throw new UnauthorizedException("Utente già registrato");
         }
@@ -153,7 +168,7 @@ public class UserServiceJdbc implements UserServiceInterface {
         user2.setRole(null);
         user2.setActive(false);
         userDAO.add(user2);
-        Token token = generateToken(objectService.getUserByEmail(user2.getEmail()));
+        Token token = generateToken(userDAO.getByEmail(user2.getEmail()));
         tokenUserDAO.add(token);
         sendMail(user2, token);
         LOGGER.info("email inviata all'utente: " + user.getEmail());
@@ -170,10 +185,11 @@ public class UserServiceJdbc implements UserServiceInterface {
         tokenUserDAO.update(token2.getId(), token2);
         return true;
     }
+ 
 
     @Override
     public void updateUser(UserDTO user) {
-       User u = objectService.getUserById(user.getId());
+       User u = userDAO.getById(user.getId());
 
         LOGGER.info("Modifica in corso per l'utente: " + user.getEmail());
         
@@ -191,7 +207,7 @@ public class UserServiceJdbc implements UserServiceInterface {
         if (user == null) throw new UnauthorizedException("Utente non valido");
         if (user.getRuoli() == null) throw new UnauthorizedException("Ruolo non valido");
        
-        User u = objectService.getUserById(user.getId());
+        User u = userDAO.getById(user.getId());
         LOGGER.info("Cancellazione in corso per l'utente: " + user.getEmail());
         if (u == null || !u.getActive()) throw new UnauthorizedException("Utente non trovato");
         
@@ -205,7 +221,7 @@ public class UserServiceJdbc implements UserServiceInterface {
         User toSave = new User(user);
         toSave.setActive(true);
 
-        Group toPut = objectService.getGroupById(user.getGroupDTO().getId());
+        Group toPut = groupDAO.getById(user.getGroupDTO().getId());
 
         if (toPut == null) {
             LOGGER.warn("Tentativo di creazione di un utente con gruppo non valido");
@@ -221,24 +237,9 @@ public class UserServiceJdbc implements UserServiceInterface {
     public List<UserDTO> getAllUsers() {
        
         LOGGER.info("Recupero lista utenti in corso");
-        return objectService.getAllUsers().stream().filter(a -> a.getActive()).map(user -> {
-            UserDTO dto=UserDTO.of().cognome(user.getNome())
-            		.nome(user.getCognome())
-            		.email(user.getEmail())
-            		.id(user.getId())
-            		.ruoli(user.getRoles().stream().map(role -> {
-						RoleDTO roleDTO =RoleDTO.of()
-								.id(role.getId())
-								.admin(role.getAdmin())
-								.descrizione(role.getDescrizione())
-								.priority(role.getPriority())
-								.build();
-						return roleDTO;
-					}).collect(Collectors.toSet()))
-            		.build();
-            dto.setPassword(user.getPassword());
-            return dto;
-        }).toList();
+        return userDAO.getAll().stream().filter(a -> a.getActive()).map(user -> 
+        	entityConverter.fromEntity(user)
+        ).toList();
     }
     
 
@@ -246,26 +247,9 @@ public class UserServiceJdbc implements UserServiceInterface {
     public PagedResult<UserDTO> getAllUsersPag(int pag,int pagSize) {
     	
     	LOGGER.info("Recupero lista utenti in corso");
-		PagedResult<User> allUsersPaged = objectService.getAllUsersPaged(pag,pagSize);
+		PagedResult<User> allUsersPaged = userDAO.getAllPag(pag,pagSize);
 		PagedResult<UserDTO> copy = PagedResult.copy(allUsersPaged);
-		copy.setContent(allUsersPaged.getContent().stream().filter(a -> a.getActive()).map(user -> {
-    		UserDTO dto =UserDTO.of().cognome(user.getNome())
-            		.nome(user.getCognome())
-            		.email(user.getEmail())
-            		.id(user.getId())
-            		.ruoli(user.getRoles().stream().map(role -> {
-						RoleDTO roleDTO =RoleDTO.of()
-								.id(role.getId())
-								.admin(role.getAdmin())
-								.descrizione(role.getDescrizione())
-								.priority(role.getPriority())
-								.build();
-						return roleDTO;
-					}).collect(Collectors.toSet()))
-            		.build();
-    		dto.setPassword(user.getPassword());
-    		return dto;
-    	}).toList());
+		copy.setContent(allUsersPaged.getContent().stream().filter(a -> a.getActive()).map(user -> entityConverter.fromEntity(user)).toList());
 		return copy;
     }
 
@@ -282,13 +266,14 @@ public class UserServiceJdbc implements UserServiceInterface {
     public void updateGroup(GroupDTO group) {
         LOGGER.info("Modifica in corso per il gruppo: " + group.getId());
       
-        Group g = objectService.getGroupById(group.getId());
+        Group g = groupDAO.getById(group.getId());
         if (g == null) {
             LOGGER.warn("Tentativo di modifica di un gruppo non valido");
             throw new GroupMissingException("Impossibile modificare un gruppo non presente");
         }
         Group group2 = new Group(group);
-        g.setRole(group2.getRoles());
+        g.setRoles(group2.getRoles());
+        //TODO gestire aggiunta di ruoli in tabella di supporto
         groupDAO.update(group.getId(), g);
         LOGGER.info("Modifica effettuata con successo per il gruppo: " + group.getId());
     }
@@ -297,7 +282,7 @@ public class UserServiceJdbc implements UserServiceInterface {
     public void deleteGroup(GroupDTO group) {
         LOGGER.info("Cancellazione in corso per il gruppo: " + group.getId());
        
-        if (objectService.getGroupById(group.getId()) == null) {
+        if (groupDAO.getById(group.getId()) == null) {
             LOGGER.warn("Tentativo di cancellazione di un gruppo non valido");
             throw new GroupMissingException("Impossibile cancellare un gruppo non presente");
         }
@@ -310,13 +295,7 @@ public class UserServiceJdbc implements UserServiceInterface {
         LOGGER.info("Recupero lista gruppi in corso");
        
         LOGGER.info("Fine recupero lista gruppi");
-        return objectService.getAllGroup().stream().map(group -> {
-            GroupDTO dto =GroupDTO.of().id(group.getId())
-           // TODO aggiungere ruoli
-            		
-            		.build();
-            return dto;
-        }).toList();
+        return groupDAO.getAll().stream().map(group -> entityConverter.fromEntity(group)).toList();
     }
     
 
@@ -325,15 +304,9 @@ public class UserServiceJdbc implements UserServiceInterface {
     	LOGGER.info("Recupero lista gruppi in corso");
     
     	LOGGER.info("Fine recupero lista gruppi");
-    	PagedResult<Group> allGroupsPaged = objectService.getAllGroupPaged(pag,pagSize);
+    	PagedResult<Group> allGroupsPaged = groupDAO.getAllPag(pag,pagSize);
 		PagedResult<GroupDTO> copy = PagedResult.copy(allGroupsPaged);
-		copy.setContent(allGroupsPaged.getContent().stream().map(group -> {
-    		GroupDTO dto  =GroupDTO.of().id(group.getId())
-           // TODO aggiungere ruoli
-            		
-            		.build();
-    		return dto;
-    	}).toList());
+		copy.setContent(allGroupsPaged.getContent().stream().map(group -> entityConverter.fromEntity(group)).toList());
 		return copy;
     
     }
@@ -361,7 +334,7 @@ public class UserServiceJdbc implements UserServiceInterface {
     public void deleteRole(RoleDTO roleDTO) {
         LOGGER.info("Cancellazione in corso per il ruolo: " + roleDTO.getId());
        
-        Role r = objectService.getRoleById(roleDTO.getId());
+        Role r = roleDAO.getById(roleDTO.getId());
         if (r == null) {
             LOGGER.warn("Tentativo di cancellazione di un ruolo non valido");
             throw new RoleMissingException("Ruolo richiesto da cancellare non presente");
@@ -375,32 +348,16 @@ public class UserServiceJdbc implements UserServiceInterface {
         LOGGER.info("Recupero lista ruoli in corso");
       
         LOGGER.info("Fine recupero lista ruoli");
-        return roleDAO.getAll().stream().map(role -> {
-            RoleDTO dto = RoleDTO.of()
-					.id(role.getId())
-					.admin(role.getAdmin())
-					.descrizione(role.getDescrizione())
-					.priority(role.getPriority())
-					.build();
-            return dto;
-        }).toList();
+        return roleDAO.getAll().stream().map(role -> entityConverter.fromEntity(role)).toList();
     }
     @Override
     public PagedResult<RoleDTO> getAllRolesPag(int pag,int pagSize) {
     	LOGGER.info("Recupero lista ruoli in corso");
     	
     	LOGGER.info("Fine recupero lista ruoli");
-    	PagedResult<Role> allGroupsPaged = objectService.getAllRolePaged(pag,pagSize);
+    	PagedResult<Role> allGroupsPaged = roleDAO.getAllPag(pag,pagSize);
 		PagedResult<RoleDTO> copy = PagedResult.copy(allGroupsPaged);
-		copy.setContent(allGroupsPaged.getContent().stream().map(role -> {
-			RoleDTO dto = RoleDTO.of()
-					.id(role.getId())
-					.admin(role.getAdmin())
-					.descrizione(role.getDescrizione())
-					.priority(role.getPriority())
-					.build();
-    		return dto;
-    	}).toList());
+		copy.setContent(allGroupsPaged.getContent().stream().map(role -> entityConverter.fromEntity(role)).toList());
 		return copy;
     }
 
@@ -421,7 +378,7 @@ public class UserServiceJdbc implements UserServiceInterface {
 
     @Override
     public TokensJwt confirmRegistration(Token token) {
-        Token token2 = objectService.getTokenByValue(token.getValue());
+        Token token2 = tokenUserDAO.getTokenByValue(token.getValue());
         if (token2 == null || !token2.getDataScadenza().isAfter(LocalDateTime.now().toInstant(ZoneOffset.UTC)))
             throw new RuntimeException("token scaduto :rifare la registrazione");
         User user = token2.getUser();
@@ -433,7 +390,7 @@ public class UserServiceJdbc implements UserServiceInterface {
 
 	@Override
 	public Token findTokenByValue(String val) {
-		return objectService.getTokenByValue(val);
+		return tokenUserDAO.getTokenByValue(val);
 	}
 
 }

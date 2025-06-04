@@ -173,6 +173,7 @@ public class UserService implements UserServiceInterface {
         tokenUserDAO.update(token2.getId(), token2);
         return true;
     }
+   
 
     @Override
     public void updateUser(UserDTO user) {
@@ -268,7 +269,7 @@ public class UserService implements UserServiceInterface {
             throw new GroupMissingException("Impossibile modificare un gruppo non presente");
         }
         Group group2 = new Group(group);
-        g.setRole(group2.getRoles());
+        g.setRoles(group2.getRoles());
         groupDAO.update(group.getId(), g);
         LOGGER.info("Modifica effettuata con successo per il gruppo: " + group.getId());
     }

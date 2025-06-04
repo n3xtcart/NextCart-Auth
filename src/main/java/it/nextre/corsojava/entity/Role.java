@@ -10,20 +10,12 @@ public class Role extends Entity {
     private Boolean admin;
     @Attribute(fieldName = "priority", colName = "priority", type = "long", className = Long.class, colClass = long.class)
     private Long priority;
-    @Attribute(fieldName = "group", colName = "groupId", type = "long", className = Group.class, colClass = long.class)
-    private Group group;
-
+   
     
 
 	
 
-	public Group getGroup() {
-		return group;
-	}
-
-	public void setGroup(Group group) {
-		this.group = group;
-	}
+	
 
 	public Role() {
     }

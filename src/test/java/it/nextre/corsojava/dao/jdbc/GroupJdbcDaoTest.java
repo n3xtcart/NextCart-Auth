@@ -3,10 +3,13 @@ package it.nextre.corsojava.dao.jdbc;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
+import java.util.HashSet;
+
 import org.junit.jupiter.api.Test;
 
 import it.nextre.corsojava.entity.Group;
 import it.nextre.corsojava.entity.Role;
+import it.nextre.corsojava.entity.User;
 
 public class GroupJdbcDaoTest {
 	
@@ -17,10 +20,11 @@ public class GroupJdbcDaoTest {
 		group.setId(1L);
 		Role role = new Role();
 		role.setId(1L);
-		group.setRole(role);
+		group.setRoles(new HashSet<Role>());
 		Long long1 = dao.add(group);
 		Group byId = dao.getById(long1);
 		assertEquals(long1, byId.getId());
+		dao.delete(long1);
 	}
 	
 	
@@ -31,10 +35,17 @@ public class GroupJdbcDaoTest {
 		group.setId(1L);
 		Role role = new Role();
 		role.setId(1L);
-		group.setRole(role);
-		dao.update(2L,group);
-		Group byId = dao.getById(3L);
-		assertNotEquals(group.getId(), byId.getId());
+		group.setRoles(new HashSet<Role>());
+		Group groupNew = new Group();
+		groupNew.setId(1L);
+		Role roleNew = new Role();
+		roleNew.setId(1L);
+		groupNew.setRoles(new HashSet<Role>());
+		Long long1 = dao.add(group);
+		dao.update(long1,groupNew);
+		Group byId = dao.getById(long1);
+		assertNotEquals(group.getUltimaModifica(), byId.getUltimaModifica());
+		dao.delete(long1);
 		
 		
 		}
@@ -47,12 +58,19 @@ public class GroupJdbcDaoTest {
 		group.setId(1L);
 		Role role = new Role();
 		role.setId(1L);
-		group.setRole(role);
+		group.setRoles(new HashSet<Role>());
 		Long long1 = dao.add(group);
 		dao.delete(long1);
 		Group byId = dao.getById(long1);
 		assertEquals(null, byId);
 		
+	}
+	
+	
+	@Test
+	public void testRelazioni() {
+		Group byId = GroupJdbcDao.getInstance().getById(1L);
+		System.out.println(byId);
 	}
 	
 	@Test
@@ -62,10 +80,11 @@ public class GroupJdbcDaoTest {
 		group.setId(1L);
 		Role role = new Role();
 		role.setId(1L);
-		group.setRole(role);
+		group.setRoles(new HashSet<Role>());
 		int size = dao.getAll().size();
 		Long long1 = dao.add(group);
 		int size2 = dao.getAll().size();
+		dao.delete(long1);
 		assertEquals(size+1, size2);
 		
 		

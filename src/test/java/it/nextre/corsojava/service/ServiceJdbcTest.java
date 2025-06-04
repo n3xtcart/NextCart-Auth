@@ -5,33 +5,63 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import it.nextre.aut.dto.GroupDTO;
+import it.nextre.aut.dto.RoleDTO;
+import it.nextre.aut.dto.UserDTO;
 import it.nextre.corsojava.dao.jdbc.GroupJdbcDao;
 import it.nextre.corsojava.dao.jdbc.RoleJdbcDao;
 import it.nextre.corsojava.dao.jdbc.TokenJdbcDao;
 import it.nextre.corsojava.dao.jdbc.UserJdbcDao;
-import it.nextre.corsojava.dto.GroupDTO;
-import it.nextre.corsojava.dto.RoleDTO;
-import it.nextre.corsojava.dto.TokenDTO;
-import it.nextre.corsojava.dto.UserDTO;
 import it.nextre.corsojava.entity.Group;
 import it.nextre.corsojava.entity.Role;
 import it.nextre.corsojava.entity.Token;
 import it.nextre.corsojava.entity.User;
 import it.nextre.corsojava.exception.UnauthorizedException;
+import it.nextre.corsojava.utils.EntityConverter;
 
 class ServiceJdbcTest {
-    UserServiceJdbc userService=new UserServiceJdbc();
+    UserServiceJdbc userService=new UserServiceJdbc(new EntityConverter());
     GroupJdbcDao groupDAO=GroupJdbcDao.getInstance();
     RoleJdbcDao roleDAO=RoleJdbcDao.getInstance();
     TokenJdbcDao tokenUserDAO=TokenJdbcDao.getInstance();
     UserJdbcDao userDAO=UserJdbcDao.getInstance();
+    long[] rolesId=new long[2];
+    long[] groupId=new long[2];
 
 
-    @BeforeEach
-    void setUp() {}
+    @BeforeAll
+    void setUp() {
+    	//aggingo due ruoli base
+    	Role adminRole =new Role();
+    	adminRole.setAdmin(true);
+    	adminRole.setDescrizione("admin");
+    	adminRole.setPriority(1L);
+    	rolesId[0] = roleDAO.add(adminRole);
+    	Role userRole =new Role();
+    	userRole.setAdmin(false);
+    	userRole.setDescrizione("user");
+    	userRole.setPriority(2L);
+    	rolesId[1] = roleDAO.add(userRole);
+    	//aggiungo due gruppi base
+    	Group adminGroup = new Group();
+    	Set<Role> hashSet = new HashSet<Role>();
+    	hashSet.add(roleDAO.getById(rolesId[0]));
+    	adminGroup.setRoles(hashSet);
+    	groupId[0] = groupDAO.add(adminGroup);
+    	Group userGroup = new Group();
+    	Set<Role> hashSet2 = new HashSet<Role>();
+    	hashSet2.add(roleDAO.getById(rolesId[1]));
+    	userGroup.setRoles(hashSet2);
+    	groupId[1] = groupDAO.add(userGroup);	
+    	
+    }
 
 
     @Test
@@ -42,7 +72,7 @@ class ServiceJdbcTest {
         userOk.setEmail("bo");
         userOk.setPassword("lalalal");
         userOk.setGroupDTO(null);
-        TokenDTO loginOk = userService.login(userOk);
+        Token loginOk = userService.login(userOk);
         assertNotNull(loginOk);
 
         UserDTO userKo = new UserDTO();
@@ -171,14 +201,14 @@ class ServiceJdbcTest {
         t.getUser().setGroup(groupDAO.getById(t.getUser().getGroup().getId()));
         t.getUser().getGroup().setRole(roleDAO.getById(t.getUser().getGroup().getRole().getId()));
        
-        TokenDTO req = new TokenDTO(t);
+        Token req = new Token(t);
         userService.logout(req);
         assertThrows(UnauthorizedException.class, () -> userService.getAllUsers(req));
         Token toDelete2 =new Token();
         toDelete2.setValue("tokenNonValido");
         toDelete2.setId(100L);
         toDelete2.setUser(new User());
-        TokenDTO req2 = new TokenDTO(toDelete2);
+        Token req2 = new Token(toDelete2);
         assertThrows(UnauthorizedException.class, () -> userService.logout(req2));
     }
 
@@ -189,7 +219,7 @@ class ServiceJdbcTest {
         t.getUser().setGroup(groupDAO.getById(t.getUser().getGroup().getId()));
         t.getUser().getGroup().setRole(roleDAO.getById(t.getUser().getGroup().getRole().getId()));
         
-        TokenDTO req = new TokenDTO(t);
+        Token req = new Token(t);
         UserDTO toSave = new UserDTO();
         toSave.setGroupDTO(new GroupDTO(groupDAO.getById(1L)));
         toSave.getGroupDTO().setRoleDTO(new RoleDTO(roleDAO.getById(toSave.getGroupDTO().getRoleDTO().getId())));
@@ -216,7 +246,7 @@ class ServiceJdbcTest {
 //    
 //    
 //        Token toDelete = tokenUserDAO.getById(1L);
-//        TokenDTO req = userService.register(userOk);
+//        Token req = userService.register(userOk);
 //        UserDTO toBeDeleted = req.getUserDTO();
 //        toBeDeleted.setPassword(toDelete.getUser().getPassword());
 //        userService.deleteUser(toBeDeleted, req);
@@ -224,13 +254,13 @@ class ServiceJdbcTest {
 //        assertEquals("Credenziali non valide", exception.getMessage());
 //
 //        Token toDelete2 = tokenUserDAO.getById(2L);
-//        TokenDTO req2 = new TokenDTO(toDelete2);
+//        Token req2 = new Token(toDelete2);
 //        UserDTO toBeDeleted2 = new UserDTO(userDAO.getById(11L));
 //        toBeDeleted.setPassword(toDelete.getUser().getPassword());
 //        userService.deleteUser(toBeDeleted2, req2);
 //        
 //        Token toDelete3 = tokenUserDAO.getById(3L);
-//        TokenDTO req3 = new TokenDTO(toDelete3);
+//        Token req3 = new Token(toDelete3);
 //        UserDTO toBeDeleted3 = new UserDTO(userDAO.getById(2L));
 //        toBeDeleted.setPassword(toDelete.getUser().getPassword());
 //        Exception exception2= assertThrows(UnauthorizedException.class, () -> userService.deleteUser(toBeDeleted3, req3));
@@ -243,7 +273,7 @@ class ServiceJdbcTest {
     t.getUser().setGroup(groupDAO.getById(t.getUser().getGroup().getId()));
     t.getUser().getGroup().setRole(roleDAO.getById(t.getUser().getGroup().getRole().getId()));
     
-        TokenDTO req = new TokenDTO(t);
+        Token req = new Token(t);
         UserDTO toBeUpdate = new UserDTO(t.getUser());
         toBeUpdate.setNome("NuovoNome");
         toBeUpdate.setCognome("NuovoCognome");
@@ -260,7 +290,7 @@ class ServiceJdbcTest {
     t.getUser().setGroup(groupDAO.getById(t.getUser().getGroup().getId()));
     t.getUser().getGroup().setRole(roleDAO.getById(t.getUser().getGroup().getRole().getId()));
    
-        TokenDTO req = new TokenDTO(t);
+        Token req = new Token(t);
         int old=userDAO.getAll().stream().filter(a->a.getActive()).toList().size();
         assertEquals(old, userService.getAllUsers(req).size());
     }
@@ -272,7 +302,7 @@ class ServiceJdbcTest {
         t.getUser().setGroup(groupDAO.getById(t.getUser().getGroup().getId()));
         t.getUser().getGroup().setRole(roleDAO.getById(t.getUser().getGroup().getRole().getId()));
        
-        TokenDTO req = new TokenDTO(t);
+        Token req = new Token(t);
         GroupDTO newGroup = new GroupDTO();
         newGroup.setRoleDTO(new RoleDTO(roleDAO.getById(1L)));
         int val =groupDAO.getAll().size();
@@ -287,7 +317,7 @@ class ServiceJdbcTest {
         t.getUser().setGroup(groupDAO.getById(t.getUser().getGroup().getId()));
         t.getUser().getGroup().setRole(roleDAO.getById(t.getUser().getGroup().getRole().getId()));
        
-        TokenDTO req = new TokenDTO(t);
+        Token req = new Token(t);
         GroupDTO groupDTO = new GroupDTO(groupDAO.getById(2L));
         groupDTO.setRoleDTO(new RoleDTO(roleDAO.getById(2L)));
         userService.updateGroup(groupDTO, req);
@@ -306,7 +336,7 @@ class ServiceJdbcTest {
         role.setId(1L);
         group.setRole(role);
         Long vaLong=groupDAO.add(group);
-        TokenDTO req = new TokenDTO(t);
+        Token req = new Token(t);
         Group byId = groupDAO.getById(vaLong);
         byId.setRole(roleDAO.getById(byId.getRole().getId()));
         GroupDTO groupDTO = new GroupDTO(byId);
@@ -323,7 +353,7 @@ class ServiceJdbcTest {
     t.getUser().setGroup(groupDAO.getById(t.getUser().getGroup().getId()));
     t.getUser().getGroup().setRole(roleDAO.getById(t.getUser().getGroup().getRole().getId()));
     
-        TokenDTO req = new TokenDTO(t);
+        Token req = new Token(t);
         RoleDTO toSave = new RoleDTO();
         toSave.setAdmin(true);
         toSave.setDescrizione("Nuovo ruolo super fico");
@@ -340,7 +370,7 @@ class ServiceJdbcTest {
     t.getUser().setGroup(groupDAO.getById(t.getUser().getGroup().getId()));
     t.getUser().getGroup().setRole(roleDAO.getById(t.getUser().getGroup().getRole().getId()));
     
-        TokenDTO req = new TokenDTO(t);
+        Token req = new Token(t);
         RoleDTO toUpdate = new RoleDTO(roleDAO.getById(1L));
         toUpdate.setDescrizione("Nuova descrizione");
         userService.updateRole(toUpdate, req);
@@ -354,7 +384,7 @@ class ServiceJdbcTest {
         t.getUser().setGroup(groupDAO.getById(t.getUser().getGroup().getId()));
         t.getUser().getGroup().setRole(roleDAO.getById(t.getUser().getGroup().getRole().getId()));
         
-        TokenDTO req = new TokenDTO(t);
+        Token req = new Token(t);
         Role role=new Role();
         role.setAdmin(true);
         role.setPriority(2L);

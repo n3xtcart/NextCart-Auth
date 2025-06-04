@@ -4,6 +4,7 @@ import java.util.Set;
 
 import it.nextre.aut.dto.UserDTO;
 import it.nextre.corsojava.entity.annotation.Attribute;
+import it.nextre.corsojava.entity.annotation.OneToOne;
 
 public class User extends Entity {
     @Attribute(colName = "nome", fieldName = "nome")
@@ -14,11 +15,13 @@ public class User extends Entity {
     private String email;
     @Attribute(colName = "password", fieldName = "password")
     private String password;
-    @Attribute(colName = "groupId", fieldName = "group", type = "long", className = Group.class, colClass = long.class)
+    @OneToOne(joinColumn = "groupId", joinTable = "groupT", mapObject = Group.class)
+    @Attribute(fieldName = "group",colName = "groupId",className = Group.class,colClass = long.class,type = "long")
     private Group group;
     @Attribute(fieldName = "active", colName = "active", className = Boolean.class, colClass = boolean.class, type = "boolean")
     private Boolean active;
-    @Attribute(fieldName = "role", colName = "roleId", type = "long", className = Role.class, colClass = long.class)
+    @OneToOne(joinColumn = "roleId", joinTable = "role", mapObject = Role.class)
+    @Attribute(fieldName = "role",colName = "roleId",className = Role.class,colClass = long.class,type = "long")
     private Role role;
 
 

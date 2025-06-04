@@ -10,22 +10,22 @@ public abstract class Entity {
     protected Long id;
 
     @Attribute(fieldName = "ultimaModifica", colName = "ultimaModifica", className = Instant.class, colClass = Timestamp.class, type = "timestamp")
-    protected Instant instant;
+    protected Instant ultimaModifica;
 
     public Entity() {
-        this.instant = Instant.now();
+        this.ultimaModifica = Instant.now();
     }
 
     public Instant getUltimaModifica() {
-        return instant;
+        return ultimaModifica;
     }
 
     public void setUltimaModifica(Instant i) {
-        this.instant = i;
+        this.ultimaModifica = i;
     }
 
     protected void aggiornaUltimaModifica() {
-        this.instant = Instant.now();
+        this.ultimaModifica = Instant.now();
     }
 
     public Long getId() {
