@@ -3,7 +3,7 @@ package it.nextre.corsojava.controller;
 import java.util.List;
 
 import it.nextre.aut.dto.RoleDTO;
-import it.nextre.corsojava.dao.jdbc.PagedResult;
+import it.nextre.aut.pagination.PagedResult;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;

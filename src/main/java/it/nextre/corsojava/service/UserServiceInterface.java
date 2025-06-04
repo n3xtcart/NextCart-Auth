@@ -5,18 +5,18 @@ import java.util.List;
 
 import it.nextre.aut.dto.GroupDTO;
 import it.nextre.aut.dto.RoleDTO;
+import it.nextre.aut.dto.TokenJwtDTO;
 import it.nextre.aut.dto.UserDTO;
-import it.nextre.corsojava.dao.jdbc.PagedResult;
-import it.nextre.corsojava.dto.TokensJwt;
+import it.nextre.aut.pagination.PagedResult;
 import it.nextre.corsojava.entity.Token;
 
 public interface UserServiceInterface {
 
-    public TokensJwt login(UserDTO user);
+    public TokenJwtDTO login(UserDTO user);
 
     public void register(UserDTO user);
     
-    public TokensJwt confirmRegistration(Token token);
+    public TokenJwtDTO confirmRegistration(Token token);
 
     public boolean checkToken(Token token);
 

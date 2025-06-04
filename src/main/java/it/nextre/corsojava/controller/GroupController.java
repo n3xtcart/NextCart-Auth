@@ -2,16 +2,11 @@ package it.nextre.corsojava.controller;
 
 import java.util.List;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import it.nextre.aut.dto.GroupDTO;
-import it.nextre.corsojava.dao.jdbc.PagedResult;
-import it.nextre.corsojava.entity.Token;
+import it.nextre.aut.pagination.PagedResult;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
-import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;

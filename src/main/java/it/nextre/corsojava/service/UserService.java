@@ -15,13 +15,13 @@ import org.jboss.logging.Logger;
 import io.quarkus.arc.lookup.LookupIfProperty;
 import it.nextre.aut.dto.GroupDTO;
 import it.nextre.aut.dto.RoleDTO;
+import it.nextre.aut.dto.TokenJwtDTO;
 import it.nextre.aut.dto.UserDTO;
-import it.nextre.corsojava.dao.jdbc.PagedResult;
+import it.nextre.aut.pagination.PagedResult;
 import it.nextre.corsojava.dao.memory.GroupDAO;
 import it.nextre.corsojava.dao.memory.RoleDAO;
 import it.nextre.corsojava.dao.memory.TokenUserDAO;
 import it.nextre.corsojava.dao.memory.UserDAO;
-import it.nextre.corsojava.dto.TokensJwt;
 import it.nextre.corsojava.entity.Group;
 import it.nextre.corsojava.entity.Role;
 import it.nextre.corsojava.entity.Token;
@@ -30,6 +30,7 @@ import it.nextre.corsojava.exception.GroupMissingException;
 import it.nextre.corsojava.exception.RoleMissingException;
 import it.nextre.corsojava.exception.UnauthorizedException;
 import it.nextre.corsojava.exception.UserMissingException;
+import it.nextre.corsojava.utils.JwtGenerator;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.mail.Authenticator;
 import jakarta.mail.Message;
@@ -58,9 +59,8 @@ public class UserService implements UserServiceInterface {
 
 
     @Override
-    public TokensJwt login(UserDTO user) {
+    public TokenJwtDTO login(UserDTO user) {
         LOGGER.info("Login in corso per l'utente: " + user.getEmail());
-        Token tokenDTO = null;
         if (user.getEmail().isBlank() || user.getPassword().isBlank()) {
             LOGGER.warn("Email o password non validi");
             throw new UnauthorizedException("Email o password non validi");
@@ -74,7 +74,7 @@ public class UserService implements UserServiceInterface {
             throw new UnauthorizedException("Credenziali non valide");
         }
         LOGGER.info("Login effettuato con successo per l'utente: " + user.getEmail());
-        return new TokensJwt(u.getEmail(), u.getRoles());
+        return JwtGenerator.generateTokens(u.getEmail(), u.getRoles());
     }
 
     public void logout(Token token) {
@@ -145,7 +145,6 @@ public class UserService implements UserServiceInterface {
         if (user.getGroupDTO() == null || groupDAO.getById(user.getGroupDTO().getId()) == null) {
             throw new UnauthorizedException("Gruppo non valido");
         }
-        Group group = groupDAO.getById(user.getGroupDTO().getId());
         LOGGER.info("Registrazione in corso per l'utente: " + user.getEmail());
        
         if (userDAO.getByEmail(user.getEmail()) != null) {
@@ -367,14 +366,14 @@ public class UserService implements UserServiceInterface {
     }
 
     @Override
-    public TokensJwt confirmRegistration(Token token) {
+    public TokenJwtDTO confirmRegistration(Token token) {
         Token token2 = tokenUserDAO.getTokenByValue(token.getValue());
         if (token2 == null || !token2.getDataScadenza().isAfter(LocalDateTime.now().toInstant(ZoneOffset.UTC)))
             throw new RuntimeException("token scaduto :rifare la registrazione");
         User user = token2.getUser();
         user.setActive(true);
         userDAO.update(user.getId(), user);
-        return new TokensJwt(user.getEmail(), user.getRoles());
+        return JwtGenerator.generateTokens(user.getEmail(), user.getRoles());
 
     }
 

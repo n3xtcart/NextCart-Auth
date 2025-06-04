@@ -13,23 +13,24 @@ import java.util.stream.Collectors;
 import org.jboss.logging.Logger;
 
 import io.quarkus.arc.lookup.LookupIfProperty;
+import io.quarkus.security.UnauthorizedException;
 import it.nextre.aut.dto.GroupDTO;
 import it.nextre.aut.dto.RoleDTO;
+import it.nextre.aut.dto.TokenJwtDTO;
 import it.nextre.aut.dto.UserDTO;
+import it.nextre.aut.pagination.PagedResult;
 import it.nextre.corsojava.dao.jdbc.GroupJdbcDao;
-import it.nextre.corsojava.dao.jdbc.PagedResult;
 import it.nextre.corsojava.dao.jdbc.RoleJdbcDao;
 import it.nextre.corsojava.dao.jdbc.TokenJdbcDao;
 import it.nextre.corsojava.dao.jdbc.UserJdbcDao;
-import it.nextre.corsojava.dto.TokensJwt;
 import it.nextre.corsojava.entity.Group;
 import it.nextre.corsojava.entity.Role;
 import it.nextre.corsojava.entity.Token;
 import it.nextre.corsojava.entity.User;
 import it.nextre.corsojava.exception.GroupMissingException;
 import it.nextre.corsojava.exception.RoleMissingException;
-import it.nextre.corsojava.exception.UnauthorizedException;
 import it.nextre.corsojava.utils.EntityConverter;
+import it.nextre.corsojava.utils.JwtGenerator;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.mail.Authenticator;
 import jakarta.mail.Message;
@@ -60,7 +61,7 @@ public class UserServiceJdbc implements UserServiceInterface {
 
 
     @Override
-    public TokensJwt login(UserDTO user) {
+    public TokenJwtDTO login(UserDTO user) {
         LOGGER.info("Login in corso per l'utente: " + user.getEmail());
         if (user.getEmail().isBlank() || user.getPassword().isBlank()) {
             LOGGER.warn("Email o password non validi");
@@ -75,13 +76,13 @@ public class UserServiceJdbc implements UserServiceInterface {
             throw new UnauthorizedException("Credenziali non valide");
         }
         LOGGER.info("Login effettuato con successo per l'utente: " + user.getEmail());
-        return new TokensJwt(u.getEmail(), u.getRoles());
+        return JwtGenerator.generateTokens(u.getEmail(), u.getRoles());
     }
 
     public void logout(Token token) {
         if (token == null) throw new UnauthorizedException("Token mancante");
         LOGGER.info("Logout in corso per l'utente: " + token.getUser().getEmail());
-        Token t = objectService.getTokenByValue(token.getValue());
+        Token t = tokenUserDAO.getTokenByValue(token.getValue());
         if (t == null) throw new UnauthorizedException("token non presente");
         tokenUserDAO.delete(t.getId());
         LOGGER.info("Logout effettuato con successo per l'utente: " + token.getUser().getEmail());
@@ -178,7 +179,7 @@ public class UserServiceJdbc implements UserServiceInterface {
     @Override
     public boolean checkToken(Token token) {
         LOGGER.info("Controllo token in corso per l'utente: " + token.getUser().getEmail());
-        Token token2 = objectService.getTokenByValue(token.getValue());
+        Token token2 = tokenUserDAO.getTokenByValue(token.getValue());
         if (token2 == null || !token2.getDataScadenza().isAfter(LocalDateTime.now().toInstant(ZoneOffset.UTC)))
             return false;
         token2.setDataScadenza(LocalDateTime.now().plusMinutes(10).toInstant(ZoneOffset.UTC));
@@ -377,14 +378,14 @@ public class UserServiceJdbc implements UserServiceInterface {
     }
 
     @Override
-    public TokensJwt confirmRegistration(Token token) {
+    public TokenJwtDTO confirmRegistration(Token token) {
         Token token2 = tokenUserDAO.getTokenByValue(token.getValue());
         if (token2 == null || !token2.getDataScadenza().isAfter(LocalDateTime.now().toInstant(ZoneOffset.UTC)))
             throw new RuntimeException("token scaduto :rifare la registrazione");
         User user = token2.getUser();
         user.setActive(true);
         userDAO.update(user.getId(), user);
-        return new TokensJwt(user.getEmail(), user.getRoles());
+        return JwtGenerator.generateTokens(user.getEmail(), user.getRoles());
 
     }
 

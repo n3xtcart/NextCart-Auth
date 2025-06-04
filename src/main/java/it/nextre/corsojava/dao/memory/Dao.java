@@ -1,11 +1,11 @@
 package it.nextre.corsojava.dao.memory;
 
-import it.nextre.corsojava.dao.jdbc.PagedResult;
-import it.nextre.corsojava.entity.Entity;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import it.nextre.aut.pagination.PagedResult;
+import it.nextre.corsojava.entity.Entity;
 
 public abstract class Dao<T extends Entity> implements DaoInterface<T> {
 
@@ -57,7 +57,7 @@ public abstract class Dao<T extends Entity> implements DaoInterface<T> {
 		int start = (page - 1) * size;
 		int end = Math.min(start + size, total);
 		List<T> items = database.values().stream().skip(start).limit(size).toList();
-		return new PagedResult<T>(total, items, size);
+		return new PagedResult<T>(items,total , size);
 	}
 	
 

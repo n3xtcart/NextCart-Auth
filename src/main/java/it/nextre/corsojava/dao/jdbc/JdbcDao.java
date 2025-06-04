@@ -22,10 +22,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.jboss.logging.Logger;
 
+import it.nextre.aut.pagination.PagedResult;
 import it.nextre.corsojava.dao.memory.DaoInterface;
 import it.nextre.corsojava.entity.Entity;
 import it.nextre.corsojava.entity.annotation.Attribute;
@@ -256,7 +256,7 @@ public abstract class JdbcDao<T extends Entity> implements DaoInterface<T> {
             	if(totalElement==null) totalElement=rs.getInt("totale");
             	list.add((T) createObject(fields, connection, rs, clazz));
             }
-            PagedResult<T> pagedResult=new PagedResult<T>(pagSize, list, totalElement);
+            PagedResult<T> pagedResult=new PagedResult<T>(list,  totalElement,pagSize);
             return pagedResult;
         } catch (FileNotFoundException e) {
             throw new JdbcDaoException("File not found" + e.getMessage(), e);
@@ -458,6 +458,7 @@ public abstract class JdbcDao<T extends Entity> implements DaoInterface<T> {
         ArrayList<Attribute> value = new ArrayList<>();
         for (Field field : fields) {
             Attribute annotations = field.getAnnotation(Attribute.class);
+            ManyToMany manyToMany = field.getAnnotation(ManyToMany.class);
             try {
             	Object invoke = clazz.getMethod("get" + field.getName().substring(0, 1).toUpperCase() +field.getName().substring(1)).invoke(item);
 				if (annotations != null && !annotations.auto() &&  invoke != null ) {
@@ -467,7 +468,36 @@ public abstract class JdbcDao<T extends Entity> implements DaoInterface<T> {
 				    sb.append("?").append(",");
 				    value.add(annotations);
 				    struc.append(annotations.colName()).append(",");
+				}else if(manyToMany!=null && invoke!=null) {
+					if(invoke instanceof Collection<?> c) {
+						if(c.isEmpty()) continue;
+						for(Object o:c) {
+							if(o instanceof Entity e) {
+								if(e.getId()==null) continue;
+								String select= "SELECT id FROM " + manyToMany.joinTable() + " WHERE id = " + e.getId();
+								ResultSet rs = null;
+								try (Connection connection = getConnection()) {
+									PreparedStatement ps = connection.prepareStatement(select);
+									rs = ps.executeQuery();
+									if(rs.next()) {
+										String queryString="INSERT INTO " + manyToMany.supportTable() + " (" + manyToMany.joinColumn() + "," + manyToMany.supportJoinColumn() + ") VALUES ("+e.getId()+","+((Entity) item).getId()+")";
+										
+											ps = connection.prepareStatement(queryString);
+											ps.executeUpdate();
+											
+										
+									}
+								} catch (IOException e1) {
+									throw new JdbcDaoException("IO error " + e1.getMessage(), e1);
+								} catch (SQLException e1) {
+									throw new JdbcDaoException("SQL error " + e1.getMessage(), e1);
+								}
+							
+						}
+					}
+					}
 				}
+				
             } catch (IllegalAccessException e) {
             	// TODO Auto-generated catch block
             	e.printStackTrace();

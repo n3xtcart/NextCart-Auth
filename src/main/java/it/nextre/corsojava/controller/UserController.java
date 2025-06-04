@@ -4,9 +4,9 @@ import java.util.List;
 
 import io.quarkus.security.Authenticated;
 import it.nextre.aut.dto.LoginInfo;
+import it.nextre.aut.dto.TokenJwtDTO;
 import it.nextre.aut.dto.UserDTO;
-import it.nextre.corsojava.dao.jdbc.PagedResult;
-import it.nextre.corsojava.dto.TokensJwt;
+import it.nextre.aut.pagination.PagedResult;
 import it.nextre.corsojava.entity.Token;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -44,7 +44,7 @@ public class UserController extends Controller{
     @Path("/login")
 @Produces(MediaType.APPLICATION_JSON) 
 @Consumes(MediaType.APPLICATION_JSON)
-    public TokensJwt login(LoginInfo info) {
+    public TokenJwtDTO login(LoginInfo info) {
     	UserDTO userDTO=new UserDTO();
     	userDTO.setEmail(info.getEmail());
     	userDTO.setPassword(info.getPassword());
