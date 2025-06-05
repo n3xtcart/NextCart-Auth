@@ -1,16 +1,17 @@
 package it.nextre.corsojava.config;
 
-import it.nextre.corsojava.service.UserService;
-import it.nextre.corsojava.service.UserServiceInterface;
-import it.nextre.corsojava.service.UserServiceJdbc;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+
+import it.nextre.aut.service.UserService;
+import it.nextre.corsojava.service.UserService.UserServiceJdbc;
+import it.nextre.corsojava.service.UserService.UserServiceMemory;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 @ApplicationScoped
-public class ServiceProducer {
+public class UserServiceProducer {
 
     @ConfigProperty(name = "source.Mem")
     private String serviceType;
@@ -18,11 +19,11 @@ public class ServiceProducer {
     @Inject
     private UserServiceJdbc serviceJdbc;
     @Inject
-    private UserService service;
+    private UserServiceMemory service;
 
     @Produces
     @Default
-    public UserServiceInterface getService() {
+    public UserService getService() {
 
         return switch (serviceType) {
             case "db" -> serviceJdbc;

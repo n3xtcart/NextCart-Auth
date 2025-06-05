@@ -1,4 +1,4 @@
-package it.nextre.corsojava.service;
+package it.nextre.corsojava.service.UserService;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -14,10 +14,12 @@ import org.jboss.logging.Logger;
 
 import io.quarkus.arc.lookup.LookupIfProperty;
 import it.nextre.aut.dto.GroupDTO;
+import it.nextre.aut.dto.LoginInfo;
 import it.nextre.aut.dto.RoleDTO;
 import it.nextre.aut.dto.TokenJwtDTO;
 import it.nextre.aut.dto.UserDTO;
 import it.nextre.aut.pagination.PagedResult;
+import it.nextre.aut.service.UserService;
 import it.nextre.corsojava.dao.memory.GroupDAO;
 import it.nextre.corsojava.dao.memory.RoleDAO;
 import it.nextre.corsojava.dao.memory.TokenUserDAO;
@@ -45,8 +47,8 @@ import jakarta.mail.internet.MimeMessage.RecipientType;
 @ApplicationScoped
 
 @LookupIfProperty(name = "source.Mem", stringValue = "mem")
-public class UserService implements UserServiceInterface {
-    private static final Logger LOGGER = Logger.getLogger(UserService.class);
+public class UserServiceMemory implements UserService{
+    private static final Logger LOGGER = Logger.getLogger(UserServiceMemory.class);
     private final UserDAO userDAO = UserDAO.getInstance();
     private final TokenUserDAO tokenUserDAO = TokenUserDAO.getIstance();
     private final GroupDAO groupDAO = GroupDAO.getIstance();
@@ -59,7 +61,7 @@ public class UserService implements UserServiceInterface {
 
 
     @Override
-    public TokenJwtDTO login(UserDTO user) {
+    public TokenJwtDTO login(LoginInfo user) {
         LOGGER.info("Login in corso per l'utente: " + user.getEmail());
         if (user.getEmail().isBlank() || user.getPassword().isBlank()) {
             LOGGER.warn("Email o password non validi");
@@ -162,7 +164,6 @@ public class UserService implements UserServiceInterface {
 
     }
 
-    @Override
     public boolean checkToken(Token token) {
         LOGGER.info("Controllo token in corso per l'utente: " + token.getUser().getEmail());
         Token token2 = tokenUserDAO.getTokenByValue(token.getValue());
@@ -175,7 +176,7 @@ public class UserService implements UserServiceInterface {
    
 
     @Override
-    public void updateUser(UserDTO user) {
+    public void update(UserDTO user) {
         if (user == null) throw new UnauthorizedException("Utente non valido");
         if (user.getGroupDTO() == null) throw new UnauthorizedException("Gruppo non valido");
         if (user.getGroupDTO().getRoleDTO() == null) throw new UnauthorizedException("Ruolo non valido");
@@ -191,8 +192,7 @@ public class UserService implements UserServiceInterface {
         LOGGER.info("Modifica effettuata con successo per l'utente: " + user.getEmail());
     }
 
-    @Override
-    public void deleteUser(UserDTO user) {
+    public void delete(UserDTO user) {
         if (user == null) throw new UnauthorizedException("Utente non valido");
         if (user.getGroupDTO() == null) throw new UnauthorizedException("Gruppo non valido");
         if (user.getGroupDTO().getRoleDTO() == null) throw new UnauthorizedException("Ruolo non valido");
@@ -204,7 +204,6 @@ public class UserService implements UserServiceInterface {
         LOGGER.info("Cancellazione effettuata con successo per l'utente: " + user.getEmail());
     }
 
-    @Override
     public void createUser(UserDTO user) {
         LOGGER.info("Creazione in corso per l'utente: " + user.getEmail());
        
@@ -224,7 +223,6 @@ public class UserService implements UserServiceInterface {
         LOGGER.info("Creazione effettuata con successo per l'utente: " + user.getEmail());
     }
 
-    @Override
     public List<UserDTO> getAllUsers() {
 
         LOGGER.info("Recupero lista utenti in corso");
@@ -249,7 +247,6 @@ public class UserService implements UserServiceInterface {
         }).toList();
     }
 
-    @Override
     public void createGroup(GroupDTO group) {
         LOGGER.info("Creazione in corso per il gruppo: " + group.getId());
       
@@ -258,7 +255,6 @@ public class UserService implements UserServiceInterface {
         LOGGER.info("Creazione effettuata con successo per il gruppo: " + group.getId());
     }
 
-    @Override
     public void updateGroup(GroupDTO group) {
         LOGGER.info("Modifica in corso per il gruppo: " + group.getId());
         
@@ -273,7 +269,6 @@ public class UserService implements UserServiceInterface {
         LOGGER.info("Modifica effettuata con successo per il gruppo: " + group.getId());
     }
 
-    @Override
     public void deleteGroup(GroupDTO group) {
         LOGGER.info("Cancellazione in corso per il gruppo: " + group.getId());
        
@@ -285,7 +280,6 @@ public class UserService implements UserServiceInterface {
         LOGGER.info("Cancellazione effettuata con successo per il gruppo: " + group.getId());
     }
 
-    @Override
     public List<GroupDTO> getAllGroup() {
         LOGGER.info("Recupero lista gruppi in corso");
         
@@ -303,7 +297,6 @@ public class UserService implements UserServiceInterface {
         }).toList();
     }
 
-    @Override
     public void createRole(RoleDTO roleDTO) {
         LOGGER.info("Creazione in corso per il ruolo: " + roleDTO.getId());
         
@@ -312,7 +305,6 @@ public class UserService implements UserServiceInterface {
         LOGGER.info("Creazione effettuata con successo per il ruolo: " + roleDTO.getId());
     }
 
-    @Override
     public void updateRole(RoleDTO roleDTO) {
         LOGGER.info("Modifica in corso per il ruolo: " + roleDTO.getId());
        
@@ -322,7 +314,6 @@ public class UserService implements UserServiceInterface {
         LOGGER.info("Modifica effettuata con successo per il ruolo: " + roleDTO.getId());
     }
 
-    @Override
     public void deleteRole(RoleDTO roleDTO) {
         LOGGER.info("Cancellazione in corso per il ruolo: " + roleDTO.getId());
       
@@ -335,7 +326,6 @@ public class UserService implements UserServiceInterface {
         LOGGER.info("Cancellazione effettuata con successo per il ruolo: " + roleDTO.getId());
     }
 
-    @Override
     public List<RoleDTO> getAllRole() {
         LOGGER.info("Recupero lista ruoli in corso");
         
@@ -365,9 +355,8 @@ public class UserService implements UserServiceInterface {
         return tokenUser;
     }
 
-    @Override
-    public TokenJwtDTO confirmRegistration(Token token) {
-        Token token2 = tokenUserDAO.getTokenByValue(token.getValue());
+    public TokenJwtDTO confirmRegistration(String token) {
+        Token token2 = tokenUserDAO.getTokenByValue(token);
         if (token2 == null || !token2.getDataScadenza().isAfter(LocalDateTime.now().toInstant(ZoneOffset.UTC)))
             throw new RuntimeException("token scaduto :rifare la registrazione");
         User user = token2.getUser();
@@ -377,25 +366,27 @@ public class UserService implements UserServiceInterface {
 
     }
 
-	@Override
 	public Token findTokenByValue(String val) {
 		return tokenUserDAO.getTokenByValue(val);
 	}
 
-	@Override
 	public PagedResult<UserDTO> getAllUsersPag( int page, int size) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
 	public PagedResult<GroupDTO> getAllGroupsPag( int page, int size) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
 	public PagedResult<RoleDTO> getAllRolesPag( int page, int size) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public TokenJwtDTO refreshToken(UserDTO user) {
 		// TODO Auto-generated method stub
 		return null;
 	}

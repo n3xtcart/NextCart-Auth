@@ -1,12 +1,15 @@
 package it.nextre.corsojava.controller;
 
+import java.util.List;
+
 import org.jboss.logging.Logger;
 
 import it.nextre.aut.dto.LoginInfo;
 import it.nextre.aut.dto.TokenJwtDTO;
 import it.nextre.aut.dto.UserDTO;
-import it.nextre.aut.service.UserService;
-import it.nextre.corsojava.config.UserServiceProducer;
+import it.nextre.aut.pagination.PagedResult;
+import it.nextre.aut.service.UserAdminService;
+import it.nextre.corsojava.config.UserAdminServiceProducer;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -18,12 +21,12 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
 @Path("/users") 
-public class UserController {
-	private static final Logger LOGGER = Logger.getLogger(UserController.class);
+public class UserAdminController {
+	private static final Logger LOGGER = Logger.getLogger(UserAdminController.class);
 
-	private final UserService service;
+	private final UserAdminService service;
 	
-	public UserController(UserServiceProducer serviceProducer) {
+	public UserAdminController(UserAdminServiceProducer serviceProducer) {
 				this.service = serviceProducer.getService();
 	}
 
@@ -33,7 +36,20 @@ public class UserController {
 
    
 
+    @GET
+    @Produces(MediaType.APPLICATION_JSON) 
+    public List<UserDTO> getAll() {
+	
+        return service.getAllUsers() ;
+    }
+    
+    @GET
+    @Path("/paginated/{page}/{size}")
+    @Produces(MediaType.APPLICATION_JSON) 
+    public PagedResult<UserDTO> getAllPag(@PathParam("page") int page, @PathParam("size") int size) {
 
+        return service.getAllUsersPag(page, size) ;
+    }
     
     @POST
     @Path("/login")
@@ -68,11 +84,15 @@ public class UserController {
     @Produces(MediaType.APPLICATION_JSON)
     public MessageResponse confirmRegistration(@PathParam("token") String token) {
         service.confirmRegistration(token);
-        return new MessageResponse("registrazione confermata con successo");
+        return new MessageResponse("Mail inviata");
     }
     
     
-   
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    public void createUser(UserDTO userDTO) {
+    	service.createUser(userDTO);
+    }
     
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
