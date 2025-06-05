@@ -146,6 +146,20 @@ public abstract class JdbcDao<T extends Entity> implements DaoInterface<T> {
             int i = 1;
             ps.setLong(i++, id);
             ps.executeUpdate();
+            List<Field> fields = new ArrayList<>(Arrays.asList(clazz.getSuperclass().getDeclaredFields()));
+
+            fields.addAll(Arrays.asList(clazz.getDeclaredFields()));
+            
+            for (Field field : fields) {
+                ManyToMany manyToMany = field.getAnnotation(ManyToMany.class);
+                if (manyToMany == null) continue;
+                String delete = "DELETE FROM " + manyToMany.supportTable() +
+                		" WHERE " + manyToMany.supportJoinColumn() + "=" + id;
+				ps = connection.prepareStatement(delete);
+				ps.executeUpdate();
+               
+            }
+            
         } catch (FileNotFoundException e) {
             throw new JdbcDaoException("File not found" + e.getMessage(), e);
         } catch (SQLException e) {
@@ -374,12 +388,69 @@ public abstract class JdbcDao<T extends Entity> implements DaoInterface<T> {
         StringBuilder struc = new StringBuilder();
         ArrayList<Attribute> value = new ArrayList<>();
         for (Field field : fields) {
+            ManyToMany manyToMany = field.getAnnotation(ManyToMany.class);
             Attribute annotations = field.getAnnotation(Attribute.class);
             if (annotations != null && !annotations.auto()) {
                 sb.append(annotations.colName() + "=").append("?").append(",");
                 value.add(annotations);
                 struc.append(annotations.colName()).append(",");
-            }
+            }else if(manyToMany != null) {
+            	String delete = "DELETE FROM " + manyToMany.supportTable() + " WHERE " + manyToMany.supportJoinColumn() + "=" + ((Entity) item).getId();
+            	PreparedStatement ps = null;
+            	try (Connection connection = getConnection()) {
+					ps = connection.prepareStatement(delete);
+					ps.executeUpdate();
+					Object invoke = null;
+					try {
+						invoke = clazz.getMethod("get" + field.getName().substring(0, 1).toUpperCase() +field.getName().substring(1)).invoke(item);
+					} catch (IllegalAccessException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IllegalArgumentException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (InvocationTargetException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (NoSuchMethodException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (SecurityException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					
+					if(invoke instanceof Collection<?> c) {
+						if(c.isEmpty()) continue;
+						for(Object o:c) {
+							if(o instanceof Entity e) {
+								if(e.getId()==null) continue;
+								String checkQuery = "SELECT id FROM " + manyToMany.joinTable() + " WHERE id = " + e.getId();
+								ps = connection.prepareStatement(checkQuery);
+								ResultSet rs = ps.executeQuery();
+								if(rs.next()) {
+									String add=	"insert into " + manyToMany.supportTable() + " (" + manyToMany.joinColumn() 
+									+ "," + manyToMany.supportJoinColumn() + ") VALUES ("+e.getId()+","+((Entity) item).getId()+")";
+						
+										ps = connection.prepareStatement(add);
+										ps.executeUpdate();
+								
+										
+									
+								}
+								
+								
+							
+						}
+					}
+					}
+				} catch (SQLException e) {
+					throw new JdbcDaoException("SQL error " + e.getMessage(), e);
+				} catch (IOException e) {
+					throw new JdbcDaoException("IO error " + e.getMessage(), e);
+				}
+            	
+			}
         }
         sb.deleteCharAt(sb.length() - 1);
         String query = "UPDATE " + tableName + sb.toString() + " where id=" + id;
@@ -411,6 +482,7 @@ public abstract class JdbcDao<T extends Entity> implements DaoInterface<T> {
             }
 
             ps.executeUpdate();
+
 
         } catch (FileNotFoundException e) {
             throw new JdbcDaoException("File not found " + e.getMessage(), e);
@@ -456,9 +528,10 @@ public abstract class JdbcDao<T extends Entity> implements DaoInterface<T> {
         StringBuilder sb = new StringBuilder(" VALUES (");
         StringBuilder struc = new StringBuilder(" (");
         ArrayList<Attribute> value = new ArrayList<>();
+        List<Field> manyToManyFields = new ArrayList<>();
         for (Field field : fields) {
             Attribute annotations = field.getAnnotation(Attribute.class);
-            ManyToMany manyToMany = field.getAnnotation(ManyToMany.class);
+           if(field.getAnnotation(ManyToMany.class) != null) manyToManyFields.add(field);
             try {
             	Object invoke = clazz.getMethod("get" + field.getName().substring(0, 1).toUpperCase() +field.getName().substring(1)).invoke(item);
 				if (annotations != null && !annotations.auto() &&  invoke != null ) {
@@ -468,34 +541,6 @@ public abstract class JdbcDao<T extends Entity> implements DaoInterface<T> {
 				    sb.append("?").append(",");
 				    value.add(annotations);
 				    struc.append(annotations.colName()).append(",");
-				}else if(manyToMany!=null && invoke!=null) {
-					if(invoke instanceof Collection<?> c) {
-						if(c.isEmpty()) continue;
-						for(Object o:c) {
-							if(o instanceof Entity e) {
-								if(e.getId()==null) continue;
-								String select= "SELECT id FROM " + manyToMany.joinTable() + " WHERE id = " + e.getId();
-								ResultSet rs = null;
-								try (Connection connection = getConnection()) {
-									PreparedStatement ps = connection.prepareStatement(select);
-									rs = ps.executeQuery();
-									if(rs.next()) {
-										String queryString="INSERT INTO " + manyToMany.supportTable() + " (" + manyToMany.joinColumn() + "," + manyToMany.supportJoinColumn() + ") VALUES ("+e.getId()+","+((Entity) item).getId()+")";
-										
-											ps = connection.prepareStatement(queryString);
-											ps.executeUpdate();
-											
-										
-									}
-								} catch (IOException e1) {
-									throw new JdbcDaoException("IO error " + e1.getMessage(), e1);
-								} catch (SQLException e1) {
-									throw new JdbcDaoException("SQL error " + e1.getMessage(), e1);
-								}
-							
-						}
-					}
-					}
 				}
 				
             } catch (IllegalAccessException e) {
@@ -553,6 +598,34 @@ public abstract class JdbcDao<T extends Entity> implements DaoInterface<T> {
             if (rs.next()) {
                 Long id = rs.getLong(1);
                 item.setId(id);
+                for(Field field:manyToManyFields) {
+                    ManyToMany manyToMany = field.getAnnotation(ManyToMany.class);
+                    Object invoke = clazz.getMethod("get" + field.getName().substring(0, 1).toUpperCase() +field.getName().substring(1)).invoke(item);
+    				
+					if(invoke instanceof Collection<?> c) {
+						if(c.isEmpty()) continue;
+						for(Object o:c) {
+							if(o instanceof Entity e) {
+								if(e.getId()==null) continue;
+								String select= "SELECT id FROM " + manyToMany.joinTable() + " WHERE id = " + e.getId();
+								
+									ps = connection.prepareStatement(select);
+									rs = ps.executeQuery();
+									if(rs.next()) {
+										String queryString="INSERT INTO " + manyToMany.supportTable() + " (" + manyToMany.joinColumn() + "," + manyToMany.supportJoinColumn() + ") VALUES ("+e.getId()+","+((Entity) item).getId()+")";
+										
+											ps = connection.prepareStatement(queryString);
+											ps.executeUpdate();
+											
+										
+									}
+								
+							
+						}
+					}
+					}
+				
+                }
                 return id;
             }
         } catch (IOException e) {
