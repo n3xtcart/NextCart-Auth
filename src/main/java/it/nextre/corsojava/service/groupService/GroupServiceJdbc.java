@@ -1,5 +1,6 @@
 package it.nextre.corsojava.service.groupService;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,6 +36,7 @@ public class GroupServiceJdbc implements GroupService{
         LOGGER.info("Creazione in corso per il gruppo: " + group.getId());
       
         Group toSave = new Group(group);
+        toSave.setDataCreazione(Instant.now());
         groupDAO.add(toSave);
         LOGGER.info("Creazione effettuata con successo per il gruppo: " + group.getId());
     }

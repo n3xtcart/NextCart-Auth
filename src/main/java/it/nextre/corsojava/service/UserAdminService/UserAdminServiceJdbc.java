@@ -1,5 +1,6 @@
 package it.nextre.corsojava.service.UserAdminService;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,7 +50,7 @@ public class UserAdminServiceJdbc extends UserServiceJdbc implements UserAdminSe
         toSave.setActive(true);
 
         
-
+        toSave.setDataCreazione(Instant.now());
         userDAO.add(toSave);
         LOGGER.info("Creazione effettuata con successo per l'utente: " + user.getEmail());
     }

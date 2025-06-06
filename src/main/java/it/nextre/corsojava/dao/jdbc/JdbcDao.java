@@ -390,7 +390,7 @@ public abstract class JdbcDao<T extends Entity> implements DaoInterface<T> {
         for (Field field : fields) {
             ManyToMany manyToMany = field.getAnnotation(ManyToMany.class);
             Attribute annotations = field.getAnnotation(Attribute.class);
-            if (annotations != null && !annotations.auto()) {
+            if (annotations != null && !annotations.auto() && annotations.update()) {
                 sb.append(annotations.colName() + "=").append("?").append(",");
                 value.add(annotations);
                 struc.append(annotations.colName()).append(",");
@@ -756,6 +756,9 @@ public abstract class JdbcDao<T extends Entity> implements DaoInterface<T> {
                         String.class);
 
                 Object me = method.invoke(rs, annotations.colName());
+                if (me == null) {
+					continue;
+				}
                 if (annotations.className().getSuperclass() == Entity.class) {
                     var entity = annotations.className().getDeclaredConstructor().newInstance();
                     Method setId = annotations.className().getMethod("setId", Long.class);

@@ -1,6 +1,7 @@
 package it.nextre.corsojava.service.UserService;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Optional;
@@ -149,6 +150,7 @@ public class UserServiceJdbc implements UserService {
         //TODO: gestire il gruppo di default
         user2.setGroup(null);
         user2.setActive(false);
+        user2.setDataCreazione(Instant.now());
         userDAO.add(user2);
         Token token = generateToken(userDAO.getByEmail(user2.getEmail()));
         tokenUserDAO.add(token);

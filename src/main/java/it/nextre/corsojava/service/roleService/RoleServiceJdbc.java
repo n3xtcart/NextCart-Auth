@@ -1,5 +1,6 @@
 package it.nextre.corsojava.service.roleService;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,7 +33,9 @@ public RoleServiceJdbc(EntityConverter entityConverter) {
 	public void create(RoleDTO roleDTO) {
         LOGGER.info("Creazione in corso per il ruolo: " + roleDTO.getId());
        
+        
         Role toSave = new Role(roleDTO);
+        toSave.setDataCreazione(Instant.now());
         roleDAO.add(toSave);
         LOGGER.info("Creazione effettuata con successo per il ruolo: " + roleDTO.getId());
     }

@@ -9,14 +9,42 @@ public abstract class Entity {
     @Attribute(fieldName = "id", colName = "id", type = "long", className = Long.class, colClass = long.class, auto = true)
     protected Long id;
 
-    @Attribute(fieldName = "ultimaModifica", colName = "ultimaModifica", className = Instant.class, colClass = Timestamp.class, type = "timestamp")
+    @Attribute(fieldName = "ultimaModifica", colName = "ultimaModifica", className = Instant.class, colClass = Timestamp.class, type = "timestamp" ,update = false)
     protected Instant ultimaModifica;
+    @Attribute(fieldName = "dataCreazione", colName = "dataCreazione", className = Instant.class, colClass = Timestamp.class, type = "timestamp")
+    protected Instant dataCreazione;
+    @Attribute(fieldName="user", colName = "creationUser", className = User.class, colClass = long.class, type = "long",update = false)
+    User user;
 
     public Entity() {
         this.ultimaModifica = Instant.now();
     }
 
-    public Instant getUltimaModifica() {
+    
+    
+    public User getUser() {
+		return user;
+	}
+
+
+
+	public void setUser(User user) {
+		this.user = user;
+	}
+
+
+
+	public Instant getDataCreazione() {
+		return dataCreazione;
+	}
+
+
+	public void setDataCreazione(Instant dataCreazione) {
+		this.dataCreazione = dataCreazione;
+	}
+
+
+	public Instant getUltimaModifica() {
         return ultimaModifica;
     }
 

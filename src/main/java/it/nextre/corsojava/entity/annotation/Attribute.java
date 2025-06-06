@@ -15,5 +15,6 @@ public @interface Attribute {
 	Class<?> className() default String.class;
 	Class<?> colClass() default String.class;
 	boolean auto() default false;
+	boolean update() default true;
 
 }
