@@ -24,6 +24,7 @@ import it.nextre.corsojava.entity.User;
 import it.nextre.corsojava.utils.EntityConverter;
 import it.nextre.corsojava.utils.JwtGenerator;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Named;
 import jakarta.mail.Authenticator;
 import jakarta.mail.Message;
 import jakarta.mail.MessagingException;
@@ -35,6 +36,7 @@ import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.MimeMessage.RecipientType;
 
 @ApplicationScoped
+@Named("defaultJdbc")
 @LookupIfProperty(name = "source.Mem", stringValue = "db")
 public class UserServiceJdbc implements UserService {
     private static final Logger LOGGER = Logger.getLogger(UserServiceJdbc.class);
@@ -146,8 +148,6 @@ public class UserServiceJdbc implements UserService {
         user2.setPassword(user.getPassword());
         //TODO: gestire il gruppo di default
         user2.setGroup(null);
-        //TODO: gestire il ruolo di default
-        user2.setRole(null);
         user2.setActive(false);
         userDAO.add(user2);
         Token token = generateToken(userDAO.getByEmail(user2.getEmail()));

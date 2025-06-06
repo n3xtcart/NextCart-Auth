@@ -9,6 +9,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 @ApplicationScoped
 public class UserServiceProducer {
@@ -17,8 +18,10 @@ public class UserServiceProducer {
     private String serviceType;
 
     @Inject
+    @Named("defaultJdbc")
     private UserServiceJdbc serviceJdbc;
     @Inject
+    @Named("defaultMemory")
     private UserServiceMemory service;
 
     @Produces

@@ -18,7 +18,7 @@ public class JwtGenerator {
 		log.info("Creating JWT tokens for user: " + email);
 		
 	    String accessToken = Jwt.subject(email)
-	                          .claim("roles", roles.stream()
+	                          .groups( roles.stream()
 	                                               .map(Role::getDescrizione).collect(Collectors.toSet()))
 	                          .claim("token_type", "access")
 	                          .expiresIn(Duration.ofMinutes(10))

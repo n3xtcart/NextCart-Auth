@@ -3,10 +3,15 @@ package it.nextre.corsojava.service.roleService;
 import java.util.List;
 import java.util.Optional;
 
+import io.quarkus.arc.lookup.LookupIfProperty;
 import it.nextre.aut.dto.RoleDTO;
 import it.nextre.aut.pagination.PagedResult;
 import it.nextre.aut.service.RoleService;
+import jakarta.enterprise.context.ApplicationScoped;
 
+@ApplicationScoped
+
+@LookupIfProperty(name = "source.Mem", stringValue = "mem")
 public class RoleServiceMemory implements RoleService {
 
 	@Override

@@ -62,8 +62,17 @@ public RoleServiceJdbc(EntityConverter entityConverter) {
 
 	@Override
 	public Optional<RoleDTO> findById(Long id) {
-		// TODO Auto-generated method stub
-		return Optional.empty();
+				LOGGER.info("Recupero ruolo con id: " + id);
+		
+		Role role = roleDAO.getById(id);
+		if (role == null) {
+			LOGGER.warn("Tentativo di recupero di un ruolo non valido");
+			throw new RoleMissingException("Ruolo richiesto non presente");
+		}
+		
+		RoleDTO roleDTO = entityConverter.fromEntity(role);
+		LOGGER.info("Recupero ruolo con id: " + id + " effettuato con successo");
+		return Optional.of(roleDTO);
 	}
 
 	@Override

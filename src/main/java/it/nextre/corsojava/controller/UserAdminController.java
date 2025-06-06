@@ -10,6 +10,7 @@ import it.nextre.aut.dto.UserDTO;
 import it.nextre.aut.pagination.PagedResult;
 import it.nextre.aut.service.UserAdminService;
 import it.nextre.corsojava.config.UserAdminServiceProducer;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -20,7 +21,7 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
-@Path("/users") 
+@Path("/admin/users") 
 public class UserAdminController {
 	private static final Logger LOGGER = Logger.getLogger(UserAdminController.class);
 
@@ -45,10 +46,10 @@ public class UserAdminController {
     
     @GET
     @Path("/paginated/{page}/{size}")
+    @RolesAllowed({"admin"}) 
     @Produces(MediaType.APPLICATION_JSON) 
     public PagedResult<UserDTO> getAllPag(@PathParam("page") int page, @PathParam("size") int size) {
-
-        return service.getAllUsersPag(page, size) ;
+    	 return service.getAllUsersPag(page, size) ;
     }
     
     @POST

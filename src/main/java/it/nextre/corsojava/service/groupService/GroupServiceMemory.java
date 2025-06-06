@@ -3,10 +3,15 @@ package it.nextre.corsojava.service.groupService;
 import java.util.List;
 import java.util.Optional;
 
+import io.quarkus.arc.lookup.LookupIfProperty;
 import it.nextre.aut.dto.GroupDTO;
 import it.nextre.aut.pagination.PagedResult;
 import it.nextre.aut.service.GroupService;
+import jakarta.enterprise.context.ApplicationScoped;
 
+@ApplicationScoped
+
+@LookupIfProperty(name = "source.Mem", stringValue = "mem")
 public class GroupServiceMemory implements GroupService {
 
 	@Override

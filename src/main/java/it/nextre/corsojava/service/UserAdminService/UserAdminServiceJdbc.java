@@ -13,16 +13,26 @@ import it.nextre.corsojava.entity.User;
 import it.nextre.corsojava.service.UserService.UserServiceJdbc;
 import it.nextre.corsojava.utils.EntityConverter;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 
 @ApplicationScoped
 @LookupIfProperty(name = "source.Mem", stringValue = "db")
 public class UserAdminServiceJdbc extends UserServiceJdbc implements UserAdminService{
-    private static final Logger LOGGER = Logger.getLogger(UserServiceJdbc.class);
-    
+	
+	 public UserAdminServiceJdbc() {
+	        // Required by CDI
+	        super(null); // If super requires a non-null param, consider using @Inject instead
+	    }
+	
+	@Inject
     public UserAdminServiceJdbc(EntityConverter entityConverter) {
-    			super(entityConverter);
+		super(entityConverter);
 	}
+
+	private static final Logger LOGGER = Logger.getLogger(UserServiceJdbc.class);
+    
+  
 
 
 	
@@ -64,7 +74,7 @@ public class UserAdminServiceJdbc extends UserServiceJdbc implements UserAdminSe
     	LOGGER.info("Recupero lista utenti in corso");
 		PagedResult<User> allUsersPaged = userDAO.getAllPag(page,size);
 		PagedResult<UserDTO> copy = PagedResult.copy(allUsersPaged);
-		copy.setContent(allUsersPaged.getContent().stream().filter(a -> a.getActive()).map(user -> entityConverter.fromEntity(user)).toList());
+		copy.setContent(allUsersPaged.getContent().stream().map(user -> entityConverter.fromEntity(user)).toList());
 		return copy;
     }
 

@@ -18,7 +18,6 @@ import it.nextre.aut.dto.LoginInfo;
 import it.nextre.aut.dto.RoleDTO;
 import it.nextre.aut.dto.TokenJwtDTO;
 import it.nextre.aut.dto.UserDTO;
-import it.nextre.aut.pagination.PagedResult;
 import it.nextre.aut.service.UserService;
 import it.nextre.corsojava.dao.memory.GroupDAO;
 import it.nextre.corsojava.dao.memory.RoleDAO;
@@ -32,8 +31,10 @@ import it.nextre.corsojava.exception.GroupMissingException;
 import it.nextre.corsojava.exception.RoleMissingException;
 import it.nextre.corsojava.exception.UnauthorizedException;
 import it.nextre.corsojava.exception.UserMissingException;
+import it.nextre.corsojava.utils.EntityConverter;
 import it.nextre.corsojava.utils.JwtGenerator;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Named;
 import jakarta.mail.Authenticator;
 import jakarta.mail.Message;
 import jakarta.mail.MessagingException;
@@ -45,7 +46,7 @@ import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.MimeMessage.RecipientType;
 
 @ApplicationScoped
-
+@Named("defaultMemory")
 @LookupIfProperty(name = "source.Mem", stringValue = "mem")
 public class UserServiceMemory implements UserService{
     private static final Logger LOGGER = Logger.getLogger(UserServiceMemory.class);
@@ -53,9 +54,12 @@ public class UserServiceMemory implements UserService{
     private final TokenUserDAO tokenUserDAO = TokenUserDAO.getIstance();
     private final GroupDAO groupDAO = GroupDAO.getIstance();
     private final RoleDAO roleDAO = RoleDAO.getIstance();
+    private final EntityConverter entityConverter;
 
 
-    
+    public UserServiceMemory(EntityConverter entityConverter) {
+    			this.entityConverter = entityConverter;
+	}
 
     
 
@@ -330,13 +334,8 @@ public class UserServiceMemory implements UserService{
         LOGGER.info("Recupero lista ruoli in corso");
         
         LOGGER.info("Fine recupero lista ruoli");
-        return roleDAO.getAll().stream().map(role -> {
-            RoleDTO dto =RoleDTO.of()
-				.id(role.getId())
-				//TODO: aggiungere i campi necessari
-				.build();
-            return dto;
-        }).toList();
+        return roleDAO.getAll().stream().map(role -> entityConverter.fromEntity(role)
+        ).toList();
     }
 
     public Token generateToken(User user) {
@@ -370,25 +369,26 @@ public class UserServiceMemory implements UserService{
 		return tokenUserDAO.getTokenByValue(val);
 	}
 
-	public PagedResult<UserDTO> getAllUsersPag( int page, int size) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public PagedResult<GroupDTO> getAllGroupsPag( int page, int size) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public PagedResult<RoleDTO> getAllRolesPag( int page, int size) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	
 
 	@Override
 	public TokenJwtDTO refreshToken(UserDTO user) {
-		// TODO Auto-generated method stub
-		return null;
+		LOGGER.info("Refresh token in corso per l'utente: " + user.getEmail());
+		if (user == null || user.getEmail() == null || user.getEmail().isBlank()) {
+			LOGGER.warn("Utente o email non validi");
+			throw new UnauthorizedException("Utente o email non validi");
+		}
+		Optional<User> byEmail = Optional.of(userDAO.getByEmail(user.getEmail()));
+		User u;
+		if (byEmail.isPresent() && byEmail.get().getActive()) {
+			u = byEmail.get();
+		} else {
+			LOGGER.warn("Utente non trovato o non attivo");
+			throw new UnauthorizedException("Utente non trovato o non attivo");
+		}
+		
+		// Generazione nuovo token
+		return JwtGenerator.generateTokens(u.getEmail(), u.getRoles());
 	}
 
 }

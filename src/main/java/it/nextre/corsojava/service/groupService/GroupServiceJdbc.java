@@ -68,8 +68,17 @@ public class GroupServiceJdbc implements GroupService{
 
 	@Override
 	public Optional<GroupDTO> findById(Long id) {
-		// TODO Auto-generated method stub
-		return Optional.empty();
+		LOGGER.info("Ricerca in corso per il gruppo con ID: " + id);
+		
+		Group group = groupDAO.getById(id);
+		if (group == null) {
+			LOGGER.warn("Nessun gruppo trovato con ID: " + id);
+			return Optional.empty();
+		}
+		
+		GroupDTO groupDTO = entityConverter.fromEntity(group);
+		LOGGER.info("Gruppo trovato con successo: " + groupDTO.getId());
+		return Optional.of(groupDTO);
 	}
 
 	@Override
