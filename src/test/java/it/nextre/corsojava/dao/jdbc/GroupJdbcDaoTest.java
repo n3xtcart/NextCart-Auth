@@ -3,19 +3,28 @@ package it.nextre.corsojava.dao.jdbc;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
+import java.sql.SQLException;
 import java.util.HashSet;
 
 import org.junit.jupiter.api.Test;
 
+import io.agroal.api.AgroalDataSource;
+import io.quarkus.test.junit.QuarkusTest;
 import it.nextre.corsojava.entity.Group;
 import it.nextre.corsojava.entity.Role;
-import it.nextre.corsojava.entity.User;
-
+import jakarta.inject.Inject;
+@QuarkusTest
 public class GroupJdbcDaoTest {
-	
+	@Inject
+	GroupJdbcDao dao ;
+//	@Inject
+//	AgroalDataSource dataSource;
 	@Test
-	public void testSaveGroup() {
-		GroupJdbcDao dao = GroupJdbcDao.getInstance();
+	public void testSaveGroup() throws SQLException {
+//		System.out.println(dataSource+" ");
+//		System.out.println(dataSource.getConnection());
+//		
+//		GroupJdbcDao dao = new GroupJdbcDao(dataSource);
 		Group group = new Group();
 		group.setId(1L);
 		Role role = new Role();
@@ -32,7 +41,6 @@ public class GroupJdbcDaoTest {
 	
 	@Test
 	public void testUpdateGroup() {
-		GroupJdbcDao dao = GroupJdbcDao.getInstance();
 		Group group = new Group();
 		group.setId(1L);
 		Role role = new Role();
@@ -57,7 +65,6 @@ public class GroupJdbcDaoTest {
 	
 	@Test
 	public void testDeleteGroup() {
-		GroupJdbcDao dao = GroupJdbcDao.getInstance();
 		Group group = new Group();
 		group.setId(1L);
 		Role role = new Role();
@@ -75,13 +82,12 @@ public class GroupJdbcDaoTest {
 	
 	@Test
 	public void testRelazioni() {
-		Group byId = GroupJdbcDao.getInstance().getById(1L);
+		Group byId =dao.getById(1L);
 		System.out.println(byId);
 	}
 	
 	@Test
 	public void testGetAllGroup() {
-		GroupJdbcDao dao = GroupJdbcDao.getInstance();
 		Group group = new Group();
 		group.setId(1L);
 		Role role = new Role();

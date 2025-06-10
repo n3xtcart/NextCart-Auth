@@ -8,17 +8,21 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
+import io.quarkus.test.junit.QuarkusTest;
 import it.nextre.aut.pagination.PagedResult;
 import it.nextre.corsojava.entity.Group;
 import it.nextre.corsojava.entity.Role;
 import it.nextre.corsojava.entity.User;
+import jakarta.inject.Inject;
 
+@QuarkusTest
 public class UserjdbcDaoTest {
+	@Inject
+	UserJdbcDao dao ;
 	
 	
 	@Test
 	public void testPag() {
-		UserJdbcDao dao=UserJdbcDao.getInstance();
 		PagedResult<User> allPag = dao.getAllPag(1, 10);
 		System.out.println(allPag);
 	}
@@ -27,7 +31,7 @@ public class UserjdbcDaoTest {
 	
 	@Test
 	public void testRelazioni() {
-		User byId = UserJdbcDao.getInstance().getById(1L);
+		User byId = dao.getById(1L);
 		System.out.println(byId);
 	}
 	
@@ -36,7 +40,6 @@ public class UserjdbcDaoTest {
 	
 	@Test
 	public void testSaveUser() {
-		UserJdbcDao dao = UserJdbcDao.getInstance();
 		User user = new User();
 		user.setId(1L);
 		user.setCognome("scarfone");
@@ -69,7 +72,6 @@ public class UserjdbcDaoTest {
 	
 	@Test
 	public void testUpdateUser() {
-		UserJdbcDao dao = UserJdbcDao.getInstance();
 		User user = new User();
 		user.setId(1L);
 		user.setCognome("Scarfone");
@@ -101,7 +103,6 @@ public class UserjdbcDaoTest {
 	
 	@Test
 	public void testDeleteUser() {
-		UserJdbcDao dao = UserJdbcDao.getInstance();
 		User user = new User();
 		user.setId(1L);
 		user.setCognome("Scarfone");
@@ -124,7 +125,6 @@ public class UserjdbcDaoTest {
 	
 	@Test
 	public void testGetAllUser() {
-		UserJdbcDao dao = UserJdbcDao.getInstance();
 		User user = new User();
 		user.setId(1L);
 		user.setCognome("Scarfone");

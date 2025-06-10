@@ -8,14 +8,19 @@ import java.time.ZoneOffset;
 
 import org.junit.jupiter.api.Test;
 
+import io.quarkus.test.junit.QuarkusTest;
 import it.nextre.corsojava.entity.Token;
 import it.nextre.corsojava.entity.User;
+import jakarta.inject.Inject;
 
+@QuarkusTest
 public class TokenJdbcDaoTest {
+	@Inject
+	TokenJdbcDao dao ;
+	
 	
 	@Test
 	public void testSaveToken() {
-		TokenJdbcDao dao = TokenJdbcDao.getInstance();
 		Token token = new Token();
 		token.setId(1L);
 		User user = new User();
@@ -32,7 +37,6 @@ public class TokenJdbcDaoTest {
 	
 	@Test
 	public void testUpdateToken() {
-		TokenJdbcDao dao = TokenJdbcDao.getInstance();
 		Token token = new Token();
 		token.setId(1L);
 		User user = new User();
@@ -52,7 +56,6 @@ public class TokenJdbcDaoTest {
 	
 	@Test
 	public void testDeleteToken() {
-		TokenJdbcDao dao = TokenJdbcDao.getInstance();
 		Token token = new Token();
 		token.setId(1L);
 		User user = new User();
@@ -68,7 +71,6 @@ public class TokenJdbcDaoTest {
 	
 	@Test
 	public void testGetAllToken() {
-		TokenJdbcDao dao = TokenJdbcDao.getInstance();
 		Token token = new Token();
 		token.setId(1L);
 		User user = new User();

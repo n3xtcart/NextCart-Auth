@@ -41,13 +41,16 @@ import jakarta.mail.internet.MimeMessage.RecipientType;
 @LookupIfProperty(name = "source.Mem", stringValue = "db")
 public class UserServiceJdbc implements UserService {
     private static final Logger LOGGER = Logger.getLogger(UserServiceJdbc.class);
-    protected final UserJdbcDao userDAO = UserJdbcDao.getInstance();
-    protected final TokenJdbcDao tokenUserDAO = TokenJdbcDao.getInstance();
+    protected final UserJdbcDao userDAO;
+    protected final TokenJdbcDao tokenUserDAO ;
     protected final EntityConverter entityConverter;
     
-    public UserServiceJdbc(EntityConverter entityConverter) {
-		this.entityConverter = new EntityConverter();
+    public UserServiceJdbc(EntityConverter entityConverter, UserJdbcDao userDAO, TokenJdbcDao tokenUserDAO) {
+		this.entityConverter = entityConverter;
+		this.userDAO = userDAO;
+		this.tokenUserDAO = tokenUserDAO;
 	}
+  
 
 
  

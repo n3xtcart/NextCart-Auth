@@ -4,14 +4,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
+import io.quarkus.test.junit.QuarkusTest;
 import it.nextre.corsojava.entity.Group;
 import it.nextre.corsojava.entity.Role;
+import jakarta.inject.Inject;
 
+@QuarkusTest
 public class RoleJdbcDaoTest {
+	@Inject
+	RoleJdbcDao dao ;
 	
 	@Test
 	public void testSaveRole() {
-		RoleJdbcDao dao = RoleJdbcDao.getInstance();
 		Role role = new Role();
 		role.setId(1L);
 		role.setAdmin(true);
@@ -30,7 +34,6 @@ public class RoleJdbcDaoTest {
 	
 	@Test
 	public void testUpdateRole() {
-		RoleJdbcDao dao = RoleJdbcDao.getInstance();
 		Role role = new Role();
 		role.setId(1L);
 		role.setAdmin(true);
@@ -52,7 +55,6 @@ public class RoleJdbcDaoTest {
 	
 	@Test
 	public void testDeleteRole() {
-		RoleJdbcDao dao = RoleJdbcDao.getInstance();
 		Role role = new Role();
 		role.setId(1L);
 		role.setAdmin(true);
@@ -69,7 +71,6 @@ public class RoleJdbcDaoTest {
 	
 	@Test
 	public void testGetAllRole() {
-		RoleJdbcDao dao = RoleJdbcDao.getInstance();
 		Role role = new Role();
 		role.setId(1L);
 		role.setAdmin(true);

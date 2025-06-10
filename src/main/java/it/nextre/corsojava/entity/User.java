@@ -91,7 +91,7 @@ public class User extends Entity {
     }
     
     public Set<Role> getRoles() {
-    	Set<Role> roles = group.getRoles();
+    	Set<Role> roles = group != null ? group.getRoles() : new java.util.HashSet<>();
 		if (role != null) {
 			roles.add(role);
 		}

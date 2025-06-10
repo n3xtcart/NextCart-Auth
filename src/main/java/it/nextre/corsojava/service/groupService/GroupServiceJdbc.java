@@ -15,6 +15,7 @@ import it.nextre.corsojava.entity.Group;
 import it.nextre.corsojava.exception.GroupMissingException;
 import it.nextre.corsojava.utils.EntityConverter;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 
 @ApplicationScoped
@@ -22,13 +23,14 @@ import jakarta.enterprise.context.ApplicationScoped;
 public class GroupServiceJdbc implements GroupService{
 	private static final Logger LOGGER = Logger.getLogger(GroupServiceJdbc.class);
 
-    private final GroupJdbcDao groupDAO = GroupJdbcDao.getInstance();
+    private final GroupJdbcDao groupDAO ;
 
 	private EntityConverter entityConverter;
 	
     
-    public GroupServiceJdbc(EntityConverter entityConverter) {
-		this.entityConverter = new EntityConverter();
+    public GroupServiceJdbc(EntityConverter entityConverter, GroupJdbcDao groupDAO) {
+		this.entityConverter = entityConverter;
+		this.groupDAO = groupDAO;
 	}
 
 	@Override

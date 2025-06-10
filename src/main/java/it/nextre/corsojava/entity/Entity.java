@@ -1,6 +1,7 @@
 package it.nextre.corsojava.entity;
 
 import it.nextre.corsojava.entity.annotation.Attribute;
+import it.nextre.corsojava.entity.annotation.OneToOne;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -13,23 +14,24 @@ public abstract class Entity {
     protected Instant ultimaModifica;
     @Attribute(fieldName = "dataCreazione", colName = "dataCreazione", className = Instant.class, colClass = Timestamp.class, type = "timestamp")
     protected Instant dataCreazione;
+    @OneToOne(joinColumn = "creationUser", joinTable = "user", mapObject = User.class)
     @Attribute(fieldName="user", colName = "creationUser", className = User.class, colClass = long.class, type = "long",update = false)
-    User user;
+    User creationUser;
 
     public Entity() {
-        this.ultimaModifica = Instant.now();
+        this.dataCreazione = Instant.now();
     }
 
     
     
-    public User getUser() {
-		return user;
+    public User getCreationUser() {
+		return creationUser;
 	}
 
 
 
-	public void setUser(User user) {
-		this.user = user;
+	public void setCreationUser(User user) {
+		this.creationUser = user;
 	}
 
 

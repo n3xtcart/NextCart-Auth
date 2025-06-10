@@ -1,6 +1,7 @@
 package it.nextre.corsojava.entity;
 
 import it.nextre.corsojava.entity.annotation.Attribute;
+import it.nextre.corsojava.entity.annotation.OneToOne;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -10,6 +11,7 @@ import java.time.ZoneOffset;
 public class Token extends Entity {
     @Attribute(colName = "value", fieldName = "value")
     private String value;
+    @OneToOne(joinColumn = "userId", joinTable = "user", mapObject = User.class)
     @Attribute(colName = "userId", type = "long", fieldName = "user", className = User.class, colClass = long.class)
     private User user;
     @Attribute(fieldName = "dataScadenza", colName = "scadenza", className = Instant.class, colClass = Timestamp.class, type = "timestamp")

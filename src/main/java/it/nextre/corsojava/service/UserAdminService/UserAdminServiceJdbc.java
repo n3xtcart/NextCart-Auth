@@ -10,6 +10,8 @@ import io.quarkus.arc.lookup.LookupIfProperty;
 import it.nextre.aut.dto.UserDTO;
 import it.nextre.aut.pagination.PagedResult;
 import it.nextre.aut.service.UserAdminService;
+import it.nextre.corsojava.dao.jdbc.TokenJdbcDao;
+import it.nextre.corsojava.dao.jdbc.UserJdbcDao;
 import it.nextre.corsojava.entity.User;
 import it.nextre.corsojava.service.UserService.UserServiceJdbc;
 import it.nextre.corsojava.utils.EntityConverter;
@@ -22,13 +24,12 @@ import jakarta.inject.Inject;
 public class UserAdminServiceJdbc extends UserServiceJdbc implements UserAdminService{
 	
 	 public UserAdminServiceJdbc() {
-	        // Required by CDI
-	        super(null); // If super requires a non-null param, consider using @Inject instead
-	    }
+		 super(null, null, null); 
+	   }
 	
 	@Inject
-    public UserAdminServiceJdbc(EntityConverter entityConverter) {
-		super(entityConverter);
+	public UserAdminServiceJdbc(EntityConverter entityConverter, UserJdbcDao userDAO, TokenJdbcDao tokenUserDAO) {
+		super(entityConverter, userDAO, tokenUserDAO);
 	}
 
 	private static final Logger LOGGER = Logger.getLogger(UserServiceJdbc.class);

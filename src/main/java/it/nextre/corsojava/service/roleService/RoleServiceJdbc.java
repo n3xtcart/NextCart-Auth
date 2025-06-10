@@ -21,12 +21,13 @@ import jakarta.enterprise.context.ApplicationScoped;
 @ApplicationScoped
 @LookupIfProperty(name = "source.Mem", stringValue = "db")
 public class RoleServiceJdbc implements RoleService{
-	private static final Logger LOGGER = Logger.getLogger(UserServiceJdbc.class);
-private final RoleJdbcDao roleDAO = RoleJdbcDao.getInstance();
+	private static final Logger LOGGER = Logger.getLogger(RoleServiceJdbc.class);
+private final RoleJdbcDao roleDAO ;
 private final EntityConverter entityConverter;
 
-public RoleServiceJdbc(EntityConverter entityConverter) {
-	this.entityConverter = new EntityConverter();
+public RoleServiceJdbc(EntityConverter entityConverter, RoleJdbcDao roleDAO) {
+	this.entityConverter = entityConverter;
+	this.roleDAO = roleDAO;
 }
 
 	@Override

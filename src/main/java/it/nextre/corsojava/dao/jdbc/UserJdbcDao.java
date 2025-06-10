@@ -2,19 +2,24 @@ package it.nextre.corsojava.dao.jdbc;
 
 import java.util.Optional;
 
+import io.agroal.api.AgroalDataSource;
 import it.nextre.corsojava.entity.User;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
+@ApplicationScoped
 public class UserJdbcDao extends JdbcDao<User> {
-	private static UserJdbcDao instance = new UserJdbcDao();
 
-	public static UserJdbcDao getInstance() {
-		return instance;
+
+
+	@Inject
+	public  UserJdbcDao(AgroalDataSource dataSource) {
+		super(User.class, "user",dataSource);
 	}
-
-	private UserJdbcDao() {
-		super(User.class,"user");
+	public UserJdbcDao() {
+		super(User.class, "user", null);
 	}
-
+	
 	public Optional<User> findByEmailPassword(String email, String password) {
 		String[] colStrings={"email","password"};
 		String[] val={email,password};
