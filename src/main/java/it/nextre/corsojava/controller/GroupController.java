@@ -1,13 +1,18 @@
 package it.nextre.corsojava.controller;
 
+import java.security.Principal;
 import java.util.List;
 
 import org.jboss.logging.Logger;
 
+import io.quarkus.security.identity.SecurityIdentity;
 import it.nextre.aut.dto.GroupDTO;
 import it.nextre.aut.pagination.PagedResult;
 import it.nextre.aut.service.GroupService;
 import it.nextre.corsojava.config.GroupServiceProducer;
+import it.nextre.corsojava.entity.User;
+import jakarta.inject.Inject;
+import jakarta.resource.spi.work.SecurityContext;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -20,9 +25,11 @@ import jakarta.ws.rs.core.MediaType;
 
 @Path("/groups") 
 public class GroupController {
-	private static final Logger LOGGER = Logger.getLogger(UserController.class);
+	private static final Logger LOGGER = Logger.getLogger(GroupController.class);
 
 	private final GroupService service;
+	@Inject
+	SecurityIdentity securityContext;
 	
 	public GroupController(GroupServiceProducer serviceProducer) {
 				this.service = serviceProducer.getService();
@@ -41,6 +48,9 @@ public class GroupController {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     public void createGroup(GroupDTO groupDTO) {
+    	Principal principal2 = securityContext.getPrincipal();
+    	User principal = (User) securityContext.getAttributes().get("user");
+    	System.out.println(securityContext.getPrincipal().getName());
     	service.create(groupDTO);
     }
     

@@ -37,7 +37,7 @@ public class GroupServiceJdbc implements GroupService{
 	public void create(GroupDTO group) {
         LOGGER.info("Creazione in corso per il gruppo: " + group.getId());
       
-        Group toSave = new Group(group);
+        Group toSave = entityConverter.fromDTO(group);
         toSave.setDataCreazione(Instant.now());
         groupDAO.add(toSave);
         LOGGER.info("Creazione effettuata con successo per il gruppo: " + group.getId());

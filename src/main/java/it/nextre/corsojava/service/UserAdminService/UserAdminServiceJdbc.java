@@ -32,7 +32,7 @@ public class UserAdminServiceJdbc extends UserServiceJdbc implements UserAdminSe
 		super(entityConverter, userDAO, tokenUserDAO);
 	}
 
-	private static final Logger LOGGER = Logger.getLogger(UserServiceJdbc.class);
+	private static final Logger LOGGER = Logger.getLogger(UserAdminServiceJdbc.class);
     
   
 

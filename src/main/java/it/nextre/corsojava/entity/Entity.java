@@ -19,7 +19,6 @@ public abstract class Entity {
     User creationUser;
 
     public Entity() {
-        this.dataCreazione = Instant.now();
     }
 
     

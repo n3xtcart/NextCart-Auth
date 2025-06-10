@@ -24,6 +24,11 @@ public class EntityConverter {
 		dto.setNome(user.getNome());
 		dto.setGroupDTO(fromEntity(user.getGroup()));
 		dto.setRuoli(user.getRoles().stream().map(this::fromEntity).collect(Collectors.toSet()));
+		dto.setCreationUser(user.getCreationUser()!= null ? user.getCreationUser().getId() : null);
+		dto.setDataCreazione(user.getDataCreazione());
+		dto.setUltimaModifica(user.getUltimaModifica());
+
+		
 		//TODO: decidere se mandare la password o meno
 		dto.setPassword(user.getPassword());
 
@@ -53,7 +58,9 @@ public class EntityConverter {
 		GroupDTO dto = new GroupDTO();
 		dto.setId(group.getId());
 		dto.setRoleDTO(group.getRoles().stream().map(this::fromEntity).collect(Collectors.toSet()));
-
+		dto.setCreationUser(group.getCreationUser()!= null ? group.getCreationUser().getId() : null);
+		dto.setDataCreazione(group.getDataCreazione());
+		dto.setUltimaModifica(group.getUltimaModifica());
 		return dto;
     }
 
@@ -78,6 +85,9 @@ public class EntityConverter {
 		dto.setAdmin(role.getAdmin());
 		dto.setDescrizione(role.getDescrizione());
 		dto.setPriority(role.getPriority());
+		dto.setCreationUser(role.getCreationUser()!= null ? role.getCreationUser().getId() : null);
+		dto.setDataCreazione(role.getDataCreazione());
+		dto.setUltimaModifica(role.getUltimaModifica());
 		
 		return dto;
     }

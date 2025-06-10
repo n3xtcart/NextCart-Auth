@@ -44,11 +44,14 @@ public class UserServiceJdbc implements UserService {
     protected final UserJdbcDao userDAO;
     protected final TokenJdbcDao tokenUserDAO ;
     protected final EntityConverter entityConverter;
+    protected final JwtGenerator jwtGenerator;
     
-    public UserServiceJdbc(EntityConverter entityConverter, UserJdbcDao userDAO, TokenJdbcDao tokenUserDAO) {
+    public UserServiceJdbc(EntityConverter entityConverter,
+    		UserJdbcDao userDAO, TokenJdbcDao tokenUserDAO,JwtGenerator jwtGenerator) {
 		this.entityConverter = entityConverter;
 		this.userDAO = userDAO;
 		this.tokenUserDAO = tokenUserDAO;
+		this.jwtGenerator = jwtGenerator;
 	}
   
 
@@ -72,7 +75,7 @@ public class UserServiceJdbc implements UserService {
             throw new UnauthorizedException("Credenziali non valide");
         }
         LOGGER.info("Login effettuato con successo per l'utente: " + info.getEmail());
-        return JwtGenerator.generateTokens(u.getEmail(), u.getRoles());
+        return jwtGenerator.generateTokens(u);
     }
 
     public void logout(Token token) {
@@ -257,7 +260,7 @@ public class UserServiceJdbc implements UserService {
 		}
 		
 		// Generazione nuovo token
-		return JwtGenerator.generateTokens(u.getEmail(), u.getRoles());
+		return jwtGenerator.generateTokens(u);
 	}
 
 
@@ -272,7 +275,7 @@ public class UserServiceJdbc implements UserService {
         User user = token2.getUser();
         user.setActive(true);
         userDAO.update(user.getId(), user);
-        return JwtGenerator.generateTokens(user.getEmail(), user.getRoles());
+        return jwtGenerator.generateTokens(user);
 
     }
 
