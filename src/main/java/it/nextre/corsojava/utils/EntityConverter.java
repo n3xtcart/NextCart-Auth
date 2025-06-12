@@ -94,7 +94,7 @@ public class EntityConverter {
 
     public Role fromDTO(RoleDTO dto) {
 		if (dto == null) {
-			
+			return null;
 		}
 		Role role = new Role();
 		role.setId(dto.getId());

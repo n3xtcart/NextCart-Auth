@@ -2,7 +2,12 @@ package it.nextre.corsojava.controller;
 
 import java.util.List;
 
+import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.jboss.logging.Logger;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import it.nextre.aut.dto.LoginInfo;
 import it.nextre.aut.dto.TokenJwtDTO;
@@ -10,7 +15,9 @@ import it.nextre.aut.dto.UserDTO;
 import it.nextre.aut.pagination.PagedResult;
 import it.nextre.aut.service.UserAdminService;
 import it.nextre.corsojava.config.UserAdminServiceProducer;
+import it.nextre.corsojava.exception.ControllerException;
 import jakarta.annotation.security.RolesAllowed;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -27,6 +34,12 @@ public class UserAdminController {
 
 	private final UserAdminService service;
 	
+	
+	@Inject
+	JsonWebToken jwt;
+	@Inject
+	ObjectMapper objectMapper;
+	
 	public UserAdminController(UserAdminServiceProducer serviceProducer) {
 				this.service = serviceProducer.getService();
 	}
@@ -40,8 +53,16 @@ public class UserAdminController {
     @GET
     @Produces(MediaType.APPLICATION_JSON) 
     public List<UserDTO> getAll() {
+    	UserDTO userObject = null;
+		try {
+			userObject = objectMapper.readValue(jwt.getClaim("user").toString(), UserDTO.class);
+		} catch (JsonMappingException e) {
+			throw new ControllerException("Error mapping user from JWT", e);
+		} catch (JsonProcessingException e) {
+			throw new ControllerException("Error processing user from JWT", e);
+		}
 	
-        return service.getAllUsers() ;
+        return service.getAllUsers(userObject) ;
     }
     
     @GET
@@ -49,7 +70,15 @@ public class UserAdminController {
     @RolesAllowed({"admin"}) 
     @Produces(MediaType.APPLICATION_JSON) 
     public PagedResult<UserDTO> getAllPag(@PathParam("page") int page, @PathParam("size") int size) {
-    	 return service.getAllUsersPag(page, size) ;
+    	UserDTO userObject = null;
+		try {
+			userObject = objectMapper.readValue(jwt.getClaim("user").toString(), UserDTO.class);
+		} catch (JsonMappingException e) {
+			throw new ControllerException("Error mapping user from JWT", e);
+		} catch (JsonProcessingException e) {
+			throw new ControllerException("Error processing user from JWT", e);
+		}
+    	 return service.getAllUsersPag(page, size,userObject) ;
     }
     
     @POST
@@ -92,21 +121,45 @@ public class UserAdminController {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     public void createUser(UserDTO userDTO) {
-    	service.createUser(userDTO);
+    	UserDTO userObject = null;
+		try {
+			userObject = objectMapper.readValue(jwt.getClaim("user").toString(), UserDTO.class);
+		} catch (JsonMappingException e) {
+			throw new ControllerException("Error mapping user from JWT", e);
+		} catch (JsonProcessingException e) {
+			throw new ControllerException("Error processing user from JWT", e);
+		}
+    	service.createUser(userDTO,userObject);
     }
     
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     public void updateUser(UserDTO userDTO) {
+    	UserDTO userObject = null;
+		try {
+			userObject = objectMapper.readValue(jwt.getClaim("user").toString(), UserDTO.class);
+		} catch (JsonMappingException e) {
+			throw new ControllerException("Error mapping user from JWT", e);
+		} catch (JsonProcessingException e) {
+			throw new ControllerException("Error processing user from JWT", e);
+		}
     	
-    	service.update(userDTO);
+    	service.update(userDTO,userObject);
     }
     
     @DELETE
     @Consumes(MediaType.APPLICATION_JSON)
     public void deleteGroup(UserDTO userDTO) {
+    	UserDTO userObject = null;
+		try {
+			userObject = objectMapper.readValue(jwt.getClaim("user").toString(), UserDTO.class);
+		} catch (JsonMappingException e) {
+			throw new ControllerException("Error mapping user from JWT", e);
+		} catch (JsonProcessingException e) {
+			throw new ControllerException("Error processing user from JWT", e);
+		}
     
-    	service.delete(userDTO);
+    	service.delete(userDTO,userObject);
     }
 
 

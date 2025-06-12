@@ -55,10 +55,12 @@ public class UserServiceMemory implements UserService{
     private final GroupDAO groupDAO = GroupDAO.getIstance();
     private final RoleDAO roleDAO = RoleDAO.getIstance();
     private final EntityConverter entityConverter;
+    private final JwtGenerator jwtGenerator;
 
 
-    public UserServiceMemory(EntityConverter entityConverter) {
+    public UserServiceMemory(EntityConverter entityConverter ,JwtGenerator jwtGenerator) {
     			this.entityConverter = entityConverter;
+    					this.jwtGenerator = jwtGenerator;
 	}
 
     
@@ -80,7 +82,7 @@ public class UserServiceMemory implements UserService{
             throw new UnauthorizedException("Credenziali non valide");
         }
         LOGGER.info("Login effettuato con successo per l'utente: " + user.getEmail());
-        return JwtGenerator.generateTokens(u.getEmail(), u.getRoles());
+        return jwtGenerator.generateTokens(u);
     }
 
     public void logout(Token token) {
@@ -180,7 +182,7 @@ public class UserServiceMemory implements UserService{
    
 
     @Override
-    public void update(UserDTO user) {
+    public void update(UserDTO user,UserDTO userAction) {
         if (user == null) throw new UnauthorizedException("Utente non valido");
         if (user.getGroupDTO() == null) throw new UnauthorizedException("Gruppo non valido");
         if (user.getGroupDTO().getRoleDTO() == null) throw new UnauthorizedException("Ruolo non valido");
@@ -231,7 +233,7 @@ public class UserServiceMemory implements UserService{
 
         LOGGER.info("Recupero lista utenti in corso");
 
-        return userDAO.getAll().stream().filter(a -> a.getActive()).map(user -> {
+        return userDAO.getAll().stream().filter(User::getActive).map(user -> {
             UserDTO dto =UserDTO.of()
 					.id(user.getId())
 					.nome(user.getNome())
@@ -361,7 +363,7 @@ public class UserServiceMemory implements UserService{
         User user = token2.getUser();
         user.setActive(true);
         userDAO.update(user.getId(), user);
-        return JwtGenerator.generateTokens(user.getEmail(), user.getRoles());
+        return jwtGenerator.generateTokens(user);
 
     }
 
@@ -388,7 +390,20 @@ public class UserServiceMemory implements UserService{
 		}
 		
 		// Generazione nuovo token
-		return JwtGenerator.generateTokens(u.getEmail(), u.getRoles());
+		return jwtGenerator.generateTokens(u);
 	}
+
+
+
+
+	@Override
+	public void delete(UserDTO userDTO, UserDTO user) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+
+
 
 }

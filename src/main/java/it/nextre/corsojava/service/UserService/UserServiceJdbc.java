@@ -20,8 +20,10 @@ import it.nextre.aut.dto.UserDTO;
 import it.nextre.aut.service.UserService;
 import it.nextre.corsojava.dao.jdbc.TokenJdbcDao;
 import it.nextre.corsojava.dao.jdbc.UserJdbcDao;
+import it.nextre.corsojava.entity.Role;
 import it.nextre.corsojava.entity.Token;
 import it.nextre.corsojava.entity.User;
+import it.nextre.corsojava.exception.GroupMissingException;
 import it.nextre.corsojava.utils.EntityConverter;
 import it.nextre.corsojava.utils.JwtGenerator;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -62,7 +64,7 @@ public class UserServiceJdbc implements UserService {
     @Override
     public TokenJwtDTO login(LoginInfo info) {
         LOGGER.info("Login in corso per l'utente: " + info.getEmail());
-        if (info.getEmail().isBlank() || info.getPassword().isBlank()) {
+        if (info==null||info.getEmail()==null || info.getPassword()==null|| info.getEmail().isBlank() || info.getPassword().isBlank()) {
             LOGGER.warn("Email o password non validi");
             throw new UnauthorizedException("Email o password non validi");
         }
@@ -140,7 +142,7 @@ public class UserServiceJdbc implements UserService {
     @Override
     public void register(UserDTO user) {
         if (user == null) {
-            throw new UnauthorizedException("Utente non valido");
+            throw new it.nextre.corsojava.exception.UnauthorizedException("Utente non valido");
         }
         LOGGER.info("Registrazione in corso per l'utente: " + user.getEmail());
        
@@ -148,6 +150,11 @@ public class UserServiceJdbc implements UserService {
             LOGGER.warn("Utente già registrato con l'email: " + user.getEmail());
             throw new UnauthorizedException("Utente già registrato");
         }
+        if(user.getGroupDTO()!=null && user.getGroupDTO().getRoleDTO() != null
+        		&& user.getGroupDTO().getRoleDTO().stream().anyMatch(role->role.getAdmin()) ) {
+			LOGGER.warn("tentativo di registrazione come admin");
+			throw new it.nextre.corsojava.exception.UnauthorizedException("Non puoi registrarti come admin");
+		}
         User user2 = new User();
         user2.setNome(user.getNome());
         user2.setCognome(user.getCognome());
@@ -176,8 +183,21 @@ public class UserServiceJdbc implements UserService {
     }
  
     @Override
-    public void update(UserDTO user) {
+    public void update(UserDTO user,UserDTO userAction) {
        User u = userDAO.getById(user.getId());
+       Optional<Role> maxUa = userAction.getRuoli().stream().map(entityConverter::fromDTO).reduce((a,b)->a.compareTo(b) >0?a:b);
+       
+       if(!u.getId().equals(userAction.getId())) {
+			LOGGER.warn("Tentativo di modifica su un utente diveso da quello che sta effettuando l'aggiornamento");
+			throw new GroupMissingException("Impossibile modificare un utente diveso da quello che sta effettuando l'aggiornamento");
+       	
+       }
+       Optional<Role> maxNu =user.getRuoli().stream().map(entityConverter::fromDTO).reduce((a,b)->a.compareTo(b) >0?a:b);
+       if((!maxNu.isEmpty() && maxUa.isEmpty()) || (maxUa.isPresent() &&  maxNu.get().compareTo(maxUa.get()) > 0)) {
+			LOGGER.warn("Tentativo di modifica un utente dandogli privilegi superiori a quelli dell'utente");
+			throw new GroupMissingException("Impossibile modificare un utente dandogli privilegi superiori a quelli dell'utente");
+      	
+      }
 
         LOGGER.info("Modifica in corso per l'utente: " + user.getEmail());
         
@@ -191,11 +211,18 @@ public class UserServiceJdbc implements UserService {
     }
 
     @Override
-    public void delete(UserDTO user) {
+    public void delete(UserDTO user,UserDTO userAction) {
         if (user == null) throw new UnauthorizedException("Utente non valido");
-        if (user.getRuoli() == null) throw new UnauthorizedException("Ruolo non valido");
-       
+        
         User u = userDAO.getById(user.getId());
+        Optional<Role> maxU = u.getRoles().stream().reduce((a,b)->a.compareTo(b) >0?a:b);
+        Optional<Role> maxUa = userAction.getRuoli().stream().map(entityConverter::fromDTO).reduce((a,b)->a.compareTo(b) >0?a:b);
+        
+        if((!maxU.isEmpty() && maxUa.isEmpty()) || (maxUa.isPresent() &&  maxU.get().compareTo(maxUa.get()) > 0)) {
+ 			LOGGER.warn("Tentativo di cancellazione un utente con privilegi superiori a quelli dell'utente");
+ 			throw new GroupMissingException("Impossibile cancellare un utente con privilegi superiori a quelli dell'utente");
+        	
+        }
         LOGGER.info("Cancellazione in corso per l'utente: " + user.getEmail());
         if (u == null || !u.getActive()) throw new UnauthorizedException("Utente non trovato");
         

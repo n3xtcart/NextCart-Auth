@@ -1,12 +1,19 @@
 package it.nextre.corsojava.controller;
 
+import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.jboss.logging.Logger;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import it.nextre.aut.dto.LoginInfo;
 import it.nextre.aut.dto.TokenJwtDTO;
 import it.nextre.aut.dto.UserDTO;
 import it.nextre.aut.service.UserService;
 import it.nextre.corsojava.config.UserServiceProducer;
+import it.nextre.corsojava.exception.ControllerException;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -20,6 +27,10 @@ import jakarta.ws.rs.core.MediaType;
 @Path("/users") 
 public class UserController {
 	private static final Logger LOGGER = Logger.getLogger(UserController.class);
+	@Inject
+	JsonWebToken jwt;
+	@Inject
+	ObjectMapper objectMapper;
 
 	private final UserService service;
 	
@@ -77,15 +88,31 @@ public class UserController {
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     public void updateUser(UserDTO userDTO) {
+    	UserDTO userObject = null;
+		try {
+			userObject = objectMapper.readValue(jwt.getClaim("user").toString(), UserDTO.class);
+		} catch (JsonMappingException e) {
+			throw new ControllerException("Error mapping user from JWT", e);
+		} catch (JsonProcessingException e) {
+			throw new ControllerException("Error processing user from JWT", e);
+		}
     	
-    	service.update(userDTO);
+    	service.update(userDTO,userObject);
     }
     
     @DELETE
     @Consumes(MediaType.APPLICATION_JSON)
     public void deleteGroup(UserDTO userDTO) {
+    	UserDTO userObject = null;
+	try {
+		userObject = objectMapper.readValue(jwt.getClaim("user").toString(), UserDTO.class);
+	} catch (JsonMappingException e) {
+		throw new ControllerException("Error mapping user from JWT", e);
+	} catch (JsonProcessingException e) {
+		throw new ControllerException("Error processing user from JWT", e);
+	}
     
-    	service.delete(userDTO);
+    	service.delete(userDTO,userObject);
     }
 
 

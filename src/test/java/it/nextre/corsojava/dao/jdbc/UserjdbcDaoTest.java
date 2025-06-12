@@ -16,13 +16,13 @@ import it.nextre.corsojava.entity.User;
 import jakarta.inject.Inject;
 
 @QuarkusTest
-public class UserjdbcDaoTest {
+class UserjdbcDaoTest {
 	@Inject
 	UserJdbcDao dao ;
 	
 	
 	@Test
-	public void testPag() {
+	void testPag() {
 		PagedResult<User> allPag = dao.getAllPag(1, 10);
 		System.out.println(allPag);
 	}
@@ -30,7 +30,7 @@ public class UserjdbcDaoTest {
 	
 	
 	@Test
-	public void testRelazioni() {
+	 void testRelazioni() {
 		User byId = dao.getById(1L);
 		System.out.println(byId);
 	}
@@ -39,7 +39,7 @@ public class UserjdbcDaoTest {
 	
 	
 	@Test
-	public void testSaveUser() {
+	void testSaveUser() {
 		User user = new User();
 		user.setId(1L);
 		user.setCognome("scarfone");
@@ -71,7 +71,7 @@ public class UserjdbcDaoTest {
 	
 	
 	@Test
-	public void testUpdateUser() {
+	void testUpdateUser() {
 		User user = new User();
 		user.setId(1L);
 		user.setCognome("Scarfone");
@@ -102,7 +102,7 @@ public class UserjdbcDaoTest {
 	
 	
 	@Test
-	public void testDeleteUser() {
+	void testDeleteUser() {
 		User user = new User();
 		user.setId(1L);
 		user.setCognome("Scarfone");
@@ -124,7 +124,7 @@ public class UserjdbcDaoTest {
 	}
 	
 	@Test
-	public void testGetAllUser() {
+	void testGetAllUser() {
 		User user = new User();
 		user.setId(1L);
 		user.setCognome("Scarfone");

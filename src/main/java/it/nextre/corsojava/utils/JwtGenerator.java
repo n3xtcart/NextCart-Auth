@@ -27,6 +27,7 @@ public class JwtGenerator {
 
 	
 	public TokenJwtDTO generateTokens(User user) {	
+		user.setPassword(null); // Clear password for security reasons
 		log.info("Creating JWT tokens for user: " + user.getEmail());
 
 		

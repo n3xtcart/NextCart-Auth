@@ -377,7 +377,34 @@ public abstract class JdbcDao<T extends Entity> implements DaoInterface<T> {
 		for (Field field : fields) {
 			ManyToMany manyToMany = field.getAnnotation(ManyToMany.class);
 			Attribute annotations = field.getAnnotation(Attribute.class);
+			Object value1;
+			try {
+				value1 = clazz
+						.getMethod("get" + field.getName().substring(0, 1).toUpperCase() + field.getName().substring(1))
+						.invoke(item);
+			if(value1 == null) {
+				LOGGER.debug("Value for field " + field.getName() + " is null, skipping.");
+				continue;
+			}
+			
+			} catch (IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalArgumentException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InvocationTargetException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (NoSuchMethodException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (SecurityException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			if (annotations != null && !annotations.auto() && annotations.update()) {
+				
 				sb.append(annotations.colName() + "=").append("?").append(",");
 				value.add(annotations);
 				struc.append(annotations.colName()).append(",");
@@ -447,6 +474,10 @@ public abstract class JdbcDao<T extends Entity> implements DaoInterface<T> {
 		String query = "UPDATE " + tableName + sb.toString() + " where id=" + id;
 		PreparedStatement ps = null;
 		try (Connection connection = getConnection()) {
+			if(sb.toString().equals(" SET") ) {
+				LOGGER.debug("No fields to update, skipping update.");
+				return;
+			}
 			ps = connection.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS);
 			int i = 1;
 			Object value1 = null;
@@ -456,6 +487,10 @@ public abstract class JdbcDao<T extends Entity> implements DaoInterface<T> {
 				value1 = clazz
 						.getMethod("get" + val.fieldName().substring(0, 1).toUpperCase() + val.fieldName().substring(1))
 						.invoke(item);
+				if(value1 == null) {
+					LOGGER.debug("Value for field " + val.fieldName() + " is null, skipping.");
+					continue;
+				}
 				Method method = null;
 				if (value1 instanceof Entity e) {
 					value1 = e.getId();
@@ -723,7 +758,7 @@ public abstract class JdbcDao<T extends Entity> implements DaoInterface<T> {
 				}
 				sb2.deleteCharAt(sb2.length() - 1);
 				String query2 = "select " + sb2 + " from " + manyToMany.joinTable() + " a join "
-						+ manyToMany.supportTable() + " b on a.id=b." + manyToMany.supportJoinColumn() + " where "
+						+ manyToMany.supportTable() + " b on a.id=b." + manyToMany.joinColumn() + " where "
 						+ manyToMany.supportJoinColumn() + " = " + ((Entity) item).getId();
 				PreparedStatement statement = connection.prepareStatement(query2);
 				ResultSet rs2 = statement.executeQuery();

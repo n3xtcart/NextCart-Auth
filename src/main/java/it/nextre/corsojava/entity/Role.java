@@ -59,6 +59,13 @@ public class Role extends Entity {
         aggiornaUltimaModifica();
         this.admin = admin;
     }
+    
+    /**
+	 * Confronta due ruoli in base al loro stato di amministratore e priorità.
+	 * 
+	 * @param o Il ruolo da confrontare.
+	 * @return 1 se maggiore,-1 se minore ,0 se uguale
+	 */
 
     public int compareTo(Role o) {
         if (admin != null && o.isAdmin() != null && admin.booleanValue() == o.isAdmin().booleanValue()) {
