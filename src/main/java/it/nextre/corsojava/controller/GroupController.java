@@ -16,6 +16,8 @@ import it.nextre.aut.pagination.PagedResult;
 import it.nextre.aut.service.GroupService;
 import it.nextre.corsojava.config.GroupServiceProducer;
 import it.nextre.corsojava.exception.ControllerException;
+import it.nextre.corsojava.exception.UserMissingException;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -28,6 +30,8 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
 @Path("/groups") 
+
+@RolesAllowed("admin")
 public class GroupController {
 	private static final Logger LOGGER = Logger.getLogger(GroupController.class);
 
@@ -58,6 +62,7 @@ public class GroupController {
 		} catch (JsonProcessingException e) {
 			throw new ControllerException("Error processing user from JWT", e);
 		}
+		LOGGER.info("richiesta di tutti i gruppi da : "+ userObject.getEmail());
         return service.getAllGroups(userObject) ;
     }
    
@@ -74,6 +79,7 @@ public class GroupController {
 			throw new ControllerException("Error processing user from JWT", e);
 		}
 
+		LOGGER.info("richiesta di creazione gruppo da : "+ userObject.getEmail());
     	
     	service.create(groupDTO,userObject);
     }
@@ -88,6 +94,8 @@ public class GroupController {
 	} catch (JsonProcessingException e) {
 		throw new ControllerException("Error processing user from JWT", e);
 	}
+	LOGGER.info("richiesta di modifica gruppo da : "+ userObject.getEmail());
+	
     	service.update(groupDTO, userObject);
     }
     
@@ -102,6 +110,8 @@ public class GroupController {
 	} catch (JsonProcessingException e) {
 		throw new ControllerException("Error processing user from JWT", e);
 	}
+	LOGGER.info("richiesta di eliminazione gruppo da : "+ userObject.getEmail());
+	
     	service.delete(groupDTO, userObject);
     }
 
@@ -117,8 +127,25 @@ public class GroupController {
 	} catch (JsonProcessingException e) {
 		throw new ControllerException("Error processing user from JWT", e);
 	}
+	LOGGER.info("richiesta di tutti i gruppi paginati da : "+ userObject.getEmail());
+	
 	
         return service.getAllGroupsPag(page, size, userObject); 
+    }
+    
+    @GET
+    @Path("/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public GroupDTO getById(@PathParam("id")long id) {UserDTO userObject = null;
+	try {
+		userObject = objectMapper.readValue(jwt.getClaim("user").toString(), UserDTO.class);
+	} catch (JsonMappingException e) {
+		throw new ControllerException("Error mapping user from JWT", e);
+	} catch (JsonProcessingException e) {
+		throw new ControllerException("Error processing user from JWT", e);
+	}LOGGER.info("richiesta di recupero utente con id : "+id+" da : "+ userObject.getEmail());
+	return service.findById(id, userObject).orElseThrow(()->new UserMissingException("utente non trovato"));
+    	
     }
 
 }

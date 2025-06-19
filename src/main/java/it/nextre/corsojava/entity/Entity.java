@@ -15,7 +15,7 @@ public abstract class Entity {
     @Attribute(fieldName = "dataCreazione", colName = "dataCreazione", className = Instant.class, colClass = Timestamp.class, type = "timestamp")
     protected Instant dataCreazione;
     @OneToOne(joinColumn = "creationUser", joinTable = "user", mapObject = User.class)
-    @Attribute(fieldName="user", colName = "creationUser", className = User.class, colClass = long.class, type = "long",update = false)
+    @Attribute(fieldName="creationUser", colName = "creationUser", className = User.class, colClass = long.class, type = "long",update = false)
     User creationUser;
 
     public Entity() {

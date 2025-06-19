@@ -1,4 +1,4 @@
-package it.nextre.corsojava.service.UserAdminService;
+package it.nextre.corsojava.service.user.admin;
 
 import java.util.List;
 import java.util.Optional;
@@ -7,7 +7,7 @@ import io.quarkus.arc.lookup.LookupIfProperty;
 import it.nextre.aut.dto.UserDTO;
 import it.nextre.aut.pagination.PagedResult;
 import it.nextre.aut.service.UserAdminService;
-import it.nextre.corsojava.service.UserService.UserServiceMemory;
+import it.nextre.corsojava.service.user.UserServiceMemory;
 import it.nextre.corsojava.utils.EntityConverter;
 import it.nextre.corsojava.utils.JwtGenerator;
 import jakarta.enterprise.context.ApplicationScoped;

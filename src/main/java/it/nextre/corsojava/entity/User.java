@@ -4,6 +4,7 @@ import java.util.Set;
 
 import it.nextre.aut.dto.UserDTO;
 import it.nextre.corsojava.entity.annotation.Attribute;
+import it.nextre.corsojava.entity.annotation.ManyToMany;
 import it.nextre.corsojava.entity.annotation.OneToOne;
 
 public class User extends Entity {
@@ -20,9 +21,9 @@ public class User extends Entity {
     private Group group;
     @Attribute(fieldName = "active", colName = "active", className = Boolean.class, colClass = boolean.class, type = "boolean")
     private Boolean active;
-    @OneToOne(joinColumn = "roleId", joinTable = "role", mapObject = Role.class)
-    @Attribute(fieldName = "role",colName = "roleId",className = Role.class,colClass = long.class,type = "long")
-    private Role role;
+    @ManyToMany(joinColumn = "roleId" ,mapObject = Role.class,joinTable = "role",supportTable="user_role_mapping",
+			supportJoinColumn = "userId")
+    private Set<Role> roles;
 
 
     public User() {
@@ -91,19 +92,13 @@ public class User extends Entity {
     }
     
     public Set<Role> getRoles() {
-    	Set<Role> roles = group != null ? group.getRoles() : new java.util.HashSet<>();
-		if (role != null) {
-			roles.add(role);
-		}
 		return roles;
 	}
 
-	public Role getRole() {
-		return role;
-	}
+	
 
-	public void setRole(Role role) {
-		this.role = role;
+	public void setRoles(Set<Role> role) {
+		this.roles = role;
 	}
     
    

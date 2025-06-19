@@ -3,8 +3,8 @@ package it.nextre.corsojava.config;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import it.nextre.aut.service.RoleService;
-import it.nextre.corsojava.service.roleService.RoleServiceJdbc;
-import it.nextre.corsojava.service.roleService.RoleServiceMemory;
+import it.nextre.corsojava.service.role.RoleServiceJdbc;
+import it.nextre.corsojava.service.role.RoleServiceMemory;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.enterprise.inject.Produces;

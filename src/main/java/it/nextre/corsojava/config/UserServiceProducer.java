@@ -3,8 +3,8 @@ package it.nextre.corsojava.config;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import it.nextre.aut.service.UserService;
-import it.nextre.corsojava.service.UserService.UserServiceJdbc;
-import it.nextre.corsojava.service.UserService.UserServiceMemory;
+import it.nextre.corsojava.service.user.UserServiceJdbc;
+import it.nextre.corsojava.service.user.UserServiceMemory;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.enterprise.inject.Produces;

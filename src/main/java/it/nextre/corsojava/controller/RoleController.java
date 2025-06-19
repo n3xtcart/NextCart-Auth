@@ -15,6 +15,8 @@ import it.nextre.aut.pagination.PagedResult;
 import it.nextre.aut.service.RoleService;
 import it.nextre.corsojava.config.RoleServiceProducer;
 import it.nextre.corsojava.exception.ControllerException;
+import it.nextre.corsojava.exception.UserMissingException;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -27,6 +29,8 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
 @Path("/roles") 
+
+@RolesAllowed("admin")
 public class RoleController  {
 	private static final Logger LOGGER = Logger.getLogger(UserController.class);
 
@@ -54,6 +58,8 @@ public class RoleController  {
 	} catch (JsonProcessingException e) {
 		throw new ControllerException("Error processing user from JWT", e);
 	}
+	LOGGER.info("richiesta di tutti i ruoli da : "+ userObject.getEmail());
+	
         return service.getAllRoles(userObject) ;
     }
     
@@ -68,6 +74,8 @@ public class RoleController  {
 		} catch (JsonProcessingException e) {
 			throw new ControllerException("Error processing user from JWT", e);
 		}
+		LOGGER.info("richiesta di creazione ruolo da : "+ userObject.getEmail());
+		
     	service.create(roleDTO,userObject);
     }
     
@@ -82,6 +90,8 @@ public class RoleController  {
 		} catch (JsonProcessingException e) {
 			throw new ControllerException("Error processing user from JWT", e);
 		}
+		LOGGER.info("richiesta di modifica ruolo da : "+ userObject.getEmail());
+		
     	service.update(roleDTO,userObject);
     }
     
@@ -96,6 +106,8 @@ public class RoleController  {
 		} catch (JsonProcessingException e) {
 			throw new ControllerException("Error processing user from JWT", e);
 		}
+		LOGGER.info("richiesta di eliminazione ruolo da : "+ userObject.getEmail());
+		
     	service.delete(roleDTO,userObject);
     }
     
@@ -112,7 +124,25 @@ public class RoleController  {
 		} catch (JsonProcessingException e) {
 			throw new ControllerException("Error processing user from JWT", e);
 		}
+		LOGGER.info("richiesta di tutti i ruoli paginati da : "+ userObject.getEmail());
+		
         return service.getAllRolesPag(page, size,userObject) ;
+    }
+    
+    
+    @GET
+    @Path("/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public RoleDTO getById(@PathParam("id")long id) {UserDTO userObject = null;
+	try {
+		userObject = objectMapper.readValue(jwt.getClaim("user").toString(), UserDTO.class);
+	} catch (JsonMappingException e) {
+		throw new ControllerException("Error mapping user from JWT", e);
+	} catch (JsonProcessingException e) {
+		throw new ControllerException("Error processing user from JWT", e);
+	}LOGGER.info("richiesta di recupero utente con id : "+id+" da : "+ userObject.getEmail());
+	return service.findById(id, userObject).orElseThrow(()->new UserMissingException("utente non trovato"));
+    	
     }
 
    

@@ -1,4 +1,4 @@
-package it.nextre.corsojava.service.UserService;
+package it.nextre.corsojava.service.user;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -82,7 +82,7 @@ public class UserServiceMemory implements UserService{
             throw new UnauthorizedException("Credenziali non valide");
         }
         LOGGER.info("Login effettuato con successo per l'utente: " + user.getEmail());
-        return jwtGenerator.generateTokens(u);
+        return jwtGenerator.generateTokens(entityConverter.fromEntity(u));
     }
 
     public void logout(Token token) {
@@ -363,7 +363,7 @@ public class UserServiceMemory implements UserService{
         User user = token2.getUser();
         user.setActive(true);
         userDAO.update(user.getId(), user);
-        return jwtGenerator.generateTokens(user);
+        return jwtGenerator.generateTokens(entityConverter.fromEntity(user));
 
     }
 
@@ -390,7 +390,7 @@ public class UserServiceMemory implements UserService{
 		}
 		
 		// Generazione nuovo token
-		return jwtGenerator.generateTokens(u);
+		return jwtGenerator.generateTokens(entityConverter.fromEntity(u));
 	}
 
 

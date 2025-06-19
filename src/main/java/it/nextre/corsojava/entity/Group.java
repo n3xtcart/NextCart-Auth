@@ -4,7 +4,6 @@ import java.util.Set;
 
 import it.nextre.aut.dto.GroupDTO;
 import it.nextre.corsojava.entity.annotation.ManyToMany;
-import it.nextre.corsojava.entity.annotation.OneToMeny;
 
 public class Group extends Entity {
 	@ManyToMany(joinColumn = "roleId" ,mapObject = Role.class,joinTable = "role",supportTable="group_role_mapping",

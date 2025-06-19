@@ -1,9 +1,10 @@
-package it.nextre.corsojava.service.UserService;
+package it.nextre.corsojava.service.user;
 
 import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
@@ -15,6 +16,7 @@ import org.jboss.logging.Logger;
 import io.quarkus.arc.lookup.LookupIfProperty;
 import io.quarkus.security.UnauthorizedException;
 import it.nextre.aut.dto.LoginInfo;
+import it.nextre.aut.dto.RoleDTO;
 import it.nextre.aut.dto.TokenJwtDTO;
 import it.nextre.aut.dto.UserDTO;
 import it.nextre.aut.service.UserService;
@@ -23,7 +25,8 @@ import it.nextre.corsojava.dao.jdbc.UserJdbcDao;
 import it.nextre.corsojava.entity.Role;
 import it.nextre.corsojava.entity.Token;
 import it.nextre.corsojava.entity.User;
-import it.nextre.corsojava.exception.GroupMissingException;
+import it.nextre.corsojava.exception.MailException;
+import it.nextre.corsojava.exception.PriorityException;
 import it.nextre.corsojava.utils.EntityConverter;
 import it.nextre.corsojava.utils.JwtGenerator;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -63,11 +66,11 @@ public class UserServiceJdbc implements UserService {
 
     @Override
     public TokenJwtDTO login(LoginInfo info) {
-        LOGGER.info("Login in corso per l'utente: " + info.getEmail());
         if (info==null||info.getEmail()==null || info.getPassword()==null|| info.getEmail().isBlank() || info.getPassword().isBlank()) {
             LOGGER.warn("Email o password non validi");
             throw new UnauthorizedException("Email o password non validi");
         }
+        LOGGER.info("Login in corso per l'utente: " + info.getEmail());
         Optional<User> byEmailPassword = userDAO.findByEmailPassword(info.getEmail(), info.getPassword());
         User u;
         if (byEmailPassword.isPresent() && byEmailPassword.get().getActive()) {
@@ -77,7 +80,7 @@ public class UserServiceJdbc implements UserService {
             throw new UnauthorizedException("Credenziali non valide");
         }
         LOGGER.info("Login effettuato con successo per l'utente: " + info.getEmail());
-        return jwtGenerator.generateTokens(u);
+        return jwtGenerator.generateTokens(entityConverter.fromEntity(u));
     }
 
     public void logout(Token token) {
@@ -98,7 +101,7 @@ public class UserServiceJdbc implements UserService {
         try {
             props.load(this.getClass().getResourceAsStream("/email.properties"));
         } catch (IOException e) {
-            throw new RuntimeException("error loading properties email " + e.getMessage(), e);
+            throw new MailException("error loading properties email " + e.getMessage(), e);
         }
         Session session = Session.getInstance(props, new Authenticator() {
             @Override
@@ -107,7 +110,7 @@ public class UserServiceJdbc implements UserService {
                 String password = props.getProperty("password");
 
                 if (username == null || password == null) {
-                    throw new IllegalArgumentException("Username o password non definiti nelle proprietà!");
+                    throw new MailException("Username o password non definiti nelle proprietà!");
                 }
 
                 return new PasswordAuthentication(username, password);
@@ -133,7 +136,7 @@ public class UserServiceJdbc implements UserService {
             message.setContent(button, "text/html; charset=UTF-8");
             Transport.send(message);
         } catch (MessagingException e) {
-            throw new RuntimeException("error creating message email " + e.getMessage(), e);
+            throw new MailException("error creating message email " + e.getMessage(), e);
         }
 
 
@@ -151,7 +154,7 @@ public class UserServiceJdbc implements UserService {
             throw new UnauthorizedException("Utente già registrato");
         }
         if(user.getGroupDTO()!=null && user.getGroupDTO().getRoleDTO() != null
-        		&& user.getGroupDTO().getRoleDTO().stream().anyMatch(role->role.getAdmin()) ) {
+        		&& user.getGroupDTO().getRoleDTO().stream().anyMatch(RoleDTO::getAdmin) ) {
 			LOGGER.warn("tentativo di registrazione come admin");
 			throw new it.nextre.corsojava.exception.UnauthorizedException("Non puoi registrarti come admin");
 		}
@@ -189,13 +192,13 @@ public class UserServiceJdbc implements UserService {
        
        if(!u.getId().equals(userAction.getId())) {
 			LOGGER.warn("Tentativo di modifica su un utente diveso da quello che sta effettuando l'aggiornamento");
-			throw new GroupMissingException("Impossibile modificare un utente diveso da quello che sta effettuando l'aggiornamento");
+			throw new PriorityException("Impossibile modificare un utente diveso da quello che sta effettuando l'aggiornamento");
        	
        }
        Optional<Role> maxNu =user.getRuoli().stream().map(entityConverter::fromDTO).reduce((a,b)->a.compareTo(b) >0?a:b);
-       if((!maxNu.isEmpty() && maxUa.isEmpty()) || (maxUa.isPresent() &&  maxNu.get().compareTo(maxUa.get()) > 0)) {
+       if((!maxNu.isEmpty() && maxUa.isEmpty()) || (maxUa.isPresent() &&maxNu.isPresent()&&  maxNu.get().compareTo(maxUa.get()) > 0)) {
 			LOGGER.warn("Tentativo di modifica un utente dandogli privilegi superiori a quelli dell'utente");
-			throw new GroupMissingException("Impossibile modificare un utente dandogli privilegi superiori a quelli dell'utente");
+			throw new PriorityException("Impossibile modificare un utente dandogli privilegi superiori a quelli dell'utente");
       	
       }
 
@@ -215,16 +218,21 @@ public class UserServiceJdbc implements UserService {
         if (user == null) throw new UnauthorizedException("Utente non valido");
         
         User u = userDAO.getById(user.getId());
-        Optional<Role> maxU = u.getRoles().stream().reduce((a,b)->a.compareTo(b) >0?a:b);
-        Optional<Role> maxUa = userAction.getRuoli().stream().map(entityConverter::fromDTO).reduce((a,b)->a.compareTo(b) >0?a:b);
+        Set<RoleDTO> ruoliUA = userAction.getRuoli();
+        ruoliUA.addAll(userAction.getGroupDTO()!=null?userAction.getGroupDTO().getRoleDTO():new HashSet<RoleDTO>());
+        Optional<Role> maxUa = ruoliUA.stream().map(entityConverter::fromDTO).reduce((a,b)->a.compareTo(b) >0?a:b);
+        Set<RoleDTO> ruoliU = user.getRuoli();
+        ruoliU.addAll(user.getGroupDTO()!=null?user.getGroupDTO().getRoleDTO():new HashSet<RoleDTO>());
         
-        if((!maxU.isEmpty() && maxUa.isEmpty()) || (maxUa.isPresent() &&  maxU.get().compareTo(maxUa.get()) > 0)) {
+        
+        Optional<Role> maxU =ruoliU.stream().map(entityConverter::fromDTO).reduce((a,b)->a.compareTo(b) >0?a:b);
+        if((!maxU.isEmpty() && maxUa.isEmpty()) || (maxUa.isPresent() && maxU.isPresent()&&  maxU.get().compareTo(maxUa.get()) > 0)) {
  			LOGGER.warn("Tentativo di cancellazione un utente con privilegi superiori a quelli dell'utente");
- 			throw new GroupMissingException("Impossibile cancellare un utente con privilegi superiori a quelli dell'utente");
+ 			throw new PriorityException("Impossibile cancellare un utente con privilegi superiori a quelli dell'utente");
         	
         }
         LOGGER.info("Cancellazione in corso per l'utente: " + user.getEmail());
-        if (u == null || !u.getActive()) throw new UnauthorizedException("Utente non trovato");
+        if ( !u.getActive()) throw new UnauthorizedException("Utente non trovato");
         
         LOGGER.info("Cancellazione effettuata con successo per l'utente: " + user.getEmail());
     }
@@ -272,22 +280,19 @@ public class UserServiceJdbc implements UserService {
 
 	@Override
 	public TokenJwtDTO refreshToken(UserDTO user) {
-		LOGGER.info("Refresh token in corso per l'utente: " + user.getEmail());
 		if (user == null || user.getEmail() == null || user.getEmail().isBlank()) {
 			LOGGER.warn("Utente o email non validi");
 			throw new UnauthorizedException("Utente o email non validi");
 		}
-		Optional<User> byEmail = Optional.of(userDAO.getByEmail(user.getEmail()));
-		User u;
-		if (byEmail.isPresent() && byEmail.get().getActive()) {
-			u = byEmail.get();
-		} else {
+		LOGGER.info("Refresh token in corso per l'utente: " + user.getEmail());
+		User byEmail = userDAO.getByEmail(user.getEmail());
+		if (byEmail==null || !byEmail.getActive()) {
 			LOGGER.warn("Utente non trovato o non attivo");
 			throw new UnauthorizedException("Utente non trovato o non attivo");
 		}
 		
 		// Generazione nuovo token
-		return jwtGenerator.generateTokens(u);
+		return jwtGenerator.generateTokens(entityConverter.fromEntity(byEmail));
 	}
 
 
@@ -302,7 +307,7 @@ public class UserServiceJdbc implements UserService {
         User user = token2.getUser();
         user.setActive(true);
         userDAO.update(user.getId(), user);
-        return jwtGenerator.generateTokens(user);
+        return jwtGenerator.generateTokens(entityConverter.fromEntity(user));
 
     }
 

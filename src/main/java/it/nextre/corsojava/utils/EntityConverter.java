@@ -46,6 +46,7 @@ public class EntityConverter {
     	user.setCognome(dto.getCognome());
     	user.setGroup(fromDTO(dto.getGroupDTO()));
     	user.setPassword(dto.getPassword());
+    	user.setRoles(dto.getRuoli().stream().map(this::fromDTO).collect(Collectors.toSet()));
     	return user;
     }
 

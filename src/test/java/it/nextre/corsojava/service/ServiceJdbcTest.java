@@ -1,6 +1,5 @@
 package it.nextre.corsojava.service;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -28,10 +27,10 @@ import it.nextre.corsojava.entity.Group;
 import it.nextre.corsojava.entity.Role;
 import it.nextre.corsojava.entity.Token;
 import it.nextre.corsojava.entity.User;
-import it.nextre.corsojava.service.UserAdminService.UserAdminServiceJdbc;
-import it.nextre.corsojava.service.UserService.UserServiceJdbc;
-import it.nextre.corsojava.service.groupService.GroupServiceJdbc;
-import it.nextre.corsojava.service.roleService.RoleServiceJdbc;
+import it.nextre.corsojava.service.group.GroupServiceJdbc;
+import it.nextre.corsojava.service.role.RoleServiceJdbc;
+import it.nextre.corsojava.service.user.UserServiceJdbc;
+import it.nextre.corsojava.service.user.admin.UserAdminServiceJdbc;
 import it.nextre.corsojava.utils.EntityConverter;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
@@ -105,7 +104,9 @@ class ServiceJdbcTest {
     	user.setEmail("email");
     	user.setPassword("password1");
     	user.setGroup(groupDAO.getById(groupAdmin));
-    	user.setRole(roleDAO.getById(roleAdmin));
+		Set< Role> set=new HashSet<Role>();
+		set.add(roleDAO.getById(roleAdmin));
+		user.setRoles(set);
     	userAdmin = userDAO.add(user);
     	userDTOAdmin = entityConverter.fromEntity(user);
     	User user2 = new User();
@@ -113,7 +114,9 @@ class ServiceJdbcTest {
     	user2.setNome("nome2");
     	user2.setActive(true);
     	user.setGroup(groupDAO.getById(groupBase));
-    	user2.setRole(roleDAO.getById(roleBase));
+		Set< Role> set2=new HashSet<Role>();
+		set.add(roleDAO.getById(roleBase));
+		user.setRoles(set2);
     	userBase = userDAO.add(user2);
     	
     }
@@ -235,10 +238,11 @@ class ServiceJdbcTest {
         toSave.setNome("Nomefico");
         toSave.setCognome("Cognomefico");
         toSave.setPassword("passwordComplessa");
-        toSave.setEmail("email123455667@example.com");
+        toSave.setEmail("email12534d5r5y6673d@example.com");
         int old=userAdminService.getAllUsers(userDTOAdmin).size();
         userAdminService.createUser(toSave,userDTOAdmin);
         assertEquals(old+1, userAdminService.getAllUsers(userDTOAdmin).size());
+        userAdminService.delete(toSave, userDTOAdmin);
     }
 
 //    @Test
@@ -320,15 +324,8 @@ class ServiceJdbcTest {
 
     @Test
     void updateGroup() {
-        Token t = tokenUserDAO.getById(6L);
-        t.setUser(userDAO.getById(t.getUser().getId()));
-        t.getUser().setGroup(groupDAO.getById(t.getUser().getGroup().getId()));
-        t.getUser().getGroup().setRoles(t.getUser().getGroup().getRoles().stream().map(a->{
-        				a=roleDAO.getById(a.getId());
-        							return a;
-        									}).collect(Collectors.toSet()));
         
-        GroupDTO groupDTO = entityConverter.fromEntity(groupDAO.getById(1L));
+        GroupDTO groupDTO = entityConverter.fromEntity(groupDAO.getById(groupBase));
       
         groupService.update(groupDTO,userDTOAdmin);
         var groups = groupService.getAllGroups(userDTOAdmin);
@@ -370,10 +367,10 @@ class ServiceJdbcTest {
 
     @Test
     void updateRole() {
-        RoleDTO toUpdate = entityConverter.fromEntity(roleDAO.getById(1L));
+        RoleDTO toUpdate = entityConverter.fromEntity(roleDAO.getById(roleBase));
         toUpdate.setDescrizione("Nuova descrizione");
         roleService.update(toUpdate,userDTOAdmin);
-        assertEquals("Nuova descrizione",  entityConverter.fromEntity(roleDAO.getById(1L)).getDescrizione());
+        assertEquals("Nuova descrizione",  entityConverter.fromEntity(roleDAO.getById(roleBase)).getDescrizione());
     }
 
     @Test

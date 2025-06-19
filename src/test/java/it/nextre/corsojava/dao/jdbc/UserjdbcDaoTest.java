@@ -58,7 +58,9 @@ class UserjdbcDaoTest {
 		group.setRoles(hashSet);
 		Role role=new Role();
 		role.setId(1L);
-		user.setRole(role);
+		Set< Role> set=new HashSet<Role>();
+		set.add(role);
+		user.setRoles(set);
 		Long long1 = dao.add(user);
 		User byId = dao.getById(long1);
 		dao.delete(long1);
@@ -81,7 +83,9 @@ class UserjdbcDaoTest {
 
 		Role role=new Role();
 		role.setId(1L);
-		user.setRole(role);
+		Set< Role> set=new HashSet<Role>();
+		set.add(role);
+		user.setRoles(set);
 		user.setActive(true);
 		Group group = new Group();
 		group.setId(3L);
@@ -112,7 +116,9 @@ class UserjdbcDaoTest {
 		user.setActive(true);
 		Role role=new Role();
 		role.setId(1L);
-		user.setRole(role);
+		Set< Role> set=new HashSet<Role>();
+		set.add(role);
+		user.setRoles(set);
 		Group group = new Group();
 		group.setId(3L);
 		user.setGroup(group);
@@ -133,7 +139,9 @@ class UserjdbcDaoTest {
 		user.setPassword("lalalal");
 		Role role=new Role();
 		role.setId(1L);
-		user.setRole(role);
+		Set< Role> set=new HashSet<Role>();
+		set.add(role);
+		user.setRoles(set);
 		user.setActive(true);
 		Group group = new Group();
 		group.setId(3L);

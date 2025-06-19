@@ -78,6 +78,8 @@ public class UserController {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public MessageResponse confirmRegistration(@PathParam("token") String token) {
+    	LOGGER.info("conferma registrazione ");
+		
         service.confirmRegistration(token);
         return new MessageResponse("registrazione confermata con successo");
     }
@@ -96,6 +98,8 @@ public class UserController {
 		} catch (JsonProcessingException e) {
 			throw new ControllerException("Error processing user from JWT", e);
 		}
+		LOGGER.info("richiesta di aggiornamento del prorpio utente da : "+ userObject.getEmail());
+		
     	
     	service.update(userDTO,userObject);
     }
@@ -111,7 +115,8 @@ public class UserController {
 	} catch (JsonProcessingException e) {
 		throw new ControllerException("Error processing user from JWT", e);
 	}
-    
+	LOGGER.info("richiesta di eliminazione del prorpio utente da : "+ userObject.getEmail());
+	
     	service.delete(userDTO,userObject);
     }
 

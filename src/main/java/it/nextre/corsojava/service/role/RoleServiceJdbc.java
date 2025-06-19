@@ -1,8 +1,10 @@
-package it.nextre.corsojava.service.roleService;
+package it.nextre.corsojava.service.role;
 
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.jboss.logging.Logger;
 
@@ -13,7 +15,7 @@ import it.nextre.aut.pagination.PagedResult;
 import it.nextre.aut.service.RoleService;
 import it.nextre.corsojava.dao.jdbc.RoleJdbcDao;
 import it.nextre.corsojava.entity.Role;
-import it.nextre.corsojava.exception.GroupMissingException;
+import it.nextre.corsojava.exception.PriorityException;
 import it.nextre.corsojava.exception.RoleMissingException;
 import it.nextre.corsojava.utils.EntityConverter;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -34,18 +36,24 @@ public RoleServiceJdbc(EntityConverter entityConverter, RoleJdbcDao roleDAO) {
 	@Override
 	public void create(RoleDTO roleDTO,UserDTO user) {
         LOGGER.info("Creazione in corso per il ruolo: " + roleDTO.getId());
-        Optional<Role> maxU = user.getRuoli().stream().map(entityConverter::fromDTO).reduce((a,b)->a.compareTo(b) >0?a:b);
+        Set<RoleDTO> ruoliU = user.getRuoli();
+        ruoliU.addAll(user.getGroupDTO()!=null?user.getGroupDTO().getRoleDTO():new HashSet<RoleDTO>());
         
-        if( (  entityConverter.fromDTO(roleDTO).compareTo(maxU.get()) > 0)) {
+        
+        Optional<Role> maxU =ruoliU.stream().map(entityConverter::fromDTO).reduce((a,b)->a.compareTo(b) >0?a:b);
+        
+        if( (maxU.isPresent() &&  entityConverter.fromDTO(roleDTO).compareTo(maxU.get()) > 0)) {
 			LOGGER.warn("Tentativo di creazione di un ruolo con privilegi superiori a quelli dell'utente");
-			throw new GroupMissingException("Impossibile creare un ruolo con privilegi superiori a quelli dell'utente");
+			throw new PriorityException("Impossibile creare un ruolo con privilegi superiori a quelli dell'utente");
         	
         }
        
         
-        Role toSave = new Role(roleDTO);
+        Role toSave = entityConverter.fromDTO(roleDTO);
         toSave.setDataCreazione(Instant.now());
-        roleDAO.add(toSave);
+        toSave.setCreationUser(entityConverter.fromDTO(user));
+
+        roleDTO.setId(roleDAO.add(toSave));
         LOGGER.info("Creazione effettuata con successo per il ruolo: " + roleDTO.getId());
     }
 
@@ -53,9 +61,24 @@ public RoleServiceJdbc(EntityConverter entityConverter, RoleJdbcDao roleDAO) {
 	public void update(RoleDTO roleDTO,UserDTO user) {
         LOGGER.info("Modifica in corso per il ruolo: " + roleDTO.getId());
        
-        Role role = new Role(roleDTO);
-
-        roleDAO.update(roleDTO.getId(), role);
+        Role roleOld = roleDAO.getById(roleDTO.getId());
+        Set<RoleDTO> ruoliU = user.getRuoli();
+        ruoliU.addAll(user.getGroupDTO()!=null?user.getGroupDTO().getRoleDTO():new HashSet<RoleDTO>());
+        
+        
+        Optional<Role> maxU =ruoliU.stream().map(entityConverter::fromDTO).reduce((a,b)->a.compareTo(b) >0?a:b);
+        if( (maxU.isPresent() &&  roleOld.compareTo(maxU.get()) > 0)) {
+			LOGGER.warn("Tentativo di modifica di un ruolo con privilegi superiori a quelli dell'utente");
+			throw new PriorityException("Impossibile modificare un ruolo con privilegi superiori a quelli dell'utente");
+        	
+        }
+        Role roleNew=entityConverter.fromDTO(roleDTO);
+        if( (maxU.isPresent() &&  roleNew.compareTo(maxU.get()) > 0)) {
+			LOGGER.warn("Tentativo di modifica di un ruolo con privilegi superiori a quelli dell'utente");
+			throw new PriorityException("Impossibile modificare un ruolo con privilegi superiori a quelli dell'utente");
+        	
+        }
+        roleDAO.update(roleDTO.getId(), roleNew);
         LOGGER.info("Modifica effettuata con successo per il ruolo: " + roleDTO.getId());
     }
 
@@ -69,9 +92,9 @@ public RoleServiceJdbc(EntityConverter entityConverter, RoleJdbcDao roleDAO) {
             throw new RoleMissingException("Ruolo richiesto da cancellare non presente");
         } Optional<Role> maxU = user.getRuoli().stream().map(entityConverter::fromDTO).reduce((a,b)->a.compareTo(b) >0?a:b);
         
-        if( (  entityConverter.fromDTO(roleDTO).compareTo(maxU.get()) > 0)) {
+        if( (maxU.isPresent() &&  entityConverter.fromDTO(roleDTO).compareTo(maxU.get()) > 0)) {
 			LOGGER.warn("Tentativo di eliminazione di un ruolo con privilegi superiori a quelli dell'utente");
-			throw new GroupMissingException("Impossibile eliminare un ruolo con privilegi superiori a quelli dell'utente");
+			throw new PriorityException("Impossibile eliminare un ruolo con privilegi superiori a quelli dell'utente");
         	
         }
        
@@ -90,9 +113,9 @@ public RoleServiceJdbc(EntityConverter entityConverter, RoleJdbcDao roleDAO) {
 		}
 		 Optional<Role> maxU = user.getRuoli().stream().map(entityConverter::fromDTO).reduce((a,b)->a.compareTo(b) >0?a:b);
 	        
-	        if( (  role.compareTo(maxU.get()) > 0)) {
+	        if(maxU.isPresent() &&(  role.compareTo(maxU.get()) > 0)) {
 				LOGGER.warn("Tentativo di creazione di un ruolo con privilegi superiori a quelli dell'utente");
-				throw new GroupMissingException("Impossibile creare un ruolo con privilegi superiori a quelli dell'utente");
+				throw new PriorityException("Impossibile creare un ruolo con privilegi superiori a quelli dell'utente");
 	        	
 	        }
 	       
@@ -110,7 +133,7 @@ public RoleServiceJdbc(EntityConverter entityConverter, RoleJdbcDao roleDAO) {
         return roleDAO.getAll().stream().filter(role->{
         	 Optional<Role> maxU = user.getRuoli().stream().map(entityConverter::fromDTO).reduce((a,b)->a.compareTo(b) >=0?a:b);
              
-             return( (  role.compareTo(maxU.get()) >= 0)) ;
+             return(   role.compareTo(maxU.get()) >= 0) ;
             
         }).map(entityConverter::fromEntity).toList();
         
@@ -123,12 +146,7 @@ public RoleServiceJdbc(EntityConverter entityConverter, RoleJdbcDao roleDAO) {
     	LOGGER.info("Fine recupero lista ruoli");
     	PagedResult<Role> allGroupsPaged = roleDAO.getAllPag(page,size);
 		PagedResult<RoleDTO> copy = PagedResult.copy(allGroupsPaged);
-		copy.setContent(allGroupsPaged.getContent().stream().filter(role->{
-       	 Optional<Role> maxU = user.getRuoli().stream().map(entityConverter::fromDTO).reduce((a,b)->a.compareTo(b) >=0?a:b);
-         
-         return( (  role.compareTo(maxU.get()) >= 0)) ;
-        
-    }).map(entityConverter::fromEntity).toList());
+		copy.setContent(allGroupsPaged.getContent().stream().map(entityConverter::fromEntity).toList());
 		return copy;
     }
 

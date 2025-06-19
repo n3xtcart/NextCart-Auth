@@ -3,8 +3,8 @@ package it.nextre.corsojava.config;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import it.nextre.aut.service.UserAdminService;
-import it.nextre.corsojava.service.UserAdminService.UserAdminServiceJdbc;
-import it.nextre.corsojava.service.UserAdminService.UserAdminServiceMemory;
+import it.nextre.corsojava.service.user.admin.UserAdminServiceJdbc;
+import it.nextre.corsojava.service.user.admin.UserAdminServiceMemory;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Default;
 import jakarta.enterprise.inject.Produces;
