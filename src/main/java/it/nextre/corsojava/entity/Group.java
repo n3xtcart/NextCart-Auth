@@ -3,6 +3,7 @@ package it.nextre.corsojava.entity;
 import java.util.Set;
 
 import it.nextre.aut.dto.GroupDTO;
+import it.nextre.corsojava.entity.annotation.Attribute;
 import it.nextre.corsojava.entity.annotation.ManyToMany;
 
 public class Group extends Entity {
@@ -10,15 +11,22 @@ public class Group extends Entity {
 			supportJoinColumn = "groupId")
     private Set<Role> roles;
 
-    public Group() {
-    }
+    @Attribute(fieldName = "descrizione", colName = "descrizione")
+    private String descrizione;
 
-    public Group(GroupDTO group) {
-		this.id = group.getId();
-		this.roles = group.getRoleDTO().stream()
-				.map(roleDTO -> new Role(roleDTO))
-				.collect(java.util.stream.Collectors.toSet());
-	
+    
+
+    
+
+    
+    
+	public String getDescrizione() {
+		return descrizione;
+	}
+
+	public void setDescrizione(String descrizione) {
+        aggiornaUltimaModifica();
+		this.descrizione = descrizione;
 	}
 
 	public Set<Role> getRoles() {

@@ -84,7 +84,7 @@ public class GroupServiceJdbc implements GroupService{
 			throw new PriorityException("Impossibile creare un gruppo con privilegi superiori a quelli dell'utente");
         	
         }
-        Group group2 = new Group(group);
+        Group group2 = entityConverter.fromDTO(group);
         g.setRoles(group2.getRoles());
         groupDAO.update(group.getId(), g);
         LOGGER.info("Modifica effettuata con successo per il gruppo: " + group.getId());
@@ -112,7 +112,7 @@ public class GroupServiceJdbc implements GroupService{
         	
         }
         groupDAO.delete(group.getId());
-        LOGGER.info("Ca)ncellazione effettuata con successo per il gruppo: " + group.getId());
+        LOGGER.info("Cancellazione effettuata con successo per il gruppo: " + group.getId());
     }
 
 	@Override

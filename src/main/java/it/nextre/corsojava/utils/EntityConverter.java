@@ -28,9 +28,7 @@ public class EntityConverter {
 		dto.setDataCreazione(user.getDataCreazione());
 		dto.setUltimaModifica(user.getUltimaModifica());
 
-		
-		//TODO: decidere se mandare la password o meno
-		dto.setPassword(user.getPassword());
+	
 
 		return dto;
     }
@@ -62,6 +60,7 @@ public class EntityConverter {
 		dto.setCreationUser(group.getCreationUser()!= null ? group.getCreationUser().getId() : null);
 		dto.setDataCreazione(group.getDataCreazione());
 		dto.setUltimaModifica(group.getUltimaModifica());
+		dto.setDescrizione(group.getDescrizione());
 		return dto;
     }
 
@@ -72,6 +71,7 @@ public class EntityConverter {
 
 		Group group = new Group();
 		group.setId(dto.getId());
+		group.setDescrizione(dto.getDescrizione());
 		group.setRoles(dto.getRoleDTO().stream().map(this::fromDTO).collect(Collectors.toSet()));
 		return group;
     }

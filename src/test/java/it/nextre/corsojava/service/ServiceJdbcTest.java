@@ -238,7 +238,7 @@ class ServiceJdbcTest {
         toSave.setNome("Nomefico");
         toSave.setCognome("Cognomefico");
         toSave.setPassword("passwordComplessa");
-        toSave.setEmail("email12534d5r5y6673d@example.com");
+        toSave.setEmail("email125343d35r5y56673d@example.com");
         int old=userAdminService.getAllUsers(userDTOAdmin).size();
         userAdminService.createUser(toSave,userDTOAdmin);
         assertEquals(old+1, userAdminService.getAllUsers(userDTOAdmin).size());

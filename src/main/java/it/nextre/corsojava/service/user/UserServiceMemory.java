@@ -159,7 +159,7 @@ public class UserServiceMemory implements UserService{
             LOGGER.warn("Utente già registrato con l'email: " + user.getEmail());
             throw new UnauthorizedException("Utente già registrato");
         }
-        User user2 = new User(user);
+        User user2 = entityConverter.fromDTO(user);
         user2.setActive(false);
         userDAO.add(user2);
         Token token = generateToken(userDAO.getByEmail(user2.getEmail()));
@@ -214,7 +214,7 @@ public class UserServiceMemory implements UserService{
         LOGGER.info("Creazione in corso per l'utente: " + user.getEmail());
        
        
-        User toSave = new User(user);
+        User toSave = entityConverter.fromDTO(user);
 
         Group toPut = groupDAO.getById(user.getGroupDTO().getId());
 
@@ -256,7 +256,7 @@ public class UserServiceMemory implements UserService{
     public void createGroup(GroupDTO group) {
         LOGGER.info("Creazione in corso per il gruppo: " + group.getId());
       
-        Group toSave = new Group(group);
+        Group toSave = entityConverter.fromDTO(group);
         groupDAO.add(toSave);
         LOGGER.info("Creazione effettuata con successo per il gruppo: " + group.getId());
     }
@@ -269,7 +269,7 @@ public class UserServiceMemory implements UserService{
             LOGGER.warn("Tentativo di modifica di un gruppo non valido");
             throw new GroupMissingException("Impossibile modificare un gruppo non presente");
         }
-        Group group2 = new Group(group);
+        Group group2 = entityConverter.fromDTO(group);
         g.setRoles(group2.getRoles());
         groupDAO.update(group.getId(), g);
         LOGGER.info("Modifica effettuata con successo per il gruppo: " + group.getId());
@@ -290,23 +290,13 @@ public class UserServiceMemory implements UserService{
         LOGGER.info("Recupero lista gruppi in corso");
         
         LOGGER.info("Fine recupero lista gruppi");
-        return groupDAO.getAll().stream().map(group -> {
-            GroupDTO dto =GroupDTO.of().id(group.getId())
-            		.roleDTO(group.getRoles().stream()
-						.map(role -> RoleDTO.of().id(role.getId())
-								.admin(role.isAdmin())
-								.priority(role.getPriority())
-								.descrizione(role.getDescrizione())
-								.build())
-						.collect(Collectors.toSet())).build();
-            return dto;
-        }).toList();
+        return groupDAO.getAll().stream().map(entityConverter::fromEntity).toList();
     }
 
     public void createRole(RoleDTO roleDTO) {
         LOGGER.info("Creazione in corso per il ruolo: " + roleDTO.getId());
         
-        Role toSave = new Role(roleDTO);
+        Role toSave = entityConverter.fromDTO(roleDTO);
         roleDAO.add(toSave);
         LOGGER.info("Creazione effettuata con successo per il ruolo: " + roleDTO.getId());
     }
@@ -314,7 +304,7 @@ public class UserServiceMemory implements UserService{
     public void updateRole(RoleDTO roleDTO) {
         LOGGER.info("Modifica in corso per il ruolo: " + roleDTO.getId());
        
-        Role role = new Role(roleDTO);
+        Role role = entityConverter.fromDTO(roleDTO);
 
         roleDAO.update(roleDTO.getId(), role);
         LOGGER.info("Modifica effettuata con successo per il ruolo: " + roleDTO.getId());

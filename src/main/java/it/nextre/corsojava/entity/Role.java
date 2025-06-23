@@ -17,17 +17,6 @@ public class Role extends Entity {
 
 	
 
-	public Role() {
-    }
-
-    public Role(RoleDTO roleDTO) {
-		this.id = roleDTO.getId();
-		this.descrizione = roleDTO.getDescrizione();
-		this.admin = roleDTO.getAdmin();
-		this.priority = roleDTO.getPriority();
-		
-		
-	}
 
 	public String getDescrizione() {
         return descrizione;

@@ -26,17 +26,7 @@ public class User extends Entity {
     private Set<Role> roles;
 
 
-    public User() {
-    }
-
-    public User(UserDTO user) {
-
-    			this.nome = user.getNome();
-		this.cognome = user.getCognome();
-		this.email = user.getEmail();
-		this.password = user.getPassword();
-		
-	}
+  
 
 	public Boolean getActive() {
         return active;

@@ -234,6 +234,7 @@ public class UserServiceJdbc implements UserService {
         LOGGER.info("Cancellazione in corso per l'utente: " + user.getEmail());
         if ( !u.getActive()) throw new UnauthorizedException("Utente non trovato");
         
+        userDAO.delete(u.getId());
         LOGGER.info("Cancellazione effettuata con successo per l'utente: " + user.getEmail());
     }
 
