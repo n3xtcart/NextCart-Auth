@@ -1,0 +1,22 @@
+services:
+  quarkus-app:
+    build:
+      context: .
+      dockerfile: src/main/docker/Dockerfile.jvm
+	  container_name: Auth
+	enviroment:
+	  quarkus_datasource_jdbc_url=jdbc:mysql://mysql_db:3336/aut
+    ports:
+      - "8080:8080"
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+    ports:
+      - "3336:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  volumes:
+    mysql_data:  

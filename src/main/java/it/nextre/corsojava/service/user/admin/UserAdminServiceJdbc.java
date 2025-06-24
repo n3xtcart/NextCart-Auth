@@ -34,12 +34,12 @@ import jakarta.inject.Inject;
 public class UserAdminServiceJdbc extends UserServiceJdbc implements UserAdminService{
 	
 	 public UserAdminServiceJdbc() {
-		 super(null, null, null,null); 
+		 super(null, null, null,null,null); 
 	   }
 	
 	@Inject
 	public UserAdminServiceJdbc(EntityConverter entityConverter, UserJdbcDao userDAO, TokenJdbcDao tokenUserDAO,JwtGenerator jwtGenerator) {
-		super(entityConverter, userDAO, tokenUserDAO, jwtGenerator);
+		super(entityConverter, userDAO, tokenUserDAO, jwtGenerator,null);
 	}
 
 	private static final Logger LOGGER = Logger.getLogger(UserAdminServiceJdbc.class);

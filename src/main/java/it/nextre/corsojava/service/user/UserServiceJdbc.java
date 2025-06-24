@@ -20,8 +20,10 @@ import it.nextre.aut.dto.RoleDTO;
 import it.nextre.aut.dto.TokenJwtDTO;
 import it.nextre.aut.dto.UserDTO;
 import it.nextre.aut.service.UserService;
+import it.nextre.corsojava.dao.jdbc.GroupJdbcDao;
 import it.nextre.corsojava.dao.jdbc.TokenJdbcDao;
 import it.nextre.corsojava.dao.jdbc.UserJdbcDao;
+import it.nextre.corsojava.entity.Group;
 import it.nextre.corsojava.entity.Role;
 import it.nextre.corsojava.entity.Token;
 import it.nextre.corsojava.entity.User;
@@ -48,15 +50,17 @@ public class UserServiceJdbc implements UserService {
     private static final Logger LOGGER = Logger.getLogger(UserServiceJdbc.class);
     protected final UserJdbcDao userDAO;
     protected final TokenJdbcDao tokenUserDAO ;
+    protected final GroupJdbcDao groupJdbcDao;
     protected final EntityConverter entityConverter;
     protected final JwtGenerator jwtGenerator;
     
     public UserServiceJdbc(EntityConverter entityConverter,
-    		UserJdbcDao userDAO, TokenJdbcDao tokenUserDAO,JwtGenerator jwtGenerator) {
+    		UserJdbcDao userDAO, TokenJdbcDao tokenUserDAO,JwtGenerator jwtGenerator, GroupJdbcDao groupJdbcDao) {
 		this.entityConverter = entityConverter;
 		this.userDAO = userDAO;
 		this.tokenUserDAO = tokenUserDAO;
 		this.jwtGenerator = jwtGenerator;
+		this.groupJdbcDao=groupJdbcDao;
 	}
   
 
@@ -125,7 +129,7 @@ public class UserServiceJdbc implements UserService {
             String button = "<html><body>"
                     + "<h2>Ciao!</h2>"
                     + "<p>Clicca sul bottone qui sotto per visitare il nostro sito:</p>"
-                    + "<a href='http://localhost:8080/users/confirmRegistration/" + token.getValue() + "' style='"
+                    + "<a href='http://localhost:4200/verify?token='" + token.getValue() + "' style='"
                     + "display: inline-block; padding: 10px 20px; font-size: 16px; "
                     + "color: white; background-color: #007bff; text-decoration: none; "
                     + "border-radius: 5px; font-family: Arial, sans-serif;'>"
@@ -163,7 +167,8 @@ public class UserServiceJdbc implements UserService {
         user2.setCognome(user.getCognome());
         user2.setEmail(user.getEmail());
         user2.setPassword(user.getPassword());
-        //TODO: gestire il gruppo di default
+        Group byDescrizione = groupJdbcDao.findByDescrizione("user");
+        user2.setGroup(byDescrizione);
         user2.setGroup(null);
         user2.setActive(false);
         user2.setDataCreazione(Instant.now());

@@ -63,7 +63,8 @@ public class EntityConverter {
 		dto.setDescrizione(group.getDescrizione());
 		return dto;
     }
-
+    
+  
     public Group fromDTO(GroupDTO dto) {
     			if (dto == null) {
 			return null;
