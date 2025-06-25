@@ -169,7 +169,6 @@ public class UserServiceJdbc implements UserService {
         user2.setPassword(user.getPassword());
         Group byDescrizione = groupJdbcDao.findByDescrizione("user");
         user2.setGroup(byDescrizione);
-        user2.setGroup(null);
         user2.setActive(false);
         user2.setDataCreazione(Instant.now());
         userDAO.add(user2);
