@@ -38,6 +38,11 @@ public class GroupJdbcDaoTest {
 		dao.delete(long1);
 	}
 	
+
+	public GroupJdbcDaoTest(UserJdbcDao userDao) {
+		System.out.println(userDao);
+	}
+	
 	
 	@Test
 	public void testUpdateGroup() {

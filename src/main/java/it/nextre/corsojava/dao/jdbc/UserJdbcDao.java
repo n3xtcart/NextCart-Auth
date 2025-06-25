@@ -35,9 +35,6 @@ public class UserJdbcDao extends JdbcDao<User> {
 
 				  );
 	
-	
-	
-
 		PreparedStatement statement = null;
 		ResultSet rSet = null;
 		try (Connection connection = dataSource.getConnection()) {

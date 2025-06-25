@@ -14,6 +14,7 @@ import it.nextre.aut.dto.RoleDTO;
 import it.nextre.aut.dto.UserDTO;
 import it.nextre.aut.pagination.PagedResult;
 import it.nextre.aut.service.UserAdminService;
+import it.nextre.corsojava.dao.jdbc.GroupJdbcDao;
 import it.nextre.corsojava.dao.jdbc.TokenJdbcDao;
 import it.nextre.corsojava.dao.jdbc.UserJdbcDao;
 import it.nextre.corsojava.entity.Group;
@@ -41,8 +42,8 @@ public class UserAdminServiceJdbc extends UserServiceJdbc implements UserAdminSe
 	   }
 	
 	@Inject
-	public UserAdminServiceJdbc(EntityConverter entityConverter, UserJdbcDao userDAO, TokenJdbcDao tokenUserDAO,JwtGenerator jwtGenerator) {
-		super(entityConverter, userDAO, tokenUserDAO, jwtGenerator,null);
+	public UserAdminServiceJdbc(EntityConverter entityConverter, UserJdbcDao userDAO, TokenJdbcDao tokenUserDAO,JwtGenerator jwtGenerator,GroupJdbcDao groupJdbcDao) {
+		super(entityConverter, userDAO, tokenUserDAO, jwtGenerator,groupJdbcDao);
 	}
 
 	private static final Logger LOGGER = Logger.getLogger(UserAdminServiceJdbc.class);

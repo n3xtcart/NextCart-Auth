@@ -14,6 +14,10 @@ public class RoleJdbcDaoTest {
 	@Inject
 	RoleJdbcDao dao ;
 	
+	public RoleJdbcDaoTest(UserJdbcDao userDao) {
+		System.out.println(userDao);
+	}
+	
 	@Test
 	public void testSaveRole() {
 		Role role = new Role();
