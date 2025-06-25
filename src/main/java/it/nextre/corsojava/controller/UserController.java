@@ -57,7 +57,7 @@ public class UserController {
         return service.login(info);
     }
 
-    public class MessageResponse {
+    public static class MessageResponse {
         public String message;
         public MessageResponse(String message) {
             this.message = message;
