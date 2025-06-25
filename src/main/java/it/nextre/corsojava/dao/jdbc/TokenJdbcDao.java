@@ -19,7 +19,16 @@ public class TokenJdbcDao extends JdbcDao<Token> {
 
 	@Inject
 	public  TokenJdbcDao(AgroalDataSource dataSource) {
-		super(Token.class, "token", dataSource);
+		super(Token.class, "token", dataSource,"CREATE TABLE IF NOT EXISTS `token` ("
+				  + "  `id` int NOT NULL AUTO_INCREMENT,"
+				  + "  `value` varchar(45) NOT NULL,"
+				  + "  `userId` int NOT NULL,"
+				  + "  `ultimaModifica` timestamp(2) NULL DEFAULT NULL,"
+				  + "  `scadenza` timestamp(1) NULL DEFAULT NULL,"
+				  + "  `dataCreazione` timestamp(1) NULL DEFAULT NULL,"
+				  + "  `creationUser` varchar(45) DEFAULT NULL,"
+				  + "  PRIMARY KEY (`id`)"
+				  + ") ENGINE=InnoDB AUTO_INCREMENT=1094 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;");
 	}
 	
 	public TokenJdbcDao() {

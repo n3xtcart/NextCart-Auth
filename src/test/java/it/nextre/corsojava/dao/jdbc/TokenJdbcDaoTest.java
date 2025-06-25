@@ -17,6 +17,8 @@ import jakarta.inject.Inject;
 public class TokenJdbcDaoTest {
 	@Inject
 	TokenJdbcDao dao ;
+	@Inject
+	UserJdbcDao userDao;
 	
 	
 	@Test
@@ -25,10 +27,14 @@ public class TokenJdbcDaoTest {
 		token.setId(1L);
 		User user = new User();
 		user.setId(1L);
+		Long long2 = userDao.add(user);
+		user.setId(long2);
 		token.setUser(user);
 		token.setValue("ddvdvdfvdfv");
 		Long long1 = dao.add(token);
 		Token byId = dao.getById(long1);
+		dao.delete(long1);
+		userDao.delete(long2);
 		assertEquals(long1, byId.getId());
 		assertEquals(token.getUser().getId(), byId.getUser().getId());
 		assertEquals(token.getValue(), byId.getValue());
@@ -40,13 +46,19 @@ public class TokenJdbcDaoTest {
 		Token token = new Token();
 		token.setId(1L);
 		User user = new User();
-		user.setId(1L);
+		user.setEmail("email");
+		Long long2 = userDao.add(user);
+		user.setId(long2);
 		token.setUser(user);
 		token.setValue("ddvdvdfvdfv");
 		token.setDataScadenza(LocalDateTime.now().plusMinutes(10).toInstant(ZoneOffset.UTC));
-		dao.update(6L,token);
-		Token byId = dao.getById(6L);
-		assertNotEquals(token.getId(), byId.getId());
+		token.setValue("newVal");
+		Long long1 = dao.add(token);
+		dao.update(long1,token);
+		Token byId = dao.getById(long1);
+		dao.delete(long1);
+		userDao.delete(long2);
+		assertEquals(token.getId(), byId.getId());
 		assertEquals(token.getUser().getId(), byId.getUser().getId());
 		assertEquals(token.getValue(), byId.getValue());
 		

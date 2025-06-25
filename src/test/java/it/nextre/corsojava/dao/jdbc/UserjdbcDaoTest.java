@@ -24,7 +24,6 @@ class UserjdbcDaoTest {
 	@Test
 	void testPag() {
 		PagedResult<User> allPag = dao.getAllPag(1, 10);
-		System.out.println(allPag);
 	}
 	
 	
@@ -148,7 +147,6 @@ class UserjdbcDaoTest {
 		user.setGroup(group);
 		int size = dao.getAll().size();
 		Optional<User> byEmailPassword = dao.findByEmailPassword("nuovaemail@example.com", "NuovaPassword");
-		System.out.println(byEmailPassword.get());
 		Long long1 = dao.add(user);
 		int size2 = dao.getAll().size();
 		dao.delete(long1);

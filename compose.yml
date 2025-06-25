@@ -1,22 +1,27 @@
+
 services:
   quarkus-app:
-    build:
-      context: .
-      dockerfile: src/main/docker/Dockerfile.jvm
-	  container_name: Auth
-	enviroment:
-	  quarkus_datasource_jdbc_url=jdbc:mysql://mysql_db:3336/aut
+    #build:
+    #  context: .
+    #  dockerfile: src/main/docker/Dockerfile.jvm
+    image: salvatores542/nextcart-auth
+    container_name: Auth
+    environment:
+      - QUARKUS_DATASOURCE_JDBC_URL=jdbc:mysql://mysql:3306/aut
     ports:
       - "8080:8080"
+    depends_on:
+      - mysql
+
   mysql:
     image: mysql:8.0
-    container_name: mysql_db
+    container_name: mysql_db1
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
+      - MYSQL_ROOT_PASSWORD=rootpassword
     ports:
       - "3336:3306"
     volumes:
       - mysql_data:/var/lib/mysql
 
-  volumes:
-    mysql_data:  
+volumes:
+  mysql_data:
