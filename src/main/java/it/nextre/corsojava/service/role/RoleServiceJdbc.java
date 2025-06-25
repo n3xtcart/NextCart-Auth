@@ -113,7 +113,7 @@ public RoleServiceJdbc(EntityConverter entityConverter, RoleJdbcDao roleDAO) {
 		}
 		 Optional<Role> maxU = user.getRuoli().stream().map(entityConverter::fromDTO).reduce((a,b)->a.compareTo(b) >0?a:b);
 	        
-	        if(maxU.isPresent() &&(  role.compareTo(maxU.get()) > 0)) {
+	        if(maxU.isPresent() &&(  role.compareTo(maxU.get()) < 0)) {
 				LOGGER.warn("Tentativo di creazione di un ruolo con privilegi superiori a quelli dell'utente");
 				throw new PriorityException("Impossibile creare un ruolo con privilegi superiori a quelli dell'utente");
 	        	
@@ -133,7 +133,7 @@ public RoleServiceJdbc(EntityConverter entityConverter, RoleJdbcDao roleDAO) {
         return roleDAO.getAll().stream().filter(role->{
         	 Optional<Role> maxU = user.getRuoli().stream().map(entityConverter::fromDTO).reduce((a,b)->a.compareTo(b) >=0?a:b);
              
-             return(   role.compareTo(maxU.get()) >= 0) ;
+             return(   role.compareTo(maxU.get()) <= 0) ;
             
         }).map(entityConverter::fromEntity).toList();
         

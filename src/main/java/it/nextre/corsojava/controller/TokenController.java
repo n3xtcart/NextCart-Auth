@@ -14,8 +14,10 @@ import it.nextre.corsojava.config.UserServiceProducer;
 import it.nextre.corsojava.exception.ControllerException;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
@@ -50,6 +52,15 @@ public class TokenController {
 		throw new ControllerException("Error processing user from JWT", e);
 	}
         return service.refreshToken(userObject);
+    }
+    
+    @POST
+    @Path("/verify")
+@Produces(MediaType.APPLICATION_JSON) 
+@Consumes(MediaType.APPLICATION_JSON)
+    public TokenJwtDTO verify( String tokenString) {
+  
+        return service.confirmRegistration(tokenString);
     }
 
 

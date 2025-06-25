@@ -129,7 +129,7 @@ public class UserServiceJdbc implements UserService {
             String button = "<html><body>"
                     + "<h2>Ciao!</h2>"
                     + "<p>Clicca sul bottone qui sotto per visitare il nostro sito:</p>"
-                    + "<a href='http://localhost:4200/verify?token='" + token.getValue() + "' style='"
+                    + "<a href='http://localhost:4200/verify?token=" + token.getValue() + "' style='"
                     + "display: inline-block; padding: 10px 20px; font-size: 16px; "
                     + "color: white; background-color: #007bff; text-decoration: none; "
                     + "border-radius: 5px; font-family: Arial, sans-serif;'>"

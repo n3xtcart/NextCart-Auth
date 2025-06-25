@@ -292,27 +292,12 @@ class ServiceJdbcTest {
 
     @Test
     void getAllUsers() {
-    	Token t = tokenUserDAO.getById(6L);
-    t.setUser(userDAO.getById(t.getUser().getId()));
-    t.getUser().setGroup(groupDAO.getById(t.getUser().getGroup().getId()));
-    t.getUser().getGroup().setRoles(t.getUser().getGroup().getRoles().stream().map(a->{
-		a=roleDAO.getById(a.getId());
-		return a;
-	}).collect(java.util.stream.Collectors.toSet()));
-
         int old=userAdminService.getAllUsers(userDTOAdmin).size();
         assertEquals(old, userAdminService.getAllUsers(userDTOAdmin).size());
     }
 
     @Test
     void createGroup() {
-    	Token t = tokenUserDAO.getById(6L);
-        t.setUser(userDAO.getById(t.getUser().getId()));
-        t.getUser().setGroup(groupDAO.getById(t.getUser().getGroup().getId()));
-        t.getUser().getGroup().setRoles(t.getUser().getGroup().getRoles().stream().map(a->{
-			a=roleDAO.getById(a.getId());
-			return a;
-		}).collect(java.util.stream.Collectors.toSet()));
         GroupDTO newGroup = new GroupDTO();
         Set<RoleDTO> roles = new HashSet<>();
         roles.add(entityConverter.fromEntity(roleDAO.getById(roleBase)));
@@ -320,6 +305,7 @@ class ServiceJdbcTest {
         int val =groupService.getAllGroups(userDTOAdmin).size();
         groupService.create(newGroup,userDTOAdmin);
         assertEquals(val+1, groupService.getAllGroups(userDTOAdmin).size());
+        groupDAO.delete(newGroup.getId());
     }
 
     @Test
@@ -334,13 +320,7 @@ class ServiceJdbcTest {
 
     @Test
     void deleteGroup() {
-        Token t = tokenUserDAO.getById(6L);
-        t.setUser(userDAO.getById(t.getUser().getId()));
-        t.getUser().setGroup(groupDAO.getById(t.getUser().getGroup().getId()));
-        t.getUser().getGroup().setRoles(t.getUser().getGroup().getRoles().stream().map(a->{
-			a=roleDAO.getById(a.getId());
-			return a;
-		}).collect(Collectors.toSet()));Group group=new Group();
+        Group group=new Group();
       
         Set<Role> roles = new HashSet<>();
         roles.add(roleDAO.getById(roleBase));
@@ -354,15 +334,14 @@ class ServiceJdbcTest {
 
     @Test
     void createRole() {
-    	Token t = tokenUserDAO.getById(6L);
-    t.setUser(userDAO.getById(t.getUser().getId()));
-        RoleDTO toSave = new RoleDTO();
-        toSave.setAdmin(true);
-        toSave.setDescrizione("Nuovo ruolo super fico");
-        toSave.setPriority(1L);
+    	RoleDTO roleDTO=new RoleDTO();
+    	roleDTO.setAdmin(false);
+    	roleDTO.setPriority(1L);
+    	
         int old =roleService.getAllRoles(userDTOAdmin).size();
-        roleService.create(toSave,userDTOAdmin);
+        roleService.create(roleDTO,userDTOAdmin);
         assertEquals(old+1, roleService.getAllRoles(userDTOAdmin).size());
+        roleDAO.delete(roleDTO.getId());
     }
 
     @Test

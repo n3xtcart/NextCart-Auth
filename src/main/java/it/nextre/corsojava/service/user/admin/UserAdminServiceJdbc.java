@@ -9,13 +9,16 @@ import java.util.Set;
 import org.jboss.logging.Logger;
 
 import io.quarkus.arc.lookup.LookupIfProperty;
+import io.quarkus.security.UnauthorizedException;
 import it.nextre.aut.dto.RoleDTO;
 import it.nextre.aut.dto.UserDTO;
 import it.nextre.aut.pagination.PagedResult;
 import it.nextre.aut.service.UserAdminService;
 import it.nextre.corsojava.dao.jdbc.TokenJdbcDao;
 import it.nextre.corsojava.dao.jdbc.UserJdbcDao;
+import it.nextre.corsojava.entity.Group;
 import it.nextre.corsojava.entity.Role;
+import it.nextre.corsojava.entity.Token;
 import it.nextre.corsojava.entity.User;
 import it.nextre.corsojava.exception.GroupMissingException;
 import it.nextre.corsojava.exception.PriorityException;
@@ -48,7 +51,40 @@ public class UserAdminServiceJdbc extends UserServiceJdbc implements UserAdminSe
 
 
 	
-	
+
+    @Override
+    public void register(UserDTO user) {
+        if (user == null) {
+            throw new it.nextre.corsojava.exception.UnauthorizedException("Utente non valido");
+        }
+        LOGGER.info("Registrazione in corso per l'utente: " + user.getEmail());
+       
+        if (userDAO.getByEmail(user.getEmail()) != null) {
+            LOGGER.warn("Utente già registrato con l'email: " + user.getEmail());
+            throw new UnauthorizedException("Utente già registrato");
+        }
+        if(user.getGroupDTO()!=null && user.getGroupDTO().getRoleDTO() != null
+        		&& user.getGroupDTO().getRoleDTO().stream().anyMatch(RoleDTO::getAdmin) ) {
+			LOGGER.warn("tentativo di registrazione come admin");
+			throw new it.nextre.corsojava.exception.UnauthorizedException("Non puoi registrarti come admin");
+		}
+        User user2 = new User();
+        user2.setNome(user.getNome());
+        user2.setCognome(user.getCognome());
+        user2.setEmail(user.getEmail());
+        user2.setPassword(user.getPassword());
+        Group byDescrizione = groupJdbcDao.findByDescrizione("admin");
+        user2.setGroup(byDescrizione);
+        user2.setGroup(null);
+        user2.setActive(false);
+        user2.setDataCreazione(Instant.now());
+        userDAO.add(user2);
+        Token token = generateToken(userDAO.getByEmail(user2.getEmail()));
+        tokenUserDAO.add(token);
+        sendMail(user2, token);
+        LOGGER.info("email inviata all'utente: " + user.getEmail());
+
+    }
 
 
 	

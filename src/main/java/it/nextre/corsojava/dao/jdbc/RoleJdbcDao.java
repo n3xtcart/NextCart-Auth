@@ -12,7 +12,16 @@ public class RoleJdbcDao extends JdbcDao<Role> {
 
 	@Inject
 	public  RoleJdbcDao(AgroalDataSource dataSource) {
-		super(Role.class, "role",dataSource);
+		super(Role.class, "role",dataSource,"CREATE TABLE IF NOT EXISTS `role` ("
+				  + "  `id` int NOT NULL AUTO_INCREMENT,"
+				  + "  `descrizione` varchar(45) DEFAULT NULL,"
+				  + "  `admin` tinyint DEFAULT NULL,"
+				  + "  `priority` int DEFAULT NULL,"
+				  + "  `ultimaModifica` timestamp(2) NULL DEFAULT NULL,"
+				  + "  `dataCreazione` timestamp(1) NULL DEFAULT NULL,"
+				  + "  `creationUser` varchar(45) DEFAULT NULL,"
+				  + "  PRIMARY KEY (`id`)"
+				  + ") ENGINE=InnoDB AUTO_INCREMENT=1309 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;");
 		LOGGER.info("inizializzazione ruoli");
 		Role admin = this.findByDescrizione("admin");
 		Role user = this.findByDescrizione("user");

@@ -1,0 +1,53 @@
+CREATE TABLE `group_role_mapping` (
+  `groupId` varchar(45) NOT NULL,
+  `roleId` varchar(45) NOT NULL,
+  PRIMARY KEY (`groupId`,`roleId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE `groupT` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `ultimaModifica` timestamp(2) NULL DEFAULT NULL,
+  `dataCreazione` timestamp(1) NULL DEFAULT NULL,
+  `creationUser` varchar(45) DEFAULT NULL,
+  `descrizione` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1653 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE `role` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `descrizione` varchar(45) DEFAULT NULL,
+  `admin` tinyint DEFAULT NULL,
+  `priority` int DEFAULT NULL,
+  `ultimaModifica` timestamp(2) NULL DEFAULT NULL,
+  `dataCreazione` timestamp(1) NULL DEFAULT NULL,
+  `creationUser` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1309 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE `token` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `value` varchar(45) NOT NULL,
+  `userId` int NOT NULL,
+  `ultimaModifica` timestamp(2) NULL DEFAULT NULL,
+  `scadenza` timestamp(1) NULL DEFAULT NULL,
+  `dataCreazione` timestamp(1) NULL DEFAULT NULL,
+  `creationUser` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1094 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE `user` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `nome` varchar(45) DEFAULT NULL,
+  `cognome` varchar(45) DEFAULT NULL,
+  `password` varchar(45) DEFAULT NULL,
+  `groupId` varchar(45) DEFAULT NULL,
+  `email` varchar(45) DEFAULT NULL,
+  `ultimaModifica` timestamp(2) NULL DEFAULT NULL,
+  `active` tinyint(1) DEFAULT '0',
+  `roleId` int DEFAULT NULL,
+  `dataCreazione` timestamp(1) NULL DEFAULT NULL,
+  `creationUser` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1601 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE `user_role_mapping` (
+  `userId` int NOT NULL,
+  `roleId` int NOT NULL,
+  PRIMARY KEY (`userId`,`roleId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

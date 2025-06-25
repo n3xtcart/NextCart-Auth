@@ -34,6 +34,7 @@ import it.nextre.corsojava.exception.JdbcDaoException;
 
 public abstract class JdbcDao<T extends Entity> implements DaoInterface<T> {
 	protected static final Logger LOGGER = Logger.getLogger(JdbcDao.class);
+
 	protected String tableName;
 	protected Class<?> clazz;
 	protected AgroalDataSource dataSource;
@@ -42,6 +43,32 @@ public abstract class JdbcDao<T extends Entity> implements DaoInterface<T> {
 	private static final String DELETEFROM = " DELETE FROM ";
 	private static final String SELECT = " SELECT ";
 
+	protected JdbcDao(Class<?> clazz, String tableName, AgroalDataSource dataSource,String createTable) {
+		this.clazz = clazz;
+		this.tableName = tableName;
+		this.dataSource = dataSource;
+		PreparedStatement statement = null;
+		ResultSet rSet = null;
+		try (Connection connection = dataSource.getConnection()) {
+			
+				LOGGER.info("controllo e creazione tabella "+tableName);
+				statement=connection.prepareStatement(createTable);
+				statement.execute();
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		finally {
+				try {
+					if(statement!=null)statement.close();
+					if(rSet!=null)rSet.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+		}
+	}
 	protected JdbcDao(Class<?> clazz, String tableName, AgroalDataSource dataSource) {
 		this.clazz = clazz;
 		this.tableName = tableName;
@@ -229,8 +256,8 @@ public abstract class JdbcDao<T extends Entity> implements DaoInterface<T> {
 				if (totalElement == null)
 					totalElement = rs.getInt("totale");
 				list.add((T) createObject(fields, connection, rs, clazz));
-			}
-			return new PagedResult<>(list, totalElement, pagSize);
+			}if (totalElement!=null)return new PagedResult<>(list, totalElement, pagSize);
+			else return new PagedResult<>(list, 0, pagSize);
 		} catch (SQLException e) {
 			throw new JdbcDaoException("SQL error" + e.getMessage(), e);
 		} catch (SecurityException e) {

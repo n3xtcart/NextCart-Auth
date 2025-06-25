@@ -67,7 +67,6 @@ public class UserController {
     @POST
     @Path("/register")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
     public MessageResponse register(UserDTO userDTO) {
         service.register(userDTO);
         return new MessageResponse("Mail inviata");
@@ -106,7 +105,7 @@ public class UserController {
     
     @DELETE
     @Consumes(MediaType.APPLICATION_JSON)
-    public void deleteGroup(UserDTO userDTO) {
+    public void deleteUser(UserDTO userDTO) {
     	UserDTO userObject = null;
 	try {
 		userObject = objectMapper.readValue(jwt.getClaim("user").toString(), UserDTO.class);
